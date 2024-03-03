@@ -7,11 +7,11 @@ namespace Backend_PcAuction.Controllers
 {
     [ApiController]
     [Route("api/v1/auctions")]
-    public class AuctionController : ControllerBase
+    public class AuctionsController : ControllerBase
     {
         private readonly IAuctionsRepository _auctionsRepository;
 
-        public AuctionController(IAuctionsRepository auctionsRepository)
+        public AuctionsController(IAuctionsRepository auctionsRepository)
         {
             _auctionsRepository = auctionsRepository;
         }
@@ -38,7 +38,7 @@ namespace Backend_PcAuction.Controllers
         {
             var auction = await _auctionsRepository.GetAsync(auctionId);
 
-            if (auctionId == null)
+            if (auction == null)
             {
                 return NotFound();
             }

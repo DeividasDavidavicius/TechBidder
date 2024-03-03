@@ -14,9 +14,9 @@ namespace Backend_PcAuction.Data.Repositories
 
     public class AuctionsRepository : IAuctionsRepository
     {
-        private readonly AuctionDbContext _context;
+        private readonly PcAuctionDbContext _context;
 
-        public AuctionsRepository(AuctionDbContext auctionDbContext)
+        public AuctionsRepository(PcAuctionDbContext auctionDbContext)
         {
             _context = auctionDbContext;
         }

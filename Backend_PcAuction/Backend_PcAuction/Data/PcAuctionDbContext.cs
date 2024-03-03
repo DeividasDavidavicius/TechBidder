@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Backend_PcAuction.Data
 {
-    public class AuctionDbContext : DbContext
+    public class PcAuctionDbContext : DbContext
     {
         public DbSet<Auction> Auctions { get; set; }
         public DbSet<Bid> Bids { get; set; }

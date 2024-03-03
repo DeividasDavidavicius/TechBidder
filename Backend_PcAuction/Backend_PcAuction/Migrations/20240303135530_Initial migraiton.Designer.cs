@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Backend_PcAuction.Migrations
 {
-    [DbContext(typeof(AuctionDbContext))]
+    [DbContext(typeof(PcAuctionDbContext))]
     [Migration("20240303135530_Initial migraiton")]
     partial class Initialmigraiton
     {
