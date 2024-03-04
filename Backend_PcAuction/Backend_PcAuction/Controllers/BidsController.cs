@@ -1,8 +1,11 @@
-﻿using Backend_PcAuction.Data.Dtos;
+﻿using Backend_PcAuction.Auth.Models;
+using Backend_PcAuction.Data.Dtos;
 using Backend_PcAuction.Data.Entities;
 using Backend_PcAuction.Data.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace Backend_PcAuction.Controllers
 {
@@ -12,14 +15,17 @@ namespace Backend_PcAuction.Controllers
     {
         private readonly IAuctionsRepository _auctionsRepository;
         private readonly IBidsRepository _bidsRepository;
+        private readonly IAuthorizationService _authorizationService;
 
-        public BidsController(IAuctionsRepository auctionsRepository, IBidsRepository bidsRepository)
+        public BidsController(IAuctionsRepository auctionsRepository, IBidsRepository bidsRepository, IAuthorizationService authorizationService)
         {
             _auctionsRepository = auctionsRepository;
             _bidsRepository = bidsRepository;
+            _authorizationService = authorizationService;
         }
 
         [HttpPost]
+        [Authorize(Roles = UserRoles.RegisteredUser)]
         public async Task<ActionResult<BidDto>> Create(Guid auctionId, CreateBidDto createBidDto)
         {
             var auction = await _auctionsRepository.GetAsync(auctionId);
@@ -33,7 +39,8 @@ namespace Backend_PcAuction.Controllers
             {
                 Amount = createBidDto.Amount,
                 CreationDate = DateTime.Now,
-                Auction = auction
+                Auction = auction,
+                UserId = User.FindFirstValue(JwtRegisteredClaimNames.Sub)
             };
 
             await _bidsRepository.CreateAsync(bid);
@@ -81,6 +88,7 @@ namespace Backend_PcAuction.Controllers
 
         [HttpDelete]
         [Route("{bidId}")]
+        [Authorize(Roles = UserRoles.RegisteredUser)]
         public async Task<ActionResult> Delete(Guid auctionId, Guid bidId)
         {
             var auction = await _auctionsRepository.GetAsync(auctionId);
@@ -96,6 +104,10 @@ namespace Backend_PcAuction.Controllers
             {
                 return NotFound();
             }
+
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, bid, PolicyNames.ResourceOwner);
+            if (!authorizationResult.Succeeded)
+                return Forbid();
 
             await _bidsRepository.DeleteAsync(bid);
 

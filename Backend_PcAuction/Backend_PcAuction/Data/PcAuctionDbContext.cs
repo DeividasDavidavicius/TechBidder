@@ -1,10 +1,12 @@
-﻿using Backend_PcAuction.Data.Entities;
+﻿using Backend_PcAuction.Auth.Model;
+using Backend_PcAuction.Data.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 
 namespace Backend_PcAuction.Data
 {
-    public class PcAuctionDbContext : DbContext
+    public class PcAuctionDbContext : IdentityDbContext<User>
     {
         public DbSet<Auction> Auctions { get; set; }
         public DbSet<Bid> Bids { get; set; }

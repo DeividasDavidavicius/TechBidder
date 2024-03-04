@@ -1,7 +1,11 @@
-﻿using Backend_PcAuction.Data.Dtos;
+﻿using Backend_PcAuction.Auth.Models;
+using Backend_PcAuction.Data.Dtos;
 using Backend_PcAuction.Data.Entities;
 using Backend_PcAuction.Data.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace Backend_PcAuction.Controllers
 {
@@ -10,13 +14,16 @@ namespace Backend_PcAuction.Controllers
     public class AuctionsController : ControllerBase
     {
         private readonly IAuctionsRepository _auctionsRepository;
+        private readonly IAuthorizationService _authorizationService;
 
-        public AuctionsController(IAuctionsRepository auctionsRepository)
+        public AuctionsController(IAuctionsRepository auctionsRepository, IAuthorizationService authorizationService)
         {
             _auctionsRepository = auctionsRepository;
+            _authorizationService = authorizationService;
         }
 
         [HttpPost]
+        [Authorize(Roles = UserRoles.RegisteredUser)]
         public async Task<ActionResult<AuctionDto>> Create(CreateAuctionDto createAuctionDto)
         {
             var auction = new Auction
@@ -24,7 +31,8 @@ namespace Backend_PcAuction.Controllers
                 Name = createAuctionDto.Name,
                 CreationDate = DateTime.Now,
                 StartDate = createAuctionDto.StartDate,
-                EndDate = createAuctionDto.EndDate
+                EndDate = createAuctionDto.EndDate,
+                UserId = User.FindFirstValue(JwtRegisteredClaimNames.Sub)
             };
 
             await _auctionsRepository.CreateAsync(auction);
@@ -56,6 +64,7 @@ namespace Backend_PcAuction.Controllers
 
         [HttpPatch]
         [Route("{auctionId}")]
+        [Authorize(Roles = UserRoles.RegisteredUser)]
         public async Task<ActionResult<AuctionDto>> Update(Guid auctionId, UpdateAuctionDto updateAuctionDto)
         {
             var auction = await _auctionsRepository.GetAsync(auctionId);
@@ -65,6 +74,10 @@ namespace Backend_PcAuction.Controllers
                 return NotFound();
             }
 
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, auction, PolicyNames.ResourceOwner);
+            if (!authorizationResult.Succeeded)
+                return Forbid();
+
             auction.Name = updateAuctionDto.Name;
             await _auctionsRepository.UpdateAsync(auction);
 
@@ -73,6 +86,7 @@ namespace Backend_PcAuction.Controllers
 
         [HttpDelete]
         [Route("{auctionId}")]
+        [Authorize(Roles = UserRoles.RegisteredUser)]
         public async Task<ActionResult> Delete(Guid auctionId)
         {
             var auction = await _auctionsRepository.GetAsync(auctionId);
@@ -81,6 +95,10 @@ namespace Backend_PcAuction.Controllers
             {
                 return NotFound();
             }
+
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, auction, PolicyNames.ResourceOwner);
+            if (!authorizationResult.Succeeded)
+                return Forbid();
 
             await _auctionsRepository.DeleteAsync(auction);
 
