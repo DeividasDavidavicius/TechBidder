@@ -38,7 +38,8 @@ namespace Backend_PcAuction.Data.Seeders
             var newAdminUser = new User()
             {
                 UserName = name,
-                Email = "moderation@mail.com"
+                Email = "moderation@mail.com",
+                BlacklistedRefreshTokens = ""
             };
 
             var existingUser = await _userManager.FindByNameAsync(newAdminUser.UserName);

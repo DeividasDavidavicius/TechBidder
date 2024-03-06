@@ -8,6 +8,8 @@ namespace Backend_PcAuction.Auth
     public interface IJwtTokenService
     {
         string CreateAccessToken(string userName, string userId, IEnumerable<string> UserRoles);
+        string CreateRefreshToken(string userId);
+        bool TryParseRefreshToken(string refreshToken, out ClaimsPrincipal? claims);
     }
 
     public class JwtTokenService : IJwtTokenService
@@ -43,6 +45,50 @@ namespace Backend_PcAuction.Auth
             );
 
             return new JwtSecurityTokenHandler().WriteToken(accessSecurityToken);
+        }
+
+        public string CreateRefreshToken(string userId)
+        {
+            var authClaims = new List<Claim>
+            {
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new(JwtRegisteredClaimNames.Sub, userId)
+            };
+
+            var token = new JwtSecurityToken(
+                issuer: _issuer,
+                audience: _audience,
+                expires: DateTime.UtcNow.AddHours(24),
+                claims: authClaims,
+                signingCredentials: new SigningCredentials(_authSignKey, SecurityAlgorithms.HmacSha256)
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public bool TryParseRefreshToken(string refreshToken, out ClaimsPrincipal? claims)
+        {
+            claims = null;
+
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+
+                var validationParameters = new TokenValidationParameters
+                {
+                    ValidIssuer = _issuer,
+                    ValidAudience = _audience,
+                    IssuerSigningKey = _authSignKey,
+                    ValidateLifetime = true
+                };
+
+                claims = tokenHandler.ValidateToken(refreshToken, validationParameters, out _);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
     }

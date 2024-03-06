@@ -4,6 +4,8 @@ using Backend_PcAuction.Auth.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using static Backend_PcAuction.Auth.Models.AuthDto;
 
 namespace Backend_PcAuction.Controllers
@@ -35,6 +37,7 @@ namespace Backend_PcAuction.Controllers
             {
                 UserName = registerUserDto.UserName,
                 Email = registerUserDto.Email,
+                BlacklistedRefreshTokens = ""
             };
 
             var createUserResult = await _userManager.CreateAsync(newUser, registerUserDto.Password);
@@ -60,14 +63,67 @@ namespace Backend_PcAuction.Controllers
                 return BadRequest("Username or password is invalid!");
 
             //user.Relogin = false;
-            await _userManager.UpdateAsync(user);
+            //await _userManager.UpdateAsync(user);
 
             var roles = await _userManager.GetRolesAsync(user);
 
             var accessToken = _jwtTokenService.CreateAccessToken(user.UserName, user.Id, roles);
-            //var refreshToken = _jwtTokenService.CreateRefreshToken(user.Id);
+            var refreshToken = _jwtTokenService.CreateRefreshToken(user.Id);
 
-            return Ok(new SuccessfulLoginDto(accessToken, "refreshToken"));
+            return Ok(new SuccessfulLoginDto(accessToken, refreshToken));
+        }
+
+        [HttpPost]
+        [Route("accessToken")]
+        public async Task<IActionResult> AccessToken(RefreshAccessTokenDto refreshAccessTokenDto)
+        {
+            if (!_jwtTokenService.TryParseRefreshToken(refreshAccessTokenDto.RefreshToken, out var claims))
+            {
+                return UnprocessableEntity();
+            }
+
+            var userId = claims.FindFirstValue(JwtRegisteredClaimNames.Sub);
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                return UnprocessableEntity("Invalid token");
+            }
+
+            if(user.IsRefreshTokenBlacklisted(refreshAccessTokenDto.RefreshToken))
+            {
+                return UnprocessableEntity("Invalid token2");
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            var accessToken = _jwtTokenService.CreateAccessToken(user.UserName, user.Id, roles);
+            var refreshToken = _jwtTokenService.CreateRefreshToken(user.Id);
+
+            user.AddRefreshTokenToBlacklist(refreshAccessTokenDto.RefreshToken);
+            await _userManager.UpdateAsync(user);
+
+            return Ok(new SuccessfulLoginDto(accessToken, refreshToken));
+        }
+
+        [HttpPost]
+        [Route("logout")]
+        public async Task<IActionResult> Logout(RefreshAccessTokenDto refreshAccessTokenDto)
+        {
+            var userId = User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                return UnprocessableEntity("Invalid token");
+            }
+
+            user.AddRefreshTokenToBlacklist(refreshAccessTokenDto.RefreshToken);
+            await _userManager.UpdateAsync(user);
+
+            return Ok("Succesfully logged out!");
         }
     }
 }
