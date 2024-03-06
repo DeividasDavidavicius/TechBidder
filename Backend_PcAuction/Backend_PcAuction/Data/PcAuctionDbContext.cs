@@ -10,6 +10,8 @@ namespace Backend_PcAuction.Data
     {
         public DbSet<Auction> Auctions { get; set; }
         public DbSet<Bid> Bids { get; set; }
+        public DbSet<Part> Parts { get; set; }
+        public DbSet<PartCategory > PartCategories { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

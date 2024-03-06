@@ -2,6 +2,7 @@ using Backend_PcAuction.Auth;
 using Backend_PcAuction.Auth.Model;
 using Backend_PcAuction.Auth.Models;
 using Backend_PcAuction.Data;
+using Backend_PcAuction.Data.DbSeeders;
 using Backend_PcAuction.Data.Repositories;
 using Backend_PcAuction.Data.Seeders;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -15,13 +16,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
-
 builder.Services.AddControllers();
 builder.Services.AddDbContext<PcAuctionDbContext>();
 builder.Services.AddTransient<IAuctionsRepository, AuctionsRepository>();
 builder.Services.AddTransient<IBidsRepository, BidsRepository>();
+builder.Services.AddTransient<IPartCategoriesRepository, PartCategoriesRepository>();
+builder.Services.AddTransient<IPartsRepository, PartsRepository>();
 builder.Services.AddTransient<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<AuthDbSeeder>();
+builder.Services.AddScoped<PartCategorySeeder>();
 
 builder.Services.AddAuthorization(options =>
 {
@@ -57,5 +60,7 @@ app.UseAuthorization();
 using var scope = app.Services.CreateScope();
 var dbSeeder = scope.ServiceProvider.GetRequiredService<AuthDbSeeder>();
 await dbSeeder.SeedAsync();
+var categorySeeder = scope.ServiceProvider.GetRequiredService<PartCategorySeeder>();
+await categorySeeder.SeedAsync();
 
 app.Run();
