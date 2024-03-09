@@ -29,15 +29,23 @@ namespace Backend_PcAuction.Controllers
             var auction = new Auction
             {
                 Name = createAuctionDto.Name,
+                Description = createAuctionDto.Description,
                 CreationDate = DateTime.Now,
                 StartDate = createAuctionDto.StartDate,
                 EndDate = createAuctionDto.EndDate,
+                MinIncrement = createAuctionDto.MinIncrement,
+                Status = "New",
+                Condition = createAuctionDto.Condition,
+                Manufacturer = createAuctionDto.Manufacturer,
+                Picture = createAuctionDto.Picture,
                 UserId = User.FindFirstValue(JwtRegisteredClaimNames.Sub)
             };
 
             await _auctionsRepository.CreateAsync(auction);
 
-            return Created($"/api/v1/auctions/{auction.Id}", new AuctionDto(auction.Id, auction.Name, auction.CreationDate, auction.StartDate, auction.EndDate));
+            return Created($"/api/v1/auctions/{auction.Id}", 
+                new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate,auction.EndDate,
+                auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.Picture));
         }
 
         [HttpGet]
@@ -51,14 +59,17 @@ namespace Backend_PcAuction.Controllers
                 return NotFound();
             }
 
-            return Ok(new AuctionDto(auction.Id, auction.Name, auction.CreationDate, auction.StartDate, auction.EndDate));
+            return Ok(new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate,
+                auction.EndDate, auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.Picture));
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AuctionDto>>> GetMany()
         {
             var auctions = await _auctionsRepository.GetManyAsync();
-            return Ok(auctions.Select(auction => new AuctionDto(auction.Id, auction.Name, auction.CreationDate, auction.StartDate, auction.EndDate)));
+            return Ok(auctions.Select(auction => 
+            new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate, auction.EndDate,
+                auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.Picture)));
 
         }
 
@@ -81,7 +92,8 @@ namespace Backend_PcAuction.Controllers
             auction.Name = updateAuctionDto.Name;
             await _auctionsRepository.UpdateAsync(auction);
 
-            return Ok(new AuctionDto(auction.Id, auction.Name, auction.CreationDate, auction.StartDate, auction.EndDate));
+            return Ok(new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate,
+                auction.EndDate, auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.Picture));
         }
 
         [HttpDelete]

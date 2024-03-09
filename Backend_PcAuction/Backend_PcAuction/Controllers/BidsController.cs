@@ -35,6 +35,29 @@ namespace Backend_PcAuction.Controllers
                 return NotFound();
             }
 
+
+            var lastBid = await _bidsRepository.GetLastAsync(auctionId);
+            if (lastBid != null)
+            {
+                if (auction.MinIncrement > 0 && createBidDto.Amount < lastBid.Amount + auction.MinIncrement)
+                {
+                    return UnprocessableEntity("Your bid is not higher by min. increment than previous bid");
+                }
+
+                if (auction.MinIncrement == 0 && createBidDto.Amount <= lastBid.Amount)
+                {
+                    return UnprocessableEntity("Your bid is not higher than the previous bid");
+                }
+            }
+            else if (auction.MinIncrement > 0 && createBidDto.Amount < auction.MinIncrement)
+            {
+                return UnprocessableEntity("Starting bid must be equal or higher than min. increment");
+            }
+            else if (auction.MinIncrement == 0 && createBidDto.Amount <= 0)
+            {
+                return UnprocessableEntity("Starting bid must be a positive number");
+            }
+
             var bid = new Bid
             {
                 Amount = createBidDto.Amount,

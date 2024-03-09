@@ -18,6 +18,8 @@ namespace Backend_PcAuction.Data.DbSeeders
         public async Task SeedAsync()
         {
             await CreateCPU();
+            await CreateGPU();
+            await CreateRAM();
         }
 
         private async Task CreateCPU()
@@ -35,6 +37,34 @@ namespace Backend_PcAuction.Data.DbSeeders
                     SpecificationName5 = "Max clock",
                     SpecificationName6 = "Base clock (2)",
                     SpecificationName7 = "Max clock (2)"
+                };
+
+                await _partCategoriesRepository.CreateAsync(categoryCPU);
+            }
+        }
+
+        private async Task CreateGPU()
+        {
+            var existingCategory = await _partCategoriesRepository.GetAsync("GPU");
+            if (existingCategory == null)
+            {
+                var categoryCPU = new PartCategory
+                {
+                    Id = "GPU",
+                };
+
+                await _partCategoriesRepository.CreateAsync(categoryCPU);
+            }
+        }
+
+        private async Task CreateRAM()
+        {
+            var existingCategory = await _partCategoriesRepository.GetAsync("RAM");
+            if (existingCategory == null)
+            {
+                var categoryCPU = new PartCategory
+                {
+                    Id = "RAM",
                 };
 
                 await _partCategoriesRepository.CreateAsync(categoryCPU);
