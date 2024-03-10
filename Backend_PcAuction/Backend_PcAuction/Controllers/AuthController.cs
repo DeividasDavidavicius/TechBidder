@@ -33,6 +33,11 @@ namespace Backend_PcAuction.Controllers
             if (user != null)
                 return BadRequest("User with this username already exists!");
 
+            var userByEmail = await _userManager.FindByEmailAsync(registerUserDto.Email);
+
+            if (userByEmail != null)
+                return BadRequest("User with this email already exists!");
+
             var newUser = new User
             {
                 UserName = registerUserDto.UserName,
