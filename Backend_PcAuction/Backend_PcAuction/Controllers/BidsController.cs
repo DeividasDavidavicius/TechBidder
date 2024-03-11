@@ -61,7 +61,7 @@ namespace Backend_PcAuction.Controllers
             var bid = new Bid
             {
                 Amount = createBidDto.Amount,
-                CreationDate = DateTime.Now,
+                CreationDate = DateTime.UtcNow,
                 Auction = auction,
                 UserId = User.FindFirstValue(JwtRegisteredClaimNames.Sub)
             };

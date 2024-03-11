@@ -8,21 +8,23 @@ import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import './../App.css';
 import { useUser } from "../contexts/UserContext";
-import { checkTokenValidity, logout, refreshAccessToken } from "../services/authService";
+import { checkTokenValidity, logout, refreshAccessToken } from "../services/AuthService";
+import PATHS from "../utils/Paths";
 
 function Header() {
-    const { isLoggedIn, role, accessToken, setLogin, setLogout } = useUser();
+    const { isLoggedIn, accessToken, setLogin, setLogout } = useUser();
     const openSnackbar = useContext(SnackbarContext);
     const navigation = useNavigate();
 
     const pages = [
-        { name: 'MAIN', route: '/' }
+        { name: 'MAIN', route: PATHS.MAIN },
+        { name: 'CREATE', route: PATHS.CREATEAUCTION }
     ];
 
     let navOptions = [];
 
     if (isLoggedIn === true) {
-        navOptions.push({ name: 'Logout', route: '/', method: 'handleLogout' });
+        navOptions.push({ name: 'Logout', route: PATHS.MAIN, method: 'handleLogout' });
     }
 
     const [anchorElNav, setAnchorElNav] = useState(null);
@@ -62,7 +64,7 @@ function Header() {
             const result = await refreshAccessToken();
             if (!result.success) {
                 setLogout();
-                navigation('/');
+                navigation(PATHS.MAIN);
                 return;
             }
             setLogin(result.response.data.accessToken, result.response.data.refreshToken);
@@ -72,7 +74,7 @@ function Header() {
             const response = await logout(localStorage.getItem('accessToken'), localStorage.getItem('refreshToken'));
             if (response.status === 200) {
                 setLogout(accessToken);
-                navigation('/login');
+                navigation(PATHS.LOGIN);
                 openSnackbar('Succesfully logged out!', 'success');
             }
         } catch { }
@@ -119,8 +121,8 @@ function Header() {
                     </Box>
 
                     <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-                        {pages.map((page) => (
-                            <Link key={page.name} to={page.route} style={{ textDecoration: 'none', color: 'white', fontWeight: 'bold', colorborderBottom: '2px solid transparent'}} className="header-link" >
+                        {pages.map((page, index) => (
+                            <Link key={page.name} to={page.route} style={{ textDecoration: 'none', color: 'white', fontWeight: 'bold', colorborderBottom: '2px solid transparent', marginRight: index !== pages.length - 1 ? '15px' : 0}} className="header-link" >
                                 {page.name}
                             </Link>
                         ))}
@@ -173,12 +175,12 @@ function Header() {
                             </> :
                             <>
                                 <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                                    <Link to="/login">
+                                    <Link to={PATHS.LOGIN}>
                                         <Button startIcon={<LoginIcon />} sx={{ marginRight: 1, color: 'white', fontWeight: 'bold' }}>
                                             Login
                                         </Button>
                                     </Link>
-                                    <Link to="/register">
+                                    <Link to={PATHS.REGISTER}>
                                         <Button startIcon={<RegisterIcon />} sx={{ marginRight: 1, color: 'white', fontWeight: 'bold' }}>
                                             Register
                                         </Button>

@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "../../contexts/UserContext";
 import { useContext, useEffect, useState } from "react";
 import SnackbarContext from "../../contexts/SnackbarContext";
-import { login, register } from "../../services/authService";
+import { login, register } from "../../services/AuthService";
+import PATHS from "../../utils/Paths";
 
 function Register() {
     const navigation = useNavigate();
@@ -16,9 +17,9 @@ function Register() {
         const isLoggedIn = localStorage.getItem('isLoggedIn');
         if (isLoggedIn === 'true') {
             openSnackbar('You have already logged in!', 'error');
-            navigation('/');
+            navigation(PATHS.MAIN);
         }
-    }, []);
+    });
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -64,7 +65,7 @@ function Register() {
                 const loginData = {username, password};
                 const response2 = await login(loginData);
                 setLogin(response2.data.accessToken, response2.data.refreshToken);
-                navigation('/');
+                navigation(PATHS.MAIN);
                 openSnackbar('Succesfully registered!', 'success');
             }
             else {

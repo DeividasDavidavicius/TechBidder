@@ -6,6 +6,6 @@ namespace Backend_PcAuction.Data.Dtos
         DateTime EndDate, double MinIncrement, string Condition, string Manufacturer, string Picture);
     public record CreateAuctionDto([Required] string Name, [Required] string Description, [Required] DateTime StartDate,
         [Required] DateTime EndDate, [Required] [Range(0, double.MaxValue)] double MinIncrement, [Required] string Condition,
-        [Required] string Manufacturer, [Required] string Picture);
+        string Manufacturer, [Required] string Picture);
     public record UpdateAuctionDto([Required] string Name);
 }

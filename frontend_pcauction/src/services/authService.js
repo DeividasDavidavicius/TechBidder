@@ -1,11 +1,11 @@
 import axios from "axios";
-import { api_url } from "../utils/constants";
+import { API_URL } from "../utils/Constants";
 import { useUser } from "../contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 
 export const login = async(data) => {
     try {
-      const response = await axios.post(`${api_url}/login`, data, {
+      const response = await axios.post(`${API_URL}/login`, data, {
         headers: {
           "Content-Type": "application/json"
         }
@@ -19,7 +19,7 @@ export const login = async(data) => {
 
   export const register = async(data) => {
     try {
-      const response = await axios.post(`${api_url}/register`, data, {
+      const response = await axios.post(`${API_URL}/register`, data, {
         headers: {
           "Content-Type": "application/json"
         }
@@ -33,7 +33,7 @@ export const login = async(data) => {
 
   export const logout = async(accessToken, refreshToken) => {
       try {
-        const response = await axios.post(`${api_url}/logout`, { refreshToken }, {
+        const response = await axios.post(`${API_URL}/logout`, { refreshToken }, {
           headers: {
             "Authorization": `Bearer ${accessToken}`
           }
@@ -50,7 +50,7 @@ export const login = async(data) => {
     const refreshToken = localStorage.getItem('refreshToken');
     try {
         const data = { refreshToken }
-        const response = await axios.post(`${api_url}/accessToken`, data, {
+        const response = await axios.post(`${API_URL}/accessToken`, data, {
           headers: {
             "Content-Type": "application/json"
           }

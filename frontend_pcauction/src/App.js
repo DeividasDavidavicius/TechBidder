@@ -2,9 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import React, { useEffect } from 'react';
 import './App.css';
 import Header from './components/Header';
-import MainPage from './components/MainPage';
-import Login from './components/auth/Login';
-import Register from './components/auth/Register';
+import AppRoutes from './utils/AppRoutes';
 
 function App() {
   useEffect(() => {
@@ -26,9 +24,9 @@ function App() {
       <Router>
         <Header/>
         <Routes>
-          <Route path='/' element={<MainPage/>}></Route>
-          <Route path='/login' element={<Login />}></Route>
-          <Route path='/register' element={<Register />}></Route>
+          {AppRoutes.map((route, index) => {
+            return <Route key={index} path={route.path} element={route.element}/>
+          })}
         </Routes>
       </Router>
     </div>

@@ -30,7 +30,7 @@ namespace Backend_PcAuction.Controllers
             {
                 Name = createAuctionDto.Name,
                 Description = createAuctionDto.Description,
-                CreationDate = DateTime.Now,
+                CreationDate = DateTime.UtcNow,
                 StartDate = createAuctionDto.StartDate,
                 EndDate = createAuctionDto.EndDate,
                 MinIncrement = createAuctionDto.MinIncrement,

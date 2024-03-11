@@ -3,8 +3,9 @@ import LockPersonTwoToneIcon from '@mui/icons-material/LockPersonTwoTone';
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../contexts/UserContext";
-import { login } from "../../services/authService";
+import { login } from "../../services/AuthService";
 import SnackbarContext from '../../contexts/SnackbarContext';
+import PATHS from "../../utils/Paths";
 
 function Login() {
     const navigation = useNavigate();
@@ -17,9 +18,9 @@ function Login() {
         if(isLoggedIn === 'true')
         {
             openSnackbar('You have already logged in!', 'error');
-            navigation('/');
+            navigation(PATHS.MAIN);
         }
-    }, []);
+    });
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -62,7 +63,7 @@ function Login() {
 
             if(response.status === 200) {
                 setLogin(response.data.accessToken, response.data.refreshToken);
-                navigation('/');
+                navigation(PATHS.MAIN);
                 openSnackbar('Succesfully logged in!', 'success');
             }
             else {
