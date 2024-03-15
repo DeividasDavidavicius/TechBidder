@@ -9,6 +9,7 @@ function AuctionInfo() {
     const { auctionId } = useParams();
     const [startDateLocal, setStartDateLocal] = useState(null);
     const [endDateLocal, setEndDateLocal] = useState(null);
+    const [imageData, setImageData] = useState(null);
     const openSnackbar = useContext(SnackbarContext);
     const navigate = useNavigate();
 
@@ -26,6 +27,7 @@ function AuctionInfo() {
             const localDateStart = new Date(utcDateStart.getTime() - offsetInMilliseconds).toLocaleString();
             const localDateEnd = new Date(utcDateEnd.getTime() - offsetInMilliseconds).toLocaleString();
 
+            setImageData(result.imageData);
             setStartDateLocal(localDateStart);
             setEndDateLocal(localDateEnd);
         };
@@ -97,6 +99,10 @@ function AuctionInfo() {
                     <Typography component="span">
                         {endDateLocal}
                     </Typography>
+
+                    <div>
+            {imageData && <img src={`data:image/jpeg;base64,${imageData}`} alt="Image" />}
+        </div>
                 </Box>
             </Box>
         </Container>

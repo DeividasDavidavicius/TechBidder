@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "../../contexts/UserContext";
 import { useContext, useEffect, useState } from "react";
 import SnackbarContext from "../../contexts/SnackbarContext";
-import { Box, Button, Container, CssBaseline,  FormControl, FormHelperText, Grid, Input, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
+import { Box, Button, Container, CssBaseline,  FormControl, FormHelperText, Grid, Input, InputLabel, MenuItem, Select, Skeleton, TextField, Typography } from "@mui/material";
 import { isDatePastNow, isEndDateLater, isValidDescription, isValidMinInc, isValidTitle } from "./Validations";
 import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -39,6 +39,8 @@ function CreateAuction() {
         const file = e.target.files[0];
         const reader = new FileReader();
 
+        console.log(reader);
+
         reader.onload = () => {
           setSelectedImage(reader.result);
         };
@@ -50,6 +52,8 @@ function CreateAuction() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        console.log(selectedImage);
 
         const title = e.target.title.value;
         const description = e.target.description.value;
@@ -76,6 +80,8 @@ function CreateAuction() {
             return;
         }
 
+        const imageData = selectedImage.split(',')[1];
+
         const accessToken = localStorage.getItem('accessToken');
         if (!checkTokenValidity(accessToken)) {
             const result = await refreshAccessToken();
@@ -94,8 +100,8 @@ function CreateAuction() {
         const endDateLocal = new Date(endDate);
         const isoEndDate = endDateLocal.toISOString();
 
-        const picture = "a";
-        const postData = {name: title, description, startDate: isoStartDate, endDate: isoEndDate, minIncrement: minInc, condition, manufacturer, picture};
+        const picture = "a"; // TODO: remove from here and back-end
+        const postData = {name: title, description, startDate: isoStartDate, endDate: isoEndDate, minIncrement: minInc, condition, manufacturer, picture, imageData};
 
         try {
             await postAuction(postData);
@@ -114,19 +120,20 @@ function CreateAuction() {
     });
 
     return (
-        <Container component="main" maxWidth="md">
+        <Container component="main" maxWidth="sm">
             <CssBaseline />
             <Box
                 sx={{
-                    marginTop: 8,
+                    marginTop: 4,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                 }}
             >
-                <Typography component="h1" variant="h5">
-                    Create new auction
+                <Typography component="h1" variant="h5" style={{ fontWeight: 'bold' }}>
+                    CREATE NEW AUCTION
                 </Typography>
+
 
                 <Box component="form" noValidate onSubmit={(event) => handleSubmit(event)} sx={{ mt: 3 }}>
                     <Grid container spacing={2}>
@@ -226,11 +233,16 @@ function CreateAuction() {
                                 name="manufacturer"
                             />
                         </Grid>
-                        {selectedImage && (
-                            <Grid item xs={12}>
-                                <img src={selectedImage} alt="Selected" style={{ maxWidth: '50%' }} />
-                            </Grid>
-                        )}
+
+                        <Grid item xs={12} style={{ height: '30vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            {selectedImage ? (
+                            <div style={{ width: '100%', height: '90%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                <img src={selectedImage} alt="Selected" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                            </div>
+                            ) : (
+                                <Skeleton variant="rectangular" width={'100%'} height={'100%'} />
+                            )}
+                        </Grid>
                         <Grid item xs={12}>
                             <Input
                                 type="file"
@@ -240,11 +252,10 @@ function CreateAuction() {
                                 style={{ display: 'none' }}
                             />
                             <label htmlFor="image-input">
-                                <Button variant="contained" component="span" fullWidth sx={{ mt: 3, mb: 2, bgcolor: '#138c94' }}
->
-                                Select Image
+                                <Button variant="contained" component="span" fullWidth sx={{ mt: 1, mb: 2, bgcolor: '#138c94' }}>
+                                    Select Image
                                 </Button>
-                                {validationErrors.image && <FormHelperText sx={{ color: theme.palette.error.main}}>{validationErrors.image}</FormHelperText>}
+                                {validationErrors.image && <FormHelperText sx={{ color: theme.palette.error.main }}>{validationErrors.image}</FormHelperText>}
                             </label>
                         </Grid>
                     </Grid>
@@ -252,7 +263,7 @@ function CreateAuction() {
                         type="submit"
                         fullWidth
                         variant="contained"
-                        sx={{ mt: 3, mb: 2, bgcolor: '#0d6267' }}
+                        sx={{ mt: 1, mb: 2, bgcolor: '#0d6267' }}
                     >
                         Create auction
                     </Button>

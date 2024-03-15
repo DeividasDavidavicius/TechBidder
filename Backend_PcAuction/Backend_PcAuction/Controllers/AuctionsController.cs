@@ -26,6 +26,7 @@ namespace Backend_PcAuction.Controllers
         [Authorize(Roles = UserRoles.RegisteredUser)]
         public async Task<ActionResult<AuctionDto>> Create(CreateAuctionDto createAuctionDto)
         {
+            byte[] imageBytes = Convert.FromBase64String(createAuctionDto.ImageData);
             var auction = new Auction
             {
                 Name = createAuctionDto.Name,
@@ -38,6 +39,7 @@ namespace Backend_PcAuction.Controllers
                 Condition = createAuctionDto.Condition,
                 Manufacturer = createAuctionDto.Manufacturer,
                 Picture = createAuctionDto.Picture,
+                ImageData = imageBytes,
                 UserId = User.FindFirstValue(JwtRegisteredClaimNames.Sub)
             };
 
@@ -50,7 +52,7 @@ namespace Backend_PcAuction.Controllers
 
         [HttpGet]
         [Route("{auctionId}")]
-        public async Task<ActionResult<AuctionDto>> Get(Guid auctionId)
+        public async Task<ActionResult<AuctionDtoWithImage>> Get(Guid auctionId)
         {
             var auction = await _auctionsRepository.GetAsync(auctionId);
 
@@ -59,8 +61,10 @@ namespace Backend_PcAuction.Controllers
                 return NotFound();
             }
 
-            return Ok(new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate,
-                auction.EndDate, auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.Picture));
+            var imageData = Convert.ToBase64String(auction.ImageData);
+
+            return Ok(new AuctionDtoWithImage(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate,
+                auction.EndDate, auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.Picture, imageData));
         }
 
         [HttpGet]

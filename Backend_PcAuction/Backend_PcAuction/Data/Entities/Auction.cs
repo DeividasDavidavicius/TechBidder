@@ -20,6 +20,8 @@ namespace Backend_PcAuction.Data.Entities
         public string Manufacturer { get; set; }
         public string Picture { get; set; } // del rodymo paziuret kaip skelbiu ratio padaro
 
+        public byte[] ImageData { get; set; }
+
         [Required]
         public string UserId { get; set; }
         [DeleteBehavior(DeleteBehavior.Restrict)]
