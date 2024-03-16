@@ -70,7 +70,6 @@ function Register() {
             }
             else {
                 const errorMessage = await response.text;
-                console.log('Login failed:', errorMessage);
                 setErrorMessage(errorMessage);
             }
         } catch (error) {
@@ -151,7 +150,7 @@ function Register() {
                         type="submit"
                         fullWidth
                         variant="contained"
-                        sx={{ mt: 3, mb: 2, bgcolor: '#0d6267' }}
+                        sx={{ mt: 3, mb: 2, bgcolor: '#0d6267', '&:hover': { backgroundColor: '#3d8185'}}}
                     >
                         Register
                     </Button>

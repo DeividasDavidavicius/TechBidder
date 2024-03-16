@@ -45,8 +45,9 @@ function Login() {
 
         let errors = {};
         setValidationErrors(errors);
-        if (!isValidUsername(username)) errors.username = "Username must be at least 5 characters long.";
-        if (!isValidPassword(password)) errors.password = "Password must be at least 6 characters long, have a lowercase and uppercase letter, one number and symbol";
+        if (!isValidUsername(username)) errors.username = "Username must be at least 5 characters long";
+        if (!isValidPassword(password)) errors.password = "Wrong login details!";
+        if(!password) errors.password = "Please fill in the password"
 
         if (Object.keys(errors).length > 0) {
             setValidationErrors(errors);
@@ -72,7 +73,7 @@ function Login() {
             }
         } catch (error) {
             console.error("Login failed:", error);
-            setErrorMessage("Failed to login, try again!");
+            setErrorMessage("Wrong login details!");
         }
     }
 
@@ -132,7 +133,7 @@ function Login() {
                         type="submit"
                         fullWidth
                         variant="contained"
-                        sx={{ mt: 3, mb: 2, bgcolor: '#0d6267'}}
+                        sx={{ mt: 3, mb: 2, bgcolor: '#0d6267', '&:hover': { backgroundColor: '#3d8185'}}}
                     >
                         Login
                     </Button>

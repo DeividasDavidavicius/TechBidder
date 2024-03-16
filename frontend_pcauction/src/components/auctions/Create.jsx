@@ -39,8 +39,6 @@ function CreateAuction() {
         const file = e.target.files[0];
         const reader = new FileReader();
 
-        console.log(reader);
-
         reader.onload = () => {
           setSelectedImage(reader.result);
         };
@@ -52,8 +50,6 @@ function CreateAuction() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        console.log(selectedImage);
 
         const title = e.target.title.value;
         const description = e.target.description.value;

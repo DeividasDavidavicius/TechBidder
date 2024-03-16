@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 
 namespace Backend_PcAuction.Controllers
 {
@@ -135,6 +136,27 @@ namespace Backend_PcAuction.Controllers
             await _bidsRepository.DeleteAsync(bid);
 
             return NoContent();
+        }
+
+        [HttpGet]
+        [Route("highest")]
+        public async Task<ActionResult<BidDto>> GetHighest(Guid auctionId)
+        {
+            var auction = await _auctionsRepository.GetAsync(auctionId);
+
+            if (auction == null)
+            {
+                return NotFound();
+            }
+
+            var bid = await _bidsRepository.GetLastAsync(auctionId);
+
+            if (bid == null)
+            {
+                return Ok(new BidDto(new Guid(), 0, DateTime.UtcNow));
+            }
+
+            return Ok(new BidDto(bid.Id, bid.Amount, bid.CreationDate));
         }
     }
 }
