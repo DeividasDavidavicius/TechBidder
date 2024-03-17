@@ -21,10 +21,6 @@ function AuctionInfo() {
     const { setLogin, setLogout } = useUser();
     const [bidAmountField, setBidAmountField] = useState(0);
 
-    const [validationErrors, setValidationErrors] = useState({
-        bidAmount: null,
-    });
-
     const handleBidChange = (event) => {
         setBidAmountField(event.target.value);
       };
@@ -38,7 +34,7 @@ function AuctionInfo() {
             if (!result.success) {
                 openSnackbar('You need to login!', 'error');
                 setLogout();
-                navigate('/login');
+                navigate(PATHS.LOGIN);
                 return;
             }
 
@@ -48,35 +44,31 @@ function AuctionInfo() {
         const bidAmount = e.target.bid.value;
 
         let errors = [];
-        setValidationErrors(errors);
         const highestBidResult = await getHighestBid(auctionId);
         const highestBid = highestBidResult.amount;
 
-
-
-        if (highestBid != null)
+        if (highestBid !== -1)
         {
             if (minIncrement > 0 && bidAmount < highestBid + minIncrement)
             {
                 errors.bidAmount = "Your bid is not higher by min. increment than previous bid";
             }
 
-            if (minIncrement == 0 && bidAmount <= highestBid)
+            if (minIncrement === 0 && bidAmount <= highestBid)
             {
                 errors.bidAmount = "Your bid is not higher than the previous bid";
             }
         }
-        else if (minIncrement > 0 && bidAmount < highestBid)
+        else if (minIncrement > 0 && bidAmount < minIncrement)
         {
             errors.bidAmount = "Starting bid must be equal or higher than min. increment";
         }
-        else if (minIncrement == 0 && bidAmount <= 0)
+        else if (minIncrement === 0 && bidAmount <= 0)
         {
             errors.bidAmount = "Starting bid must be a positive number";
         }
 
         if (Object.keys(errors).length > 0) {
-            setValidationErrors(errors); // TODO : REMOVE AND TEST ALL 4 ERRORS
             openSnackbar(errors.bidAmount, 'error'); // TODO ADD TEXT BELOW
             return;
         }
@@ -86,6 +78,7 @@ function AuctionInfo() {
 
         openSnackbar('Bid placed!', 'success');
         setBidAmountField(0);
+        setHighestBid(bidAmount);
         //window.location.reload();
         // navigate(PATHS.AUCTIONINFO.replace(":auctionId", auctionId));
     };
@@ -127,7 +120,7 @@ function AuctionInfo() {
 
         getAuctionData();
         getHighestBidData();
-      }, []);
+      });
 
       return (
         <Container component="main" maxWidth="lg">
@@ -197,7 +190,6 @@ function AuctionInfo() {
                                         fontWeight: 'bold',
                                         fontSize: '36px',
                                         fontFamily: 'Arial, sans-serif',
-                                        color: '#333',
                                         textTransform: 'uppercase',
                                         color: '#3b9298',
                                         lineHeight: 1}}
@@ -216,7 +208,7 @@ function AuctionInfo() {
                                         textTransform: 'uppercase',
                                         lineHeight: 1}}
                                     >
-                                        &nbsp;{highestBid}€
+                                        &nbsp;{highestBid === -1 ? "NONE" : highestBid + "€"}
                                 </Typography >
                             </Box>
                         </Grid>
@@ -229,7 +221,6 @@ function AuctionInfo() {
                                         fontWeight: 'bold',
                                         fontSize: '16px',
                                         fontFamily: 'Arial, sans-serif',
-                                        color: '#333',
                                         letterSpacing: '1px',
                                         textTransform: 'uppercase',
                                         color: '#3b9298' }}
@@ -268,7 +259,6 @@ function AuctionInfo() {
                                     variant="contained"
                                     color="primary"
                                     sx={{
-                                        marginLeft: '8px',
                                         width: '50%',
                                         borderTopLeftRadius: '10px',
                                         borderBottomLeftRadius: '10px',
@@ -276,6 +266,8 @@ function AuctionInfo() {
                                         borderBottomRightRadius: '10px',
                                         marginLeft: 3,
                                         bgcolor: '#0d6267',
+                                        fontSize: '14px',
+                                        fontWeight: 'bold',
                                         '&:hover': {
                                             backgroundColor: '#3d8185',
                                           },

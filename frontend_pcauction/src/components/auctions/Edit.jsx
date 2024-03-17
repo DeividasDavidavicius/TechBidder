@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useUser } from "../../contexts/UserContext";
 import { useContext, useEffect, useState } from "react";
 import SnackbarContext from "../../contexts/SnackbarContext";
@@ -8,16 +8,26 @@ import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { useTheme } from '@mui/material/styles';
 import 'dayjs/locale/lt';
+import dayjs from 'dayjs';
 import { checkTokenValidity, refreshAccessToken } from "../../services/AuthService";
 import PATHS from "../../utils/Paths";
-import { postAuction } from "../../services/AuctionService";
+import { getAuction, postAuction, putAuction } from "../../services/AuctionService";
+import { formatDate } from "../../utils/DateUtils";
 
-function CreateAuction() {
+function EditAuction() {
     const navigate = useNavigate();
     const theme = useTheme();
-    const { role, setLogin, setLogout } = useUser();
+    const { role, setLogin, setLogout, getUserId } = useUser();
     const openSnackbar = useContext(SnackbarContext);
-
+    const [startingName, setStartingName] = useState("");
+    const [name, setName] = useState("");
+    const [description, setDescription] = useState("");
+    const [imageData, setImageData] = useState(null);
+    const [startDateLocal, setStartDateLocal] = useState(null);
+    const [endDateLocal, setEndDateLocal] = useState(null);
+    const [manufacturer, setManufacturer] = useState("");
+    const [minIncrement, setMinIncrement] = useState(0);
+    const { auctionId } = useParams();
     const [condition, setCondition] = useState("New");
     const [selectedImage, setSelectedImage] = useState(null);
     const [imageType, setImageType] = useState(null);
@@ -49,38 +59,66 @@ function CreateAuction() {
         if (file) {
           reader.readAsDataURL(file);
         }
-      };
+    };
+
+    const handleNameChange = (e) => {
+        setName(e.target.value);
+    };
+
+    const handleDescriptionChange = (e) => {
+        setDescription(e.target.value);
+    };
+
+    const handleMinIncrementChange = (e) => {
+        setMinIncrement(e.target.value);
+    };
+
+    const handleManufacturerChange = (e) => {
+        console.log(e);
+        setManufacturer(e.target.value);
+    };
+
+    const handleStartDateChange = (e) => {
+        console.log(e);
+        setStartDateLocal(e.$d.toLocaleString());
+    };
+
+    const handleEndDateChange = (e) => {
+        console.log(e);
+        setEndDateLocal(e.$d.toLocaleString());
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const title = e.target.title.value;
-        const description = e.target.description.value;
-        const startDate = e.target.startDate.value;
-        const endDate = e.target.endDate.value;
-        const minInc = e.target.minInc.value;
-        const manufacturer = e.target.manufacturer.value ? e.target.manufacturer.value : "";
+        const startDate = startDateLocal
+        const endDate = endDateLocal;
+        setManufacturer(manufacturer ? manufacturer : "");
 
         let errors = [];
         setValidationErrors(errors);
-        if (!isValidTitle(title)) errors.title = "Title must be at 5 - 50 characters long";
+        if (!isValidTitle(name)) errors.title = "Title must be at 5 - 50 characters long";
         if (!isValidDescription(description)) errors.description = "Description must be at least 10 characters long";
         if(!isDatePastNow(startDate)) errors.startDate = "Start date must be later than current time";
         if(!isDatePastNow(endDate)) errors.endDate = "End date must be later than current time";
         if(!isEndDateLater(startDate, endDate)) errors.endDate = "End date must be later than start date";
-        if(!isValidMinInc(minInc)) errors.minInc = "Minimum increment must 0 or a positive number";
+        if(!isValidMinInc(minIncrement)) errors.minInc = "Minimum increment must 0 or a positive number";
         if(startDate == null || startDate === "") errors.startDate = "Auction start date must be set";
         if(endDate == null || endDate === "") errors.endDate = "Auction end date must be set";
         if(condition === null || condition === "") errors.condition = "Condition must be set"
-        if(selectedImage === null || selectedImage === "") errors.image = "Image must be selected";
-        if(!imageType || !imageType.startsWith('image/')) errors.image = "Please select a valid image file";
+        if(imageType && !imageType.startsWith('image/')) errors.image = "Please select a valid image file";
 
         if (Object.keys(errors).length > 0) {
             setValidationErrors(errors);
             return;
         }
 
-        const imageData = selectedImage.split(',')[1];
+        let newImageData = imageData;
+
+        if(selectedImage)
+        {
+            newImageData = selectedImage.split(',')[1];
+        }
 
         const accessToken = localStorage.getItem('accessToken');
         if (!checkTokenValidity(accessToken)) {
@@ -95,29 +133,60 @@ function CreateAuction() {
             setLogin(result.response.data.accessToken, result.response.data.refreshToken);
         }
 
-        const startDateLocal = new Date(startDate);
-        const isoStartDate = startDateLocal.toISOString()
-        const endDateLocal = new Date(endDate);
-        const isoEndDate = endDateLocal.toISOString();
+        const newStartDate = new Date(startDate);
+        const isoStartDate = newStartDate.toISOString()
+        const newEndDate = new Date(endDate);
+        const isoEndDate = newEndDate.toISOString();
 
         const picture = "a"; // TODO: remove from here and back-end
-        const postData = {name: title, description, startDate: isoStartDate, endDate: isoEndDate, minIncrement: minInc, condition, manufacturer, picture, imageData};
+        const putData = {name, description, startDate: isoStartDate, endDate: isoEndDate, minIncrement, condition, manufacturer, picture, imageData: newImageData};
 
         try {
-            await postAuction(postData);
+            await putAuction(putData, auctionId);
             navigate(PATHS.MAIN); // TODO: Pakeisti i listo view'a  o  ne main page
-            openSnackbar('Auction created successfully!', 'success');
+            openSnackbar('Auction updated successfully!', 'success');
         } catch(error) {
             openSnackbar(error.response.data.errorMessage, "error")
         }
     };
 
     useEffect(() => {
-        if (!role.includes("RegisteredUser")) {
-            openSnackbar('You can not create auction!', 'error');
-            navigate('/');
-        }
-    });
+        const getAuctionData = async () => {
+            try {
+                const result = await getAuction(auctionId);
+
+                if (!(role.includes("RegisteredUser") && result.userId === getUserId()) && !role.includes("Admin")) {
+
+                    openSnackbar('You can not edit this auction!', 'error');
+                    navigate('/');
+                }
+
+                setImageData(result.imageData);
+                setStartingName(result.name);
+                setName(result.name);
+                setDescription(result.description);
+                setMinIncrement(result.minIncrement);
+                setCondition(result.condition);
+                setManufacturer(result.manufacturer);
+
+                const offsetInMilliseconds = new Date().getTimezoneOffset() * 60000;
+                const utcDateStart = new Date(result.startDate);
+                const utcDateEnd = new Date(result.endDate);
+
+                const localDateStart = new Date(utcDateStart.getTime() - offsetInMilliseconds).toLocaleString();
+                const localDateEnd = new Date(utcDateEnd.getTime() - offsetInMilliseconds).toLocaleString();
+
+                setStartDateLocal(localDateStart.slice(0, -3));
+                setEndDateLocal(localDateEnd.slice(0, -3));
+            }
+            catch {
+                openSnackbar('This auction does not exist!', 'error');
+                navigate(PATHS.MAIN);
+            }
+        };
+
+        getAuctionData();
+    }, []);
 
     return (
         <Container component="main" maxWidth="sm">
@@ -131,7 +200,7 @@ function CreateAuction() {
                 }}
             >
                 <Typography component="h1" variant="h5" style={{ fontWeight: 'bold' }}>
-                    CREATE NEW AUCTION
+                    UPDATE AUCTION '{startingName}'
                 </Typography>
 
 
@@ -146,7 +215,8 @@ function CreateAuction() {
                                 id="title"
                                 label="Title"
                                 name="title"
-                                autoFocus
+                                value={name}
+                                onChange={handleNameChange}
                             />
                         </Grid>
                         <Grid item xs={12}>
@@ -160,12 +230,16 @@ function CreateAuction() {
                                 name="description"
                                 multiline
                                 rows={3}
-                            />
+                                value={description}
+                                onChange={handleDescriptionChange}
+                                />
                         </Grid>
                         <Grid item xs={12}>
                             <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="lt">
                                 <DateTimePicker
                                     label="Auction start date *"
+                                    value={dayjs(startDateLocal)}
+                                    onChange={handleStartDateChange}
                                     sx={{ width: '100%' }}
                                     name="startDate"
                                     slotProps={{
@@ -179,17 +253,19 @@ function CreateAuction() {
                         </Grid>
                         <Grid item xs={12}>
                             <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="lt">
-                            <DateTimePicker
-                                label="Auction end date *"
-                                sx={{ width: '100%' }}
-                                name="endDate"
-                                slotProps={{
-                                    textField: {
-                                      error: Boolean(validationErrors.endDate),
-                                      helperText: validationErrors.endDate,
-                                    },
-                                  }}
-                            />
+                                <DateTimePicker
+                                    label="Auction end date *"
+                                    value={dayjs(endDateLocal)}
+                                    onChange={handleEndDateChange}
+                                    sx={{ width: '100%' }}
+                                    name="endDate"
+                                    slotProps={{
+                                        textField: {
+                                        error: Boolean(validationErrors.endDate),
+                                        helperText: validationErrors.endDate,
+                                        },
+                                    }}
+                                />
                             </LocalizationProvider>
                         </Grid>
                         <Grid item xs={12}>
@@ -203,7 +279,8 @@ function CreateAuction() {
                                 name="minInc"
                                 type="number"
                                 inputProps={{ min: 0 }}
-                                defaultValue={0}
+                                value = {minIncrement}
+                                onChange = { handleMinIncrementChange }
                             />
                         </Grid>
                         <Grid item xs={12}>
@@ -231,16 +308,20 @@ function CreateAuction() {
                                 id="manufacturer"
                                 label="Manufacturer"
                                 name="manufacturer"
+                                value={manufacturer}
+                                onChange = {handleManufacturerChange}
                             />
                         </Grid>
 
                         <Grid item xs={12} style={{ height: '30vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                             {selectedImage ? (
-                            <div style={{ width: '100%', height: '90%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                <img src={selectedImage} alt="Selected" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
-                            </div>
+                                <div style={{ width: '100%', height: '90%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                    <img src={selectedImage} alt="Selected" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                                </div>
                             ) : (
-                                <Skeleton variant="rectangular" width={'100%'} height={'100%'} />
+                                <div style={{ width: '100%', height: '90%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                    {imageData && <img src={`data:image/jpeg;base64,${imageData}`} alt="Image" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />}
+                                </div>
                             )}
                         </Grid>
                         <Grid item xs={12}>
@@ -265,7 +346,7 @@ function CreateAuction() {
                         variant="contained"
                         sx={{ mt: 1, mb: 2, bgcolor: '#0d6267' }}
                     >
-                        Create auction
+                        Update auction
                     </Button>
                 </Box>
             </Box>
@@ -273,4 +354,4 @@ function CreateAuction() {
     );
 }
 
-export default CreateAuction;
+export default EditAuction;

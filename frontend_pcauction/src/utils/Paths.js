@@ -2,9 +2,10 @@ const PATHS = {
     MAIN: '/',
     LOGIN: '/login',
     REGISTER: '/register',
-    CREATEAUCTION: '/auctions/create',
-    AUCTION: '/auction',
+    AUCTIONS: '/auctions',
     AUCTIONINFO: '/auctions/:auctionId',
+    CREATEAUCTION: '/auctions/create',
+    EDITAUCTION: '/auctions/edit/:auctionId',
     ANY: '*'
 }
 

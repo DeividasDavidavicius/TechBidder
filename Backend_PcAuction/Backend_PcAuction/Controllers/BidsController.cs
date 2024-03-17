@@ -153,7 +153,7 @@ namespace Backend_PcAuction.Controllers
 
             if (bid == null)
             {
-                return Ok(new BidDto(new Guid(), 0, DateTime.UtcNow));
+                return Ok(new BidDto(new Guid(), -1, DateTime.UtcNow));
             }
 
             return Ok(new BidDto(bid.Id, bid.Amount, bid.CreationDate));

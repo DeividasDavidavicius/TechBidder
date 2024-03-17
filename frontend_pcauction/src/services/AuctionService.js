@@ -26,3 +26,27 @@ export const postAuction = async (data) => {
     }
   };
 
+  export const getAuctionsWithPagination = async (page) => {
+    try {
+      const response = await axios.get(`${API_URL}/auctions/pagination?page=${page}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error getting auction:', error);
+      throw error;
+    }
+  };
+
+  export const putAuction = async (data, id) => {
+    try {
+      const accessToken = localStorage.getItem('accessToken');
+      await axios.put(`${API_URL}/auctions/${id}`, data, {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`
+        }
+      })
+    } catch (error) {
+      console.error("Error updating auction", error);
+      throw error;
+    }
+  };

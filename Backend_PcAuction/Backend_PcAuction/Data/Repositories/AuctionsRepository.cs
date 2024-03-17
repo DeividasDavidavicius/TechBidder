@@ -9,7 +9,9 @@ namespace Backend_PcAuction.Data.Repositories
         Task DeleteAsync(Auction auction);
         Task<Auction?> GetAsync(Guid auctionId);
         Task<IReadOnlyList<Auction>> GetManyAsync();
+        Task<IReadOnlyList<Auction>> GetManyWithPaginationAsync(int page);
         Task UpdateAsync(Auction auction);
+        Task<int> GetCountAsync();
     }
 
     public class AuctionsRepository : IAuctionsRepository
@@ -37,6 +39,11 @@ namespace Backend_PcAuction.Data.Repositories
             return await _context.Auctions.ToListAsync();
         }
 
+        public async Task<IReadOnlyList<Auction>> GetManyWithPaginationAsync(int page)
+        {
+            return await _context.Auctions.Skip((page - 1) * 5).Take(5).ToListAsync();
+        }
+
         public async Task UpdateAsync(Auction auction)
         {
             _context.Auctions.Update(auction);
@@ -47,6 +54,11 @@ namespace Backend_PcAuction.Data.Repositories
         {
             _context.Auctions.Remove(auction);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<int> GetCountAsync()
+        {
+            return await _context.Auctions.CountAsync();
         }
     }
 }
