@@ -21,5 +21,5 @@ export const isEndDateLater = (startDate, endDate) =>
 }
 
 export const isValidMinInc = (minInc) => {
-    return minInc && minInc >= 0;
+    return minInc !== null && minInc !== "" && minInc >= 0;
 }

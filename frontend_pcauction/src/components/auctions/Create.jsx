@@ -40,7 +40,7 @@ function CreateAuction() {
         const file = e.target.files[0];
         const reader = new FileReader();
 
-        setImageType(file && file.type ? file.type : imageType);
+        setImageType(file && file.type ? file.type : null);
 
         reader.onload = () => {
           setSelectedImage(reader.result);

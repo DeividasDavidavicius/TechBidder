@@ -120,7 +120,7 @@ function AuctionInfo() {
 
         getAuctionData();
         getHighestBidData();
-      });
+      }, [auctionId, navigate, openSnackbar]);
 
       return (
         <Container component="main" maxWidth="lg">

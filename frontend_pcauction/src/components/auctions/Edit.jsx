@@ -2,7 +2,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useUser } from "../../contexts/UserContext";
 import { useContext, useEffect, useState } from "react";
 import SnackbarContext from "../../contexts/SnackbarContext";
-import { Box, Button, Container, CssBaseline,  FormControl, FormHelperText, Grid, Input, InputLabel, MenuItem, Select, Skeleton, TextField, Typography } from "@mui/material";
+import { Box, Button, Container, CssBaseline,  FormControl, FormHelperText, Grid, Input, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
 import { isDatePastNow, isEndDateLater, isValidDescription, isValidMinInc, isValidTitle } from "./Validations";
 import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -11,8 +11,7 @@ import 'dayjs/locale/lt';
 import dayjs from 'dayjs';
 import { checkTokenValidity, refreshAccessToken } from "../../services/AuthService";
 import PATHS from "../../utils/Paths";
-import { getAuction, postAuction, putAuction } from "../../services/AuctionService";
-import { formatDate } from "../../utils/DateUtils";
+import { getAuction, putAuction } from "../../services/AuctionService";
 
 function EditAuction() {
     const navigate = useNavigate();
@@ -50,7 +49,7 @@ function EditAuction() {
         const file = e.target.files[0];
         const reader = new FileReader();
 
-        setImageType(file && file.type ? file.type : imageType);
+        setImageType(file && file.type ? file.type : null);
 
         reader.onload = () => {
           setSelectedImage(reader.result);
@@ -74,7 +73,6 @@ function EditAuction() {
     };
 
     const handleManufacturerChange = (e) => {
-        console.log(e);
         setManufacturer(e.target.value);
     };
 
@@ -84,7 +82,6 @@ function EditAuction() {
     };
 
     const handleEndDateChange = (e) => {
-        console.log(e);
         setEndDateLocal(e.$d.toLocaleString());
     };
 
@@ -106,7 +103,7 @@ function EditAuction() {
         if(startDate == null || startDate === "") errors.startDate = "Auction start date must be set";
         if(endDate == null || endDate === "") errors.endDate = "Auction end date must be set";
         if(condition === null || condition === "") errors.condition = "Condition must be set"
-        if(imageType && !imageType.startsWith('image/')) errors.image = "Please select a valid image file";
+        if(!imageType || !imageType.startsWith('image/')) errors.image = "Please select a valid image file";
 
         if (Object.keys(errors).length > 0) {
             setValidationErrors(errors);
@@ -162,6 +159,7 @@ function EditAuction() {
                 }
 
                 setImageData(result.imageData);
+                setImageType("image/");
                 setStartingName(result.name);
                 setName(result.name);
                 setDescription(result.description);
@@ -186,7 +184,7 @@ function EditAuction() {
         };
 
         getAuctionData();
-    }, []);
+    }, [auctionId, getUserId, navigate, openSnackbar, role]);
 
     return (
         <Container component="main" maxWidth="sm">
@@ -278,7 +276,6 @@ function EditAuction() {
                                 label="Minimum increment"
                                 name="minInc"
                                 type="number"
-                                inputProps={{ min: 0 }}
                                 value = {minIncrement}
                                 onChange = { handleMinIncrementChange }
                             />
@@ -320,7 +317,7 @@ function EditAuction() {
                                 </div>
                             ) : (
                                 <div style={{ width: '100%', height: '90%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                    {imageData && <img src={`data:image/jpeg;base64,${imageData}`} alt="Image" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />}
+                                    {imageData && <img src={`data:image/jpeg;base64,${imageData}`} alt="OldPicture" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />}
                                 </div>
                             )}
                         </Grid>
