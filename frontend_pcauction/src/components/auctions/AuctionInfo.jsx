@@ -32,7 +32,7 @@ function AuctionInfo() {
         if (!checkTokenValidity(accessToken)) {
             const result = await refreshAccessToken();
             if (!result.success) {
-                openSnackbar('You need to login!', 'error');
+                openSnackbar('You must login to place bids!', 'error');
                 setLogout();
                 navigate(PATHS.LOGIN);
                 return;
@@ -68,15 +68,20 @@ function AuctionInfo() {
             errors.bidAmount = "Starting bid must be a positive number";
         }
 
+        if(bidAmount > 50000)
+        {
+            errors.bidAmount = "Bid can not exceed 50000€";
+        }
+
         if (Object.keys(errors).length > 0) {
-            openSnackbar(errors.bidAmount, 'error'); // TODO ADD TEXT BELOW
+            openSnackbar(errors.bidAmount, 'error');
             return;
         }
 
         const data = {amount: bidAmount};
         await postBid(data, auctionId);
 
-        openSnackbar('Bid placed!', 'success');
+        openSnackbar('Bid placed successfully!', 'success');
         setBidAmountField(0);
         setHighestBid(bidAmount);
         //window.location.reload();

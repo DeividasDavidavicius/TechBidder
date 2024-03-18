@@ -59,6 +59,11 @@ namespace Backend_PcAuction.Controllers
                 return UnprocessableEntity("Starting bid must be a positive number");
             }
 
+            if(createBidDto.Amount > 50000)
+            {
+                return UnprocessableEntity("Bid can not exceed 50000€");
+            }
+
             var bid = new Bid
             {
                 Amount = createBidDto.Amount,

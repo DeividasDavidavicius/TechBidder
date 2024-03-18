@@ -51,7 +51,22 @@ namespace Backend_PcAuction.Controllers
                 return UnprocessableEntity("Minimum increment must 0 or a positive number");
             }
 
-            // ADD DATE VALIDATIONS
+            if (createAuctionDto.StartDate < DateTime.UtcNow)
+            {
+                return UnprocessableEntity("Start date must be later than current time");
+            }
+
+            if (createAuctionDto.EndDate < DateTime.UtcNow)
+            {
+                return UnprocessableEntity("End date must be later than current time");
+            }
+
+            if (createAuctionDto.EndDate < createAuctionDto.StartDate)
+            {
+                return UnprocessableEntity("End date must be later than start date");
+            }
+
+            // TODO Create and update, backend and frontend: Max auction length 7 days (or 14), min 1 hour (or 1 day)
 
             var auction = new Auction
             {
@@ -158,7 +173,20 @@ namespace Backend_PcAuction.Controllers
                 return UnprocessableEntity("Minimum increment must 0 or a positive number");
             }
 
-            // ADD DATE VALIDATIONS
+            if(updateAuctionDto.StartDate <  DateTime.UtcNow) 
+            {
+                return UnprocessableEntity("Start date must be later than current time");
+            }
+
+            if (updateAuctionDto.EndDate < DateTime.UtcNow)
+            {
+                return UnprocessableEntity("End date must be later than current time");
+            }
+
+            if (updateAuctionDto.EndDate < updateAuctionDto.StartDate)
+            {
+                return UnprocessableEntity("End date must be later than start date");
+            }
 
             auction.Name = updateAuctionDto.Name;
             auction.Description = updateAuctionDto.Description;
