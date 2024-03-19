@@ -1,15 +1,11 @@
-import { useContext, useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";import SnackbarContext from "../../contexts/SnackbarContext";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import PATHS from "../../utils/Paths";
-import { checkTokenValidity, refreshAccessToken } from "../../services/AuthService";
-import { useUser } from "../../contexts/UserContext";
 import { Avatar, Box, Card, CardActionArea, CardContent, CardHeader, Container, CssBaseline, Pagination, Typography } from "@mui/material";
 import { getAuctionsWithPagination } from "../../services/AuctionService";
 
 function AuctionList() {
-    const openSnackbar = useContext(SnackbarContext);
     const navigate = useNavigate();
-    const { setLogin, setLogout } = useUser();
 
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
@@ -44,25 +40,8 @@ function AuctionList() {
         navigate(PATHS.AUCTIONINFO.replace(":auctionId", auctionId));
       };
 
-    const accessTokenCheck = async () => {
-        const accessToken = localStorage.getItem('accessToken');
-        if (!checkTokenValidity(accessToken)) {
-            const result = await refreshAccessToken();
-            if (!result.success) {
-                openSnackbar('You need to login!', 'error');
-                setLogout();
-                navigate(PATHS.LOGIN);
-                return;
-            }
-
-            setLogin(result.response.data.accessToken, result.response.data.refreshToken);
-        }
-    };
-
-
-
     return (
-<Container component="main" maxWidth="lg">
+    <Container component="main" maxWidth="lg">
       <CssBaseline />
       <Box
         sx={{

@@ -6,6 +6,8 @@ import Register from "../components/auth/Register";
 import PATHS from "./Paths";
 import AuctionList from "../components/auctions/AuctionList";
 import EditAuction from "../components/auctions/Edit";
+import PartList from "../components/parts/PartList";
+import CreatePart from "../components/parts/CreatePart";
 
 
 const AppRoutes = [
@@ -16,7 +18,9 @@ const AppRoutes = [
     { path: PATHS.AUCTIONS, element: <AuctionList/> },
     { path: PATHS.AUCTIONINFO, element: <AuctionInfo/> },
     { path: PATHS.CREATEAUCTION, element: <CreateAuction/> },
-    { path: PATHS.EDITAUCTION, element: <EditAuction/> }
+    { path: PATHS.EDITAUCTION, element: <EditAuction/> },
+    { path: PATHS.PARTS, element: <PartList/> },
+    { path: PATHS.CREATEPART, element: <CreatePart/> }
 ];
 
 export default AppRoutes;

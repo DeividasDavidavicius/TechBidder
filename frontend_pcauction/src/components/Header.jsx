@@ -19,7 +19,8 @@ function Header() {
     const pages = [
         { name: 'MAIN', route: PATHS.MAIN },
         { name: 'CREATE', route: PATHS.CREATEAUCTION },
-        { name: "AUCTIONS", route: PATHS.AUCTIONS + "?page=1" }
+        { name: "AUCTIONS", route: PATHS.AUCTIONS + "?page=1" },
+        { name: "PARTS", route: PATHS.PARTS }
     ];
 
     let navOptions = [];
