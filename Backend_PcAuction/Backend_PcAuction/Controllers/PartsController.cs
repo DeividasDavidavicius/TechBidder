@@ -118,17 +118,19 @@ namespace Backend_PcAuction.Controllers
                 return NotFound();
             }
 
+            Console.WriteLine(updatePartDto);
+
             part.Name = updatePartDto.Name;
-            part.SpecificationValue1 ??= updatePartDto.SpecificationValue1;
-            part.SpecificationValue2 ??= updatePartDto.SpecificationValue2;
-            part.SpecificationValue3 ??= updatePartDto.SpecificationValue3;
-            part.SpecificationValue4 ??= updatePartDto.SpecificationValue4;
-            part.SpecificationValue5 ??= updatePartDto.SpecificationValue5;
-            part.SpecificationValue6 ??= updatePartDto.SpecificationValue6;
-            part.SpecificationValue7 ??= updatePartDto.SpecificationValue7;
-            part.SpecificationValue8 ??= updatePartDto.SpecificationValue8;
-            part.SpecificationValue9 ??= updatePartDto.SpecificationValue9;
-            part.SpecificationValue10 ??= updatePartDto.SpecificationValue10;
+            part.SpecificationValue1 = updatePartDto.SpecificationValue1;
+            part.SpecificationValue2 = updatePartDto.SpecificationValue2;
+            part.SpecificationValue3 = updatePartDto.SpecificationValue3;
+            part.SpecificationValue4 = updatePartDto.SpecificationValue4;
+            part.SpecificationValue5 = updatePartDto.SpecificationValue5;
+            part.SpecificationValue6 = updatePartDto.SpecificationValue6;
+            part.SpecificationValue7 = updatePartDto.SpecificationValue7;
+            part.SpecificationValue8 = updatePartDto.SpecificationValue8;
+            part.SpecificationValue9 = updatePartDto.SpecificationValue9;
+            part.SpecificationValue10 = updatePartDto.SpecificationValue10;
 
             await _partsRepository.UpdateAsync(part);
 

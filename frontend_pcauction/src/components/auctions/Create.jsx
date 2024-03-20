@@ -82,6 +82,14 @@ function CreateAuction() {
 
         const imageData = selectedImage.split(',')[1];
 
+        const startDateLocal = new Date(startDate);
+        const isoStartDate = startDateLocal.toISOString()
+        const endDateLocal = new Date(endDate);
+        const isoEndDate = endDateLocal.toISOString();
+
+        const picture = "a"; // TODO: remove from here and back-end
+        const postData = {name: title, description, startDate: isoStartDate, endDate: isoEndDate, minIncrement: minInc, condition, manufacturer, picture, imageData};
+
         const accessToken = localStorage.getItem('accessToken');
         if (!checkTokenValidity(accessToken)) {
             const result = await refreshAccessToken();
@@ -95,17 +103,9 @@ function CreateAuction() {
             setLogin(result.response.data.accessToken, result.response.data.refreshToken);
         }
 
-        const startDateLocal = new Date(startDate);
-        const isoStartDate = startDateLocal.toISOString()
-        const endDateLocal = new Date(endDate);
-        const isoEndDate = endDateLocal.toISOString();
-
-        const picture = "a"; // TODO: remove from here and back-end
-        const postData = {name: title, description, startDate: isoStartDate, endDate: isoEndDate, minIncrement: minInc, condition, manufacturer, picture, imageData};
-
         try {
             await postAuction(postData);
-            navigate(PATHS.MAIN); // TODO: Pakeisti i listo view'a  o  ne main page
+            navigate(PATHS.MAIN); // TODO: Pakeisti i listo view'a  o  ne main page, arba auction info vidu
             openSnackbar('Auction created successfully!', 'success');
         } catch(error) {
             openSnackbar(error.response.data.errorMessage, "error")
@@ -130,11 +130,9 @@ function CreateAuction() {
                     alignItems: 'center',
                 }}
             >
-                <Typography component="h1" variant="h5" style={{ fontWeight: 'bold' }}>
+                <Typography component="h1" variant="h5" sx={{ fontSize: '26px', fontWeight: 'bold', fontFamily: 'Arial, sans-serif', color: '#0d6267' }}>
                     CREATE NEW AUCTION
                 </Typography>
-
-
                 <Box component="form" noValidate onSubmit={(event) => handleSubmit(event)} sx={{ mt: 3 }}>
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
@@ -252,7 +250,7 @@ function CreateAuction() {
                                 style={{ display: 'none' }}
                             />
                             <label htmlFor="image-input">
-                                <Button variant="contained" component="span" fullWidth sx={{ mt: 1, mb: 2, bgcolor: '#138c94' }}>
+                                <Button variant="contained" component="span" fullWidth sx={{ mt: 1, mb: 2, bgcolor: '#138c94', '&:hover': { backgroundColor: '#07383b'}  }}>
                                     Select Image
                                 </Button>
                                 {validationErrors.image && <FormHelperText sx={{ color: theme.palette.error.main }}>{validationErrors.image}</FormHelperText>}
@@ -263,7 +261,7 @@ function CreateAuction() {
                         type="submit"
                         fullWidth
                         variant="contained"
-                        sx={{ mt: 1, mb: 2, bgcolor: '#0d6267' }}
+                        sx={{ mt: 1, mb: 2, bgcolor: '#0d6267', '&:hover': { backgroundColor: '#07383b'} }}
                     >
                         Create auction
                     </Button>

@@ -77,7 +77,6 @@ function EditAuction() {
     };
 
     const handleStartDateChange = (e) => {
-        console.log(e);
         setStartDateLocal(e.$d.toLocaleString());
     };
 
@@ -198,7 +197,7 @@ function EditAuction() {
                 }}
             >
                 <Typography component="h1" variant="h5" style={{ fontWeight: 'bold' }}>
-                    UPDATE AUCTION '{startingName}'
+                    EDIT AUCTION '{startingName}'
                 </Typography>
 
 

@@ -8,6 +8,7 @@ const PATHS = {
     EDITAUCTION: '/auctions/edit/:auctionId',
     PARTS: '/admin/parts',
     CREATEPART: '/admin/parts/create',
+    EDITPART: '/admin/categories/:categoryId/parts/:partId',
     ANY: '*'
 }
 

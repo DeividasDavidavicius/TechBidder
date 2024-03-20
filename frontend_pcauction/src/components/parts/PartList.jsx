@@ -88,9 +88,11 @@ function PartList() {
                         <TableCell>{part.categoryId}</TableCell>
                         <TableCell>{part.name}</TableCell>
                         <TableCell>
-                            <Button startIcon={<ModeEditIcon />} sx={{ marginRight: 3, color: '#138c94', fontWeight: 'bold' }}>
-                                Edit
-                            </Button>
+                            <Link to={PATHS.EDITPART.replace(':partId', part.id).replace(':categoryId', part.categoryId)}>
+                                <Button startIcon={<ModeEditIcon />} sx={{ marginRight: 3, color: '#138c94', fontWeight: 'bold' }}>
+                                    Edit
+                                </Button>
+                            </Link>
                             <Button startIcon={<DeleteIcon />} sx={{ marginRight: 0, color: '#138c94', fontWeight: 'bold' }}>
                                 Delete
                             </Button>

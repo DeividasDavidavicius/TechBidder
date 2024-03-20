@@ -1,16 +1,15 @@
 import { useContext, useEffect, useState } from "react";
-import { getCategories } from "../../services/PartCategoryService";
-import { Box, Button, Container, CssBaseline, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
+import { getCategories, getCategory } from "../../services/PartCategoryService";
+import { Box, Button, Container, CssBaseline, Grid, TextField, Typography } from "@mui/material";
 import { checkTokenValidity, refreshAccessToken } from "../../services/AuthService";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useUser } from "../../contexts/UserContext";
 import SnackbarContext from "../../contexts/SnackbarContext";
 import PATHS from "../../utils/Paths";
-import { postPart } from "../../services/PartService";
+import { getPart, postPart, putPart } from "../../services/PartService";
+import { set } from "date-fns";
 
-function CreatePart() {
-    const [categories, setCategories] = useState([]);
-    const [partCategory, setPartCategory] = useState("");
+function EditPart() {
     const [categoryFields, setCategoryFields] = useState(null);
     const [name, setName] = useState("");
     const [specValue1, setSpecValue1] = useState("");
@@ -31,14 +30,8 @@ function CreatePart() {
     const navigate = useNavigate();
     const { setLogin, setLogout } = useUser();
     const openSnackbar = useContext(SnackbarContext);
-
-
-    const handlePartCategoryChange = (e) => {
-        const categoryName = e.target.value;
-        setPartCategory(categoryName);
-        const categoryFields = categories.find(category => category.id === categoryName);
-        setCategoryFields(categoryFields);
-    }
+    const { partId } = useParams();
+    const { categoryId } = useParams();
 
     const handleNameChange = (e) => {
         setName(e.target.value);
@@ -94,10 +87,12 @@ function CreatePart() {
             return;
         }
 
-        const postData = {name, specificationValue1: specValue1, specificationValue2: specValue2, specificationValue3: specValue3,
+        const putData = {name, specificationValue1: specValue1, specificationValue2: specValue2, specificationValue3: specValue3,
             specificationValue4: specValue4, specificationValue5: specValue5, specificationValue6: specValue6,
             specificationValue7: specValue7,  specificationValue8: specValue8, specificationValue9: specValue9,
             specificationValue10: specValue10};
+
+        console.log(putData);
 
         const accessToken = localStorage.getItem('accessToken');
         if (!checkTokenValidity(accessToken)) {
@@ -113,7 +108,7 @@ function CreatePart() {
         }
 
         try {
-            await postPart(postData, partCategory);
+            await putPart(putData, categoryId, partId);
             navigate(PATHS.PARTS);
             openSnackbar('Part created successfully!', 'success');
         } catch(error) {
@@ -123,16 +118,26 @@ function CreatePart() {
     };
 
     useEffect(() => {
-        const fetchCategoriesData = async () => {
-            const result = await getCategories();
-            setCategories(result);
+        const fetchPartData = async () => {
+            const partData = await getPart(categoryId, partId);
 
-            const defaultCategory = "CPU";
-            setPartCategory(defaultCategory);
-            setCategoryFields(result.find(category => category.id === defaultCategory));
+            setName(partData.name);
+            setSpecValue1(partData.specificationValue1);
+            setSpecValue2(partData.specificationValue2);
+            setSpecValue3(partData.specificationValue3);
+            setSpecValue4(partData.specificationValue4);
+            setSpecValue5(partData.specificationValue5);
+            setSpecValue6(partData.specificationValue6);
+            setSpecValue7(partData.specificationValue7);
+            setSpecValue8(partData.specificationValue8);
+            setSpecValue9(partData.specificationValue9);
+            setSpecValue10(partData.specificationValue10);
+
+            const categoryFields= await getCategory(categoryId);
+            setCategoryFields(categoryFields);
         };
 
-        fetchCategoriesData();
+        fetchPartData();
 
     }, []);
 
@@ -148,31 +153,35 @@ function CreatePart() {
                 }}
             >
                 <Typography component="h1" variant="h5" sx={{ fontSize: '26px', fontWeight: 'bold', fontFamily: 'Arial, sans-serif', color: '#0d6267' }}>
-                    CREATE NEW PART
+                    EDIT PART
                 </Typography>
 
                 <Box component="form" noValidate onSubmit={(event) => handleSubmit(event)} sx={{ mt: 3 }}>
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
-                            <FormControl fullWidth>
-                                <InputLabel id="part-category-label">Part category *</InputLabel>
-                                <Select
-                                    labelId="part-category-label"
-                                    id="part-category"
-                                    label="Part category"
-                                    value={partCategory}
-                                    onChange={handlePartCategoryChange}
-                                    required
-                                    sx={{ textAlign: 'left' }}
-                                >
-                                    {categories.map((category) => (
-                                        <MenuItem key={category.id} value={category.id}>
-                                            {category.id}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </Grid>
+                            <TextField
+                                fullWidth
+                                id="part-category"
+                                label="Part category"
+                                value={categoryId}
+                                name="part-category"
+                                disabled={true}
+                                sx={{
+                                    "& .MuiInputBase-input.Mui-disabled": {
+                                        WebkitTextFillColor: "#138c94",
+                                        fontWeight: 'bold'
+                                    },
+                                    "& .MuiInputBase-root.Mui-disabled": {
+                                        "& > fieldset": {
+                                         borderColor: "#138c94"
+                                        }
+                                    },
+                                    '& label.Mui-disabled': {
+                                        color: '#138c94'
+                                    },
+                                }}
+                            />
+                            </Grid>
                         <Grid item xs={12}>
                             <TextField
                                 error={Boolean(validationErrors.name)}
@@ -183,6 +192,7 @@ function CreatePart() {
                                 label="Name"
                                 name="name"
                                 autoFocus
+                                value={name}
                                 onChange={handleNameChange}
                             />
                         </Grid>
@@ -193,6 +203,7 @@ function CreatePart() {
                                     id="specValue1"
                                     label={categoryFields.specificationName1}
                                     name="specValue1"
+                                    value={specValue1}
                                     onChange={handleSpecValue1Change}
                                 />
                              </Grid>
@@ -204,6 +215,7 @@ function CreatePart() {
                                     id="specValue2"
                                     label={categoryFields.specificationName2}
                                     name="specValue2"
+                                    value={specValue2}
                                     onChange={handleSpecValue2Change}
                                 />
                             </Grid>
@@ -215,6 +227,7 @@ function CreatePart() {
                                     id="specValue3"
                                     label={categoryFields.specificationName3}
                                     name="specValue3"
+                                    value={specValue3}
                                     onChange={handleSpecValue3Change}
                                 />
                             </Grid>
@@ -226,6 +239,7 @@ function CreatePart() {
                                 id="specValue4"
                                 label={categoryFields.specificationName4}
                                 name="specValue4"
+                                value={specValue4}
                                 onChange={handleSpecValue4Change}
                             />
                         </Grid>
@@ -237,6 +251,7 @@ function CreatePart() {
                                 id="specValue5"
                                 label={categoryFields.specificationName5}
                                 name="specValue5"
+                                value={specValue5}
                                 onChange={handleSpecValue5Change}
                             />
                         </Grid>
@@ -248,6 +263,7 @@ function CreatePart() {
                                 id="specValue6"
                                 label={categoryFields.specificationName6}
                                 name="specValue6"
+                                value={specValue6}
                                 onChange={handleSpecValue6Change}
                             />
                         </Grid>
@@ -259,6 +275,7 @@ function CreatePart() {
                                 id="specValue7"
                                 label={categoryFields.specificationName7}
                                 name="specValue7"
+                                value={specValue7}
                                 onChange={handleSpecValue7Change}
                             />
                         </Grid>
@@ -270,6 +287,7 @@ function CreatePart() {
                                 id="specValue8"
                                 label={categoryFields.specificationName8}
                                 name="specValue8"
+                                value={specValue8}
                                 onChange={handleSpecValue8Change}
                             />
                         </Grid>
@@ -281,6 +299,7 @@ function CreatePart() {
                                 id="specValue9"
                                 label={categoryFields.specificationName9}
                                 name="specValue9"
+                                value={specValue9}
                                 onChange={handleSpecValue9Change}
                             />
                         </Grid>
@@ -292,6 +311,7 @@ function CreatePart() {
                                 id="specValue10"
                                 label={categoryFields.specificationName10}
                                 name="specValue10"
+                                value={specValue10}
                                 onChange={handleSpecValue10Change}
                             />
                         </Grid>
@@ -303,7 +323,7 @@ function CreatePart() {
                         variant="contained"
                         sx={{ mt: 2, mb: 2, bgcolor: '#0d6267', '&:hover': { backgroundColor: '#07383b'}}}
                     >
-                        CREATE PART
+                        UPDATE PART
                     </Button>
                 </Box>
 
@@ -312,4 +332,4 @@ function CreatePart() {
     );
 };
 
-export default CreatePart;
+export default EditPart;
