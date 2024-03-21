@@ -20,7 +20,8 @@ function Header() {
         { name: 'MAIN', route: PATHS.MAIN },
         { name: 'CREATE', route: PATHS.CREATEAUCTION },
         { name: "AUCTIONS", route: PATHS.AUCTIONS + "?page=1" },
-        { name: "PARTS", route: PATHS.PARTS }
+        { name: "PARTS", route: PATHS.PARTS },
+        { name: "SERIES", route: PATHS.SERIES }
     ];
 
     let navOptions = [];

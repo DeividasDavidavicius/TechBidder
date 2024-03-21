@@ -22,6 +22,7 @@ builder.Services.AddTransient<IAuctionsRepository, AuctionsRepository>();
 builder.Services.AddTransient<IBidsRepository, BidsRepository>();
 builder.Services.AddTransient<IPartCategoriesRepository, PartCategoriesRepository>();
 builder.Services.AddTransient<IPartsRepository, PartsRepository>();
+builder.Services.AddTransient<ISeriesRepository, SeriesRepository>();
 builder.Services.AddTransient<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<AuthDbSeeder>();
 builder.Services.AddScoped<PartCategorySeeder>();

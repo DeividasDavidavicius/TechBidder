@@ -9,6 +9,9 @@ const PATHS = {
     PARTS: '/admin/parts',
     CREATEPART: '/admin/parts/create',
     EDITPART: '/admin/categories/:categoryId/parts/:partId',
+    SERIES: '/admin/series',
+    CREATESERIES: '/admin/series/create',
+    EDITSERIES: '/admin/categories/:categoryId/series/:seriesId',
     ANY: '*'
 }
 

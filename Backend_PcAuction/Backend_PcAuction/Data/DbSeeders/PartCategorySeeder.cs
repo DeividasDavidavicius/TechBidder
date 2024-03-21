@@ -56,6 +56,7 @@ namespace Backend_PcAuction.Data.DbSeeders
                     SpecificationName2 = "Core count", // probably most important
                     SpecificationName3 = "Transistor count (million)", // can skip in calculations
                     SpecificationName4 = "Base clock (MHz)", // can skip in calculations
+                    SpecificationName9 = "Suggested PSU (W)",
                     SpecificationName10 = "Wattage (W)"
                 };
 
@@ -74,7 +75,6 @@ namespace Backend_PcAuction.Data.DbSeeders
                     SpecificationName1 = "Memory size (GB)",
                     SpecificationName2 = "Memory speed (MHz)",
                     SpecificationName3 = "DDR version",
-                    SpecificationName9 = "Suggested PSU (W)",
                     SpecificationName10 = "Wattage (W)"
                 };
 

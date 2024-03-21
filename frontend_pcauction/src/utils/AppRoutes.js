@@ -9,6 +9,9 @@ import EditAuction from "../components/auctions/Edit";
 import PartList from "../components/parts/PartList";
 import CreatePart from "../components/parts/CreatePart";
 import EditPart from "../components/parts/EditPart";
+import SeriesList from "../components/series/SeriesList";
+import CreateSeries from "../components/series/CreateSeries";
+import EditSeries from "../components/series/EditSeries";
 
 
 const AppRoutes = [
@@ -22,7 +25,10 @@ const AppRoutes = [
     { path: PATHS.EDITAUCTION, element: <EditAuction/> },
     { path: PATHS.PARTS, element: <PartList/> },
     { path: PATHS.CREATEPART, element: <CreatePart/> },
-    { path: PATHS.EDITPART, element: <EditPart/> }
+    { path: PATHS.EDITPART, element: <EditPart/> },
+    { path: PATHS.SERIES, element: <SeriesList/>},
+    { path: PATHS.CREATESERIES, element: <CreateSeries/>},
+    { path: PATHS.EDITSERIES, element: <EditSeries/> }
 ];
 
 export default AppRoutes;

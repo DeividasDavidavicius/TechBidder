@@ -14,13 +14,11 @@ namespace Backend_PcAuction.Controllers
     {
         private readonly IPartCategoriesRepository _partCategoriesRepository;
         private readonly IPartsRepository _partsRepository;
-        private readonly IAuthorizationService _authorizationService;
 
-        public PartsController(IPartCategoriesRepository partCategoriesRepository, IPartsRepository partsRepository, IAuthorizationService authorizationService)
+        public PartsController(IPartCategoriesRepository partCategoriesRepository, IPartsRepository partsRepository)
         {
             _partCategoriesRepository = partCategoriesRepository;
             _partsRepository = partsRepository;
-            _authorizationService = authorizationService;
         }
 
         [HttpPost]
@@ -83,7 +81,7 @@ namespace Backend_PcAuction.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Part>>> GetMany(string categoryId)
+        public async Task<ActionResult<IEnumerable<PartDto>>> GetMany(string categoryId)
         {
             var category = await _partCategoriesRepository.GetAsync(categoryId);
 
@@ -99,7 +97,7 @@ namespace Backend_PcAuction.Controllers
                  part.SpecificationValue8, part.SpecificationValue9, part.SpecificationValue10, part.Category.Id, part.Series?.Id)));
         }
 
-        [HttpPut]
+        [HttpPatch]
         [Authorize(Roles = UserRoles.Admin)]
         [Route("{partId}")]
         public async Task<ActionResult<PartDto>> Update(string categoryId, Guid partId, UpdatePartDto updatePartDto)
@@ -117,8 +115,6 @@ namespace Backend_PcAuction.Controllers
             {
                 return NotFound();
             }
-
-            Console.WriteLine(updatePartDto);
 
             part.Name = updatePartDto.Name;
             part.SpecificationValue1 = updatePartDto.SpecificationValue1;

@@ -36,10 +36,10 @@ export const getParts = async (partCategoryId) => {
     }
   };
 
-  export const putPart = async (data, partCategoryId, partId) => {
+  export const patchPart = async (data, partCategoryId, partId) => {
     try {
       const accessToken = localStorage.getItem('accessToken');
-      await axios.put(`${API_URL}/categories/${partCategoryId}/parts/${partId}`, data, {
+      await axios.patch(`${API_URL}/categories/${partCategoryId}/parts/${partId}`, data, {
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${accessToken}`
@@ -47,6 +47,21 @@ export const getParts = async (partCategoryId) => {
       })
     } catch (error) {
       console.error("Error updating part", error);
+      throw error;
+    }
+  };
+
+  export const deletePart = async (partCategoryId, partId) => {
+    try {
+      const accessToken = localStorage.getItem('accessToken');
+      await axios.delete(`${API_URL}/categories/${partCategoryId}/parts/${partId}`, {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`
+        }
+      })
+    } catch (error) {
+      console.error("Error deleting part", error);
       throw error;
     }
   };

@@ -1,16 +1,14 @@
 import { useContext, useEffect, useState } from "react";
-import { getCategories, getCategory } from "../../services/PartCategoryService";
+import { getCategory } from "../../services/PartCategoryService";
 import { Box, Button, Container, CssBaseline, Grid, TextField, Typography } from "@mui/material";
 import { checkTokenValidity, refreshAccessToken } from "../../services/AuthService";
 import { useNavigate, useParams } from "react-router-dom";
 import { useUser } from "../../contexts/UserContext";
 import SnackbarContext from "../../contexts/SnackbarContext";
 import PATHS from "../../utils/Paths";
-import { getPart, postPart, putPart } from "../../services/PartService";
-import { set } from "date-fns";
-
+import { getPart, patchPart } from "../../services/PartService";
 function EditPart() {
-    const [categoryFields, setCategoryFields] = useState(null);
+    const [categoryFields, setCategoryFields] = useState({});
     const [name, setName] = useState("");
     const [specValue1, setSpecValue1] = useState("");
     const [specValue2, setSpecValue2] = useState("");
@@ -87,12 +85,10 @@ function EditPart() {
             return;
         }
 
-        const putData = {name, specificationValue1: specValue1, specificationValue2: specValue2, specificationValue3: specValue3,
+        const patchData = {name, specificationValue1: specValue1, specificationValue2: specValue2, specificationValue3: specValue3,
             specificationValue4: specValue4, specificationValue5: specValue5, specificationValue6: specValue6,
             specificationValue7: specValue7,  specificationValue8: specValue8, specificationValue9: specValue9,
             specificationValue10: specValue10};
-
-        console.log(putData);
 
         const accessToken = localStorage.getItem('accessToken');
         if (!checkTokenValidity(accessToken)) {
@@ -108,9 +104,9 @@ function EditPart() {
         }
 
         try {
-            await putPart(putData, categoryId, partId);
+            await patchPart(patchData, categoryId, partId);
             navigate(PATHS.PARTS);
-            openSnackbar('Part created successfully!', 'success');
+            openSnackbar('Part updated successfully!', 'success');
         } catch(error) {
             openSnackbar(error.response.data.errorMessage, "error")
         }
@@ -122,16 +118,16 @@ function EditPart() {
             const partData = await getPart(categoryId, partId);
 
             setName(partData.name);
-            setSpecValue1(partData.specificationValue1);
-            setSpecValue2(partData.specificationValue2);
-            setSpecValue3(partData.specificationValue3);
-            setSpecValue4(partData.specificationValue4);
-            setSpecValue5(partData.specificationValue5);
-            setSpecValue6(partData.specificationValue6);
-            setSpecValue7(partData.specificationValue7);
-            setSpecValue8(partData.specificationValue8);
-            setSpecValue9(partData.specificationValue9);
-            setSpecValue10(partData.specificationValue10);
+            setSpecValue1(partData.specificationValue1 == null ? undefined : partData.specificationValue1);
+            setSpecValue2(partData.specificationValue2 == null ? undefined : partData.specificationValue2);
+            setSpecValue3(partData.specificationValue3 == null ? undefined : partData.specificationValue3);
+            setSpecValue4(partData.specificationValue4 == null ? undefined : partData.specificationValue4);
+            setSpecValue5(partData.specificationValue5 == null ? undefined : partData.specificationValue5);
+            setSpecValue6(partData.specificationValue6 == null ? undefined : partData.specificationValue6);
+            setSpecValue7(partData.specificationValue7 == null ? undefined : partData.specificationValue7);
+            setSpecValue8(partData.specificationValue8 == null ? undefined : partData.specificationValue8);
+            setSpecValue9(partData.specificationValue9 == null ? undefined : partData.specificationValue9);
+            setSpecValue10(partData.specificationValue10 == null ? undefined : partData.specificationValue10);
 
             const categoryFields= await getCategory(categoryId);
             setCategoryFields(categoryFields);
@@ -139,7 +135,7 @@ function EditPart() {
 
         fetchPartData();
 
-    }, []);
+    }, [categoryId, partId]);
 
     return (
         <Container component="main" maxWidth="sm">

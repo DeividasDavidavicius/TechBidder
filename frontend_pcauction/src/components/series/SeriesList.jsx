@@ -1,7 +1,6 @@
 import { Box, Button, Container, CssBaseline, Dialog, DialogActions, DialogTitle, Table, TableBody, TableCell, TableHead, TableRow, TextField } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 import { getCategories } from "../../services/PartCategoryService";
-import { deletePart, getParts } from "../../services/PartService";
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
@@ -11,10 +10,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { checkTokenValidity, refreshAccessToken } from "../../services/AuthService";
 import SnackbarContext from "../../contexts/SnackbarContext";
 import { useUser } from "../../contexts/UserContext";
+import { deleteSeries, getAllCategorySeries } from "../../services/SeriesService";
 
-function PartList() {
-    const [parts, setParts] = useState([]);
-    const [currentPart, setCurrentPart] = useState({});
+function SeriesList() {
+    const [series, setSeries] = useState([]);
+    const [currentSeries, setCurrentSeries] = useState({});
     const [searchTerm, setSearchTerm] = useState('');
     const [openRemoveModal, setOpenRemoveModal] = useState(false);
 
@@ -27,18 +27,18 @@ function PartList() {
             const result = await getCategories();
 
             const categoryIds = result.map(category => category.id);
-            fetchPartsData(categoryIds);
+            fetchSeriesData(categoryIds);
         };
 
-        const fetchPartsData = async (categoryIds) => {
+        const fetchSeriesData = async (categoryIds) => {
             if (categoryIds.length === 0) return;
 
-            const partsPromises = categoryIds.map(category => getParts(category));
-            const results = await Promise.all(partsPromises);
+            const seriesPromises = categoryIds.map(category => getAllCategorySeries(category));
+            const results = await Promise.all(seriesPromises);
 
-            const flattenedParts = results.reduce((acc, curr) => acc.concat(curr), []);
+            const flattenedSeries = results.reduce((acc, curr) => acc.concat(curr), []);
 
-            setParts(flattenedParts);
+            setSeries(flattenedSeries);
         };
 
         fetchCategoriesData();
@@ -49,21 +49,21 @@ function PartList() {
         setSearchTerm(event.target.value);
     };
 
-    const filteredParts = parts.filter(part =>
-        part.name.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredSeries = series.filter(s =>
+        s.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const handleOpenRemove = (part) => {
-        setCurrentPart(part);
+    const handleOpenRemove = (series) => {
+        setCurrentSeries(series);
         setOpenRemoveModal(true);
     };
 
     const handleCloseRemove = () => {
         setOpenRemoveModal(false);
-        setCurrentPart({});
+        setCurrentSeries({});
     };
 
-    const handleRemovePart = async () => {
+    const handleRemoveSeries = async () => {
         const accessToken = localStorage.getItem('accessToken');
         if (!checkTokenValidity(accessToken)) {
             const result = await refreshAccessToken();
@@ -77,13 +77,13 @@ function PartList() {
             setLogin(result.response.data.accessToken, result.response.data.refreshToken);
         }
 
-        deletePart(currentPart.categoryId, currentPart.id);
-        openSnackbar('Part deleted successfully!', 'success');
+        deleteSeries(currentSeries.categoryId, currentSeries.id);
+        openSnackbar('Series deleted successfully!', 'success');
 
-        const updatedParts = parts.filter(
-            (part) => part.id !== currentPart.id
+        const updatedSeries = series.filter(
+            (s) => s.id !== currentSeries.id
         );
-        setParts(updatedParts);
+        setSeries(updatedSeries);
         handleCloseRemove();
     }
 
@@ -102,7 +102,7 @@ function PartList() {
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
 
                 <TextField
-                    label="Search Parts"
+                    label="Search Series"
                     variant="outlined"
                     value={searchTerm}
                     onChange={handleSearchChange}
@@ -111,9 +111,9 @@ function PartList() {
                     size="small"
                     sx={{ width: 'calc(50% - 40px)' }}
                 />
-                <Link to={PATHS.CREATEPART}>
+                <Link to={PATHS.CREATESERIES}>
                     <Button startIcon={<AddCircleOutlineIcon />} sx={{ color: '#138c94', fontWeight: 'bold' }}>
-                        CREATE PART
+                        CREATE SERIES
                     </Button>
                 </Link>
             </Box>
@@ -121,24 +121,24 @@ function PartList() {
                 <TableHead>
                     <TableRow>
                         <TableCell style={{ backgroundColor: '#0d6267', color: 'white', fontWeight: 'bold' }}>CATEGORY</TableCell>
-                        <TableCell style={{ backgroundColor: '#0d6267', color: 'white', fontWeight: 'bold' }}>PART NAME</TableCell>
+                        <TableCell style={{ backgroundColor: '#0d6267', color: 'white', fontWeight: 'bold' }}>SERIES NAME</TableCell>
                         <TableCell style={{ backgroundColor: '#0d6267',  color: 'white', fontWeight: 'bold' }}>ACTIONS</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                {filteredParts.map((part, index) => (
+                {filteredSeries.map((s, index) => (
                     <TableRow key={index}>
-                        <TableCell>{part.categoryId}</TableCell>
-                        <TableCell>{part.name}</TableCell>
+                        <TableCell>{s.categoryId}</TableCell>
+                        <TableCell>{s.name}</TableCell>
                         <TableCell>
-                            <Link to={PATHS.EDITPART.replace(':partId', part.id).replace(':categoryId', part.categoryId)}>
+                            <Link to={PATHS.EDITSERIES.replace(':seriesId', s.id).replace(':categoryId', s.categoryId)}>
                                 <Button startIcon={<ModeEditIcon />} sx={{ marginRight: 3, color: '#138c94', fontWeight: 'bold' }}>
                                     Edit
                                 </Button>
                             </Link>
                             <Button startIcon={<DeleteIcon />}
                                 sx={{ marginRight: 0, color: '#138c94', fontWeight: 'bold' }}
-                                onClick={ () => handleOpenRemove(part)}
+                                onClick={ () => handleOpenRemove(s)}
                             >
                                 Delete
                             </Button>
@@ -149,9 +149,9 @@ function PartList() {
             </Table>
         </Box>
         <Dialog open={openRemoveModal} onClose={handleCloseRemove}>
-                <DialogTitle sx={{ fontSize: '20px', fontWeight: 'bold', fontFamily: 'Arial, sans-serif', color: '#0d6267' }} >Do you want to remove '{currentPart.name}'?</DialogTitle>
+                <DialogTitle sx={{ fontSize: '20px', fontWeight: 'bold', fontFamily: 'Arial, sans-serif', color: '#0d6267' }} >Do you want to remove '{currentSeries.name}'?</DialogTitle>
                 <DialogActions style={{ justifyContent: 'center' }}>
-                    <Button onClick={handleRemovePart} startIcon={<ModeEditIcon />} sx ={{ fontWeight: 'bold', color: "red" }}>
+                    <Button onClick={handleRemoveSeries} startIcon={<ModeEditIcon />} sx ={{ fontWeight: 'bold', color: "red" }}>
                         Remove
                     </Button>
                     <Button onClick={handleCloseRemove} startIcon={<HighlightOffIcon />} sx ={{ fontWeight: 'bold', color: "#369c7d" }}>
@@ -163,4 +163,4 @@ function PartList() {
       );
 }
 
-export default PartList;
+export default SeriesList;

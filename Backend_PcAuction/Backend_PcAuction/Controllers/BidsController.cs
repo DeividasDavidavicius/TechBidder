@@ -90,7 +90,6 @@ namespace Backend_PcAuction.Controllers
             }
 
             var bid = await _bidsRepository.GetAsync(auctionId, bidId);
-            Console.WriteLine(auctionId + " " + bidId);
 
             if (bid == null)
             {
