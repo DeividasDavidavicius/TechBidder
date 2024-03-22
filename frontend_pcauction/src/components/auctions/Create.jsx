@@ -21,6 +21,7 @@ function CreateAuction() {
     const [condition, setCondition] = useState("New");
     const [selectedImage, setSelectedImage] = useState(null);
     const [imageType, setImageType] = useState(null);
+    const [imageFile, setImageFile] = useState(undefined);
     const [validationErrors, setValidationErrors] = useState({
         title: null,
         description: null,
@@ -38,6 +39,7 @@ function CreateAuction() {
     const handleImageChange = (e) => {
         validationErrors.image = null;
         const file = e.target.files[0];
+
         const reader = new FileReader();
 
         setImageType(file && file.type ? file.type : null);
@@ -49,6 +51,8 @@ function CreateAuction() {
         if (file) {
           reader.readAsDataURL(file);
         }
+
+        setImageFile(file);
       };
 
     const handleSubmit = async (e) => {
@@ -80,15 +84,20 @@ function CreateAuction() {
             return;
         }
 
-        const imageData = selectedImage.split(',')[1];
-
         const startDateLocal = new Date(startDate);
         const isoStartDate = startDateLocal.toISOString()
         const endDateLocal = new Date(endDate);
         const isoEndDate = endDateLocal.toISOString();
 
-        const picture = "a"; // TODO: remove from here and back-end
-        const postData = {name: title, description, startDate: isoStartDate, endDate: isoEndDate, minIncrement: minInc, condition, manufacturer, picture, imageData};
+        const formData = new FormData();
+        formData.append("name", title);
+        formData.append("description", description);
+        formData.append("startDate", isoStartDate);
+        formData.append("endDate", isoEndDate);
+        formData.append("minIncrement", minInc);
+        formData.append("condition", condition);
+        formData.append("manufacturer", manufacturer);
+        formData.append("image", imageFile);
 
         const accessToken = localStorage.getItem('accessToken');
         if (!checkTokenValidity(accessToken)) {
@@ -104,7 +113,7 @@ function CreateAuction() {
         }
 
         try {
-            await postAuction(postData);
+            await postAuction(formData);
             navigate(PATHS.MAIN); // TODO: Pakeisti i listo view'a  o  ne main page, arba auction info vidu
             openSnackbar('Auction created successfully!', 'success');
         } catch(error) {

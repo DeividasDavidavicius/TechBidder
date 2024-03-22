@@ -6,7 +6,6 @@ export const postAuction = async (data) => {
       const accessToken = localStorage.getItem('accessToken');
       await axios.post(`${API_URL}/auctions`, data, {
         headers: {
-          "Content-Type": "application/json",
           "Authorization": `Bearer ${accessToken}`
         }
       })
@@ -41,7 +40,6 @@ export const postAuction = async (data) => {
       const accessToken = localStorage.getItem('accessToken');
       await axios.put(`${API_URL}/auctions/${id}`, data, {
         headers: {
-          "Content-Type": "application/json",
           "Authorization": `Bearer ${accessToken}`
         }
       })

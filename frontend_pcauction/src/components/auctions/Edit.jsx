@@ -30,6 +30,8 @@ function EditAuction() {
     const [condition, setCondition] = useState("New");
     const [selectedImage, setSelectedImage] = useState(null);
     const [imageType, setImageType] = useState(null);
+    const [imageFile, setImageFile] = useState(undefined);
+    const [imageUri, setImageUri] = useState(null);
     const [validationErrors, setValidationErrors] = useState({
         title: null,
         description: null,
@@ -58,6 +60,9 @@ function EditAuction() {
         if (file) {
           reader.readAsDataURL(file);
         }
+
+        setImageFile(file);
+        setImageUri(URL.createObjectURL(file) || imageUri);
     };
 
     const handleNameChange = (e) => {
@@ -109,13 +114,6 @@ function EditAuction() {
             return;
         }
 
-        let newImageData = imageData;
-
-        if(selectedImage)
-        {
-            newImageData = selectedImage.split(',')[1];
-        }
-
         const accessToken = localStorage.getItem('accessToken');
         if (!checkTokenValidity(accessToken)) {
             const result = await refreshAccessToken();
@@ -134,11 +132,18 @@ function EditAuction() {
         const newEndDate = new Date(endDate);
         const isoEndDate = newEndDate.toISOString();
 
-        const picture = "a"; // TODO: remove from here and back-end
-        const putData = {name, description, startDate: isoStartDate, endDate: isoEndDate, minIncrement, condition, manufacturer, picture, imageData: newImageData};
+        const formData = new FormData();
+        formData.append("name", name);
+        formData.append("description", description);
+        formData.append("startDate", isoStartDate);
+        formData.append("endDate", isoEndDate);
+        formData.append("minIncrement", minIncrement);
+        formData.append("condition", condition);
+        formData.append("manufacturer", manufacturer);
+        formData.append("image", imageFile);
 
         try {
-            await putAuction(putData, auctionId);
+            await putAuction(formData, auctionId);
             navigate(PATHS.MAIN); // TODO: Pakeisti i listo view'a  o  ne main page
             openSnackbar('Auction updated successfully!', 'success');
         } catch(error) {
@@ -165,6 +170,8 @@ function EditAuction() {
                 setMinIncrement(result.minIncrement);
                 setCondition(result.condition);
                 setManufacturer(result.manufacturer);
+                setImageUri(result.imageUri);
+
 
                 const offsetInMilliseconds = new Date().getTimezoneOffset() * 60000;
                 const utcDateStart = new Date(result.startDate);
@@ -312,11 +319,11 @@ function EditAuction() {
                         <Grid item xs={12} style={{ height: '30vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                             {selectedImage ? (
                                 <div style={{ width: '100%', height: '90%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                    <img src={selectedImage} alt="Selected" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                                    <img src={imageUri} alt="Selected" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
                                 </div>
                             ) : (
                                 <div style={{ width: '100%', height: '90%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                    {imageData && <img src={`data:image/jpeg;base64,${imageData}`} alt="OldPicture" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />}
+                                    {<img src={imageUri} alt="OldPicture" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />}
                                 </div>
                             )}
                         </Grid>

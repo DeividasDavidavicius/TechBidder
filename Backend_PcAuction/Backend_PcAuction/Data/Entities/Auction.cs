@@ -17,10 +17,8 @@ namespace Backend_PcAuction.Data.Entities
         public string Status { get; set; }
         // add part
         public string Condition { get; set; }
-        public string Manufacturer { get; set; }
-        public string Picture { get; set; } // del rodymo paziuret kaip skelbiu ratio padaro
-
-        public byte[] ImageData { get; set; }
+        public string? Manufacturer { get; set; }
+        public string ImageUri { get; set; } // del rodymo paziuret kaip skelbiu ratio padaro
 
         [Required]
         public string UserId { get; set; }

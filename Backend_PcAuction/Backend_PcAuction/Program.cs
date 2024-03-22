@@ -1,10 +1,13 @@
+using Azure.Storage.Blobs;
 using Backend_PcAuction.Auth;
 using Backend_PcAuction.Auth.Model;
 using Backend_PcAuction.Auth.Models;
 using Backend_PcAuction.Data;
 using Backend_PcAuction.Data.DbSeeders;
+using Backend_PcAuction.Data.Entities;
 using Backend_PcAuction.Data.Repositories;
 using Backend_PcAuction.Data.Seeders;
+using Backend_PcAuction.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -26,6 +29,8 @@ builder.Services.AddTransient<ISeriesRepository, SeriesRepository>();
 builder.Services.AddTransient<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<AuthDbSeeder>();
 builder.Services.AddScoped<PartCategorySeeder>();
+builder.Services.AddScoped<IAzureBlobStorageService, AzureBlobStorageService>();
+
 
 builder.Services.AddAuthorization(options =>
 {
@@ -62,6 +67,10 @@ builder.Services.AddCors(options =>
                    .AllowCredentials();
         });
 });
+
+var blobServiceClient = new BlobServiceClient(builder.Configuration["AzureBlob:ConnectionString"]);
+var blobContainerClient = blobServiceClient.GetBlobContainerClient(builder.Configuration["AzureBlob:ContainerName"]);
+builder.Services.AddScoped(provider => blobContainerClient);
 
 var app = builder.Build();
 

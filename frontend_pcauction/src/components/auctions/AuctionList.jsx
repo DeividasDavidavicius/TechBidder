@@ -75,7 +75,7 @@ function AuctionList() {
               </Box>
               <Avatar
                 alt="Auction Image"
-                src={`data:image/jpeg;base64,${auction.imageData}`}
+                src={auction.imageUri}
                 sx={{
                   width: '200px',
                   height: '200px',

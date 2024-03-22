@@ -2,6 +2,7 @@
 using Backend_PcAuction.Data.Dtos;
 using Backend_PcAuction.Data.Entities;
 using Backend_PcAuction.Data.Repositories;
+using Backend_PcAuction.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
@@ -15,28 +16,23 @@ namespace Backend_PcAuction.Controllers
     {
         private readonly IAuctionsRepository _auctionsRepository;
         private readonly IAuthorizationService _authorizationService;
+        private readonly IAzureBlobStorageService _azureBlobStorageService;
 
-        public AuctionsController(IAuctionsRepository auctionsRepository, IAuthorizationService authorizationService)
+
+        public AuctionsController(IAuctionsRepository auctionsRepository, IAuthorizationService authorizationService, IAzureBlobStorageService azureBlobStorageService)
         {
             _auctionsRepository = auctionsRepository;
             _authorizationService = authorizationService;
+            _azureBlobStorageService = azureBlobStorageService;
         }
 
         [HttpPost]
         [Authorize(Roles = UserRoles.RegisteredUser)]
-        public async Task<ActionResult<AuctionDto>> Create(CreateAuctionDto createAuctionDto)
+        public async Task<ActionResult<AuctionDto>> Create([FromForm] CreateAuctionDto createAuctionDto)
         {
-            byte[] imageBytes;
-            try
-            {
-                imageBytes = Convert.FromBase64String(createAuctionDto.ImageData);
-            }
-            catch
-            {
-                imageBytes = new byte[0];
-            }
+            var imageUri = await _azureBlobStorageService.UploadImageAsync(createAuctionDto.Image);
 
-            if(createAuctionDto.Name.Length < 5 || createAuctionDto.Name.Length > 50)
+            if (createAuctionDto.Name.Length < 5 || createAuctionDto.Name.Length > 50)
             {
                 return UnprocessableEntity("Title must be at 5 - 50 characters long");
             }
@@ -79,8 +75,7 @@ namespace Backend_PcAuction.Controllers
                 Status = "New",
                 Condition = createAuctionDto.Condition,
                 Manufacturer = createAuctionDto.Manufacturer,
-                Picture = createAuctionDto.Picture,
-                ImageData = imageBytes,
+                ImageUri = imageUri,
                 UserId = User.FindFirstValue(JwtRegisteredClaimNames.Sub)
             };
 
@@ -88,12 +83,12 @@ namespace Backend_PcAuction.Controllers
 
             return Created($"/api/v1/auctions/{auction.Id}", 
                 new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate,auction.EndDate,
-                auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.UserId));
+                auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.UserId));
         }
 
         [HttpGet]
         [Route("{auctionId}")]
-        public async Task<ActionResult<AuctionDtoWithImage>> Get(Guid auctionId)
+        public async Task<ActionResult<AuctionDto>> Get(Guid auctionId)
         {
             var auction = await _auctionsRepository.GetAsync(auctionId);
 
@@ -102,10 +97,8 @@ namespace Backend_PcAuction.Controllers
                 return NotFound();
             }
 
-            var imageData = Convert.ToBase64String(auction.ImageData);
-
-            return Ok(new AuctionDtoWithImage(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate,
-                auction.EndDate, auction.MinIncrement, auction.Condition, auction.Manufacturer, imageData, auction.UserId));
+            return Ok(new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate,
+                auction.EndDate, auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.UserId));
         }
 
         [HttpGet]
@@ -114,7 +107,7 @@ namespace Backend_PcAuction.Controllers
             var auctions = await _auctionsRepository.GetManyAsync();
             return Ok(auctions.Select(auction => 
             new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate, auction.EndDate,
-                auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.UserId)));
+                auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.UserId)));
 
         }
 
@@ -126,8 +119,8 @@ namespace Backend_PcAuction.Controllers
             var auctionCount = await _auctionsRepository.GetCountAsync();
 
             var resultAuctions = auctions.Select(auction =>
-            new AuctionDtoWithImage(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate, auction.EndDate,
-                auction.MinIncrement, auction.Condition, auction.Manufacturer, Convert.ToBase64String(auction.ImageData), auction.UserId));
+            new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate, auction.EndDate,
+                auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.UserId));
 
             return Ok(new AuctionsWithPaginationDto(resultAuctions, auctionCount));
         }
@@ -135,7 +128,7 @@ namespace Backend_PcAuction.Controllers
         [HttpPut]
         [Route("{auctionId}")]
         [Authorize(Roles = UserRoles.RegisteredUser)]
-        public async Task<ActionResult<AuctionDto>> Update(Guid auctionId, UpdateAuctionDto updateAuctionDto)
+        public async Task<ActionResult<AuctionDto>> Update(Guid auctionId, [FromForm] UpdateAuctionDto updateAuctionDto)
         {
             var auction = await _auctionsRepository.GetAsync(auctionId);
 
@@ -147,16 +140,6 @@ namespace Backend_PcAuction.Controllers
             var authorizationResult = await _authorizationService.AuthorizeAsync(User, auction, PolicyNames.ResourceOwner);
             if (!authorizationResult.Succeeded)
                 return Forbid();
-
-            byte[] imageBytes;
-            try
-            {
-                imageBytes = Convert.FromBase64String(updateAuctionDto.ImageData);
-            }
-            catch
-            {
-                imageBytes = new byte[0];
-            }
 
             if (updateAuctionDto.Name.Length < 5 || updateAuctionDto.Name.Length > 50)
             {
@@ -188,6 +171,16 @@ namespace Backend_PcAuction.Controllers
                 return UnprocessableEntity("End date must be later than start date");
             }
 
+            if (updateAuctionDto.Image != null)
+            {
+                if (!auction.ImageUri.StartsWith("/default"))
+                {
+                    await _azureBlobStorageService.DeleteImageAsync(auction.ImageUri);
+                }
+
+                auction.ImageUri = await _azureBlobStorageService.UploadImageAsync(updateAuctionDto.Image);
+            }
+
             auction.Name = updateAuctionDto.Name;
             auction.Description = updateAuctionDto.Description;
             auction.StartDate = updateAuctionDto.StartDate;
@@ -195,12 +188,11 @@ namespace Backend_PcAuction.Controllers
             auction.MinIncrement = updateAuctionDto.MinIncrement;
             auction.Condition = updateAuctionDto.Condition;
             auction.Manufacturer = updateAuctionDto.Manufacturer;
-            auction.ImageData = imageBytes;
 
             await _auctionsRepository.UpdateAsync(auction);
 
             return Ok(new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate,
-                auction.EndDate, auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.UserId));
+                auction.EndDate, auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.UserId));
         }
 
         [HttpDelete]

@@ -15,7 +15,7 @@ function AuctionInfo() {
     const [endDateLocal, setEndDateLocal] = useState(null);
     const [minIncrement, setMinIncrement] = useState(0);
     const [highestBid, setHighestBid] = useState(0);
-    const [imageData, setImageData] = useState(null);
+    const [imageUri, setImageUri] = useState(null);
     const openSnackbar = useContext(SnackbarContext);
     const navigate = useNavigate();
     const { setLogin, setLogout } = useUser();
@@ -93,7 +93,7 @@ function AuctionInfo() {
             try {
                 const result = await getAuction(auctionId);
                 setAuctionData(result);
-                setImageData(result.imageData);
+
 
                 const offsetInMilliseconds = new Date().getTimezoneOffset() * 60000;
                 const utcDateStart = new Date(result.startDate);
@@ -102,6 +102,7 @@ function AuctionInfo() {
                 const localDateStart = new Date(utcDateStart.getTime() - offsetInMilliseconds).toLocaleString();
                 const localDateEnd = new Date(utcDateEnd.getTime() - offsetInMilliseconds).toLocaleString();
 
+                setImageUri(result.imageUri);
                 setStartDateLocal(localDateStart);
                 setEndDateLocal(localDateEnd);
                 setMinIncrement(result.minIncrement);
@@ -165,7 +166,7 @@ function AuctionInfo() {
                     >
                         <Avatar
                         alt="User Photo"
-                        src={`data:image/jpeg;base64,${imageData}`}
+                            src={imageUri}
                         sx={{
                             width: '100%',
                             height: '90%',
