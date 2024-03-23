@@ -13,11 +13,13 @@ namespace Backend_PcAuction.Controllers
     public class PartsController : ControllerBase
     {
         private readonly IPartCategoriesRepository _partCategoriesRepository;
+        private readonly ISeriesRepository _seriesRepository;
         private readonly IPartsRepository _partsRepository;
 
-        public PartsController(IPartCategoriesRepository partCategoriesRepository, IPartsRepository partsRepository)
+        public PartsController(IPartCategoriesRepository partCategoriesRepository, ISeriesRepository seriesRepository, IPartsRepository partsRepository)
         {
             _partCategoriesRepository = partCategoriesRepository;
+            _seriesRepository = seriesRepository;
             _partsRepository = partsRepository;
         }
 
@@ -28,6 +30,13 @@ namespace Backend_PcAuction.Controllers
             var category = await _partCategoriesRepository.GetAsync(categoryId);
 
             if (category == null)
+            {
+                return NotFound();
+            }
+
+            var series = await _seriesRepository.GetAsync(categoryId, createPartDto.SeriesId);
+
+            if (createPartDto.SeriesId != null && series == null)
             {
                 return NotFound();
             }
@@ -46,7 +55,7 @@ namespace Backend_PcAuction.Controllers
                 SpecificationValue9 = createPartDto.SpecificationValue9,
                 SpecificationValue10 = createPartDto.SpecificationValue10,
                 Category = category,
-                Series = null,
+                Series = series,
             };
 
             await _partsRepository.CreateAsync(part);
@@ -116,6 +125,13 @@ namespace Backend_PcAuction.Controllers
                 return NotFound();
             }
 
+            var series = await _seriesRepository.GetAsync(categoryId, updatePartDto.SeriesId);
+
+            if (updatePartDto.SeriesId != null && series == null)
+            {
+                return NotFound();
+            }
+
             part.Name = updatePartDto.Name;
             part.SpecificationValue1 = updatePartDto.SpecificationValue1;
             part.SpecificationValue2 = updatePartDto.SpecificationValue2;
@@ -127,6 +143,7 @@ namespace Backend_PcAuction.Controllers
             part.SpecificationValue8 = updatePartDto.SpecificationValue8;
             part.SpecificationValue9 = updatePartDto.SpecificationValue9;
             part.SpecificationValue10 = updatePartDto.SpecificationValue10;
+            part.Series = series;
 
             await _partsRepository.UpdateAsync(part);
 

@@ -1,15 +1,18 @@
 import { useContext, useEffect, useState } from "react";
 import { getCategory } from "../../services/PartCategoryService";
-import { Box, Button, Container, CssBaseline, Grid, TextField, Typography } from "@mui/material";
+import { Box, Button, Container, CssBaseline, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
 import { checkTokenValidity, refreshAccessToken } from "../../services/AuthService";
 import { useNavigate, useParams } from "react-router-dom";
 import { useUser } from "../../contexts/UserContext";
 import SnackbarContext from "../../contexts/SnackbarContext";
 import PATHS from "../../utils/Paths";
 import { getPart, patchPart } from "../../services/PartService";
+import { getAllCategorySeries, getSeries } from "../../services/SeriesService";
 function EditPart() {
     const [categoryFields, setCategoryFields] = useState({});
+    const [partSeries, setPartSeries] = useState("");
     const [name, setName] = useState("");
+    const [seriesId, setSeriesId] = useState("");
     const [specValue1, setSpecValue1] = useState("");
     const [specValue2, setSpecValue2] = useState("");
     const [specValue3, setSpecValue3] = useState("");
@@ -26,10 +29,11 @@ function EditPart() {
     });
 
     const navigate = useNavigate();
-    const { setLogin, setLogout } = useUser();
+    const { role, setLogin, setLogout } = useUser();
     const openSnackbar = useContext(SnackbarContext);
     const { partId } = useParams();
     const { categoryId } = useParams();
+    const [categorySeries, setCategorySeries] = useState([]);
 
     const handleNameChange = (e) => {
         setName(e.target.value);
@@ -73,6 +77,13 @@ function EditPart() {
     const handleSpecValue10Change = (e) => {
         setSpecValue10(e.target.value);
     };
+
+    const handlePartSeriesChange = (e) =>
+    {
+        setPartSeries(e.target.value);
+    };
+
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -85,10 +96,12 @@ function EditPart() {
             return;
         }
 
+        const seriesId = partSeries === "none" ? null : partSeries;
+
         const patchData = {name, specificationValue1: specValue1, specificationValue2: specValue2, specificationValue3: specValue3,
             specificationValue4: specValue4, specificationValue5: specValue5, specificationValue6: specValue6,
             specificationValue7: specValue7,  specificationValue8: specValue8, specificationValue9: specValue9,
-            specificationValue10: specValue10};
+            specificationValue10: specValue10, seriesId};
 
         const accessToken = localStorage.getItem('accessToken');
         if (!checkTokenValidity(accessToken)) {
@@ -114,6 +127,11 @@ function EditPart() {
     };
 
     useEffect(() => {
+        if (!role.includes("Admin")) {
+            openSnackbar('Only admins can access this page!', 'error');
+            navigate(PATHS.MAIN);
+        }
+
         const fetchPartData = async () => {
             const partData = await getPart(categoryId, partId);
 
@@ -128,14 +146,37 @@ function EditPart() {
             setSpecValue8(partData.specificationValue8 == null ? undefined : partData.specificationValue8);
             setSpecValue9(partData.specificationValue9 == null ? undefined : partData.specificationValue9);
             setSpecValue10(partData.specificationValue10 == null ? undefined : partData.specificationValue10);
+            setSeriesId(partData.seriesId);
+
 
             const categoryFields= await getCategory(categoryId);
             setCategoryFields(categoryFields);
+
+            fetchAllCategorySeries(categoryId);
+        };
+
+        const fetchCategorySeries = async(categoryId, seriesId) => {
+            const result = await getSeries(categoryId, seriesId);
+            setPartSeries(result.id);
+        };
+
+        const fetchAllCategorySeries = async(categoryId) => {
+            const result = await getAllCategorySeries(categoryId);
+            setCategorySeries(result);
+
+            if(seriesId)
+            {
+                fetchCategorySeries(categoryId, seriesId);
+            }
+            else
+            {
+                setPartSeries("none");
+            }
         };
 
         fetchPartData();
 
-    }, [categoryId, partId]);
+    }, [categoryId, partId, seriesId, navigate, openSnackbar, role]);
 
     return (
         <Container component="main" maxWidth="sm">
@@ -177,7 +218,28 @@ function EditPart() {
                                     },
                                 }}
                             />
-                            </Grid>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <FormControl fullWidth>
+                                <InputLabel id="part-category-label">Series</InputLabel>
+                                <Select
+                                    labelId="part-series-label"
+                                    id="part-series"
+                                    label="Series"
+                                    value={partSeries}
+                                    onChange={handlePartSeriesChange}
+                                    required
+                                    sx={{ textAlign: 'left' }}
+                                >
+                                    <MenuItem value = {"none"}>{"-"}</MenuItem>
+                                    {categorySeries.map((s) => (
+                                        <MenuItem key={s.id} value={s.id}>
+                                            {s.name}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </Grid>
                         <Grid item xs={12}>
                             <TextField
                                 error={Boolean(validationErrors.name)}

@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "../../contexts/UserContext";
 import { useContext, useEffect, useState } from "react";
 import SnackbarContext from "../../contexts/SnackbarContext";
-import { Box, Button, Container, CssBaseline,  FormControl, FormHelperText, Grid, Input, InputLabel, MenuItem, Select, Skeleton, TextField, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, Container, CssBaseline,  FormControl, FormHelperText, Grid, Input, InputLabel, MenuItem, Select, Skeleton, TextField, Typography } from "@mui/material";
 import { isDatePastNow, isEndDateLater, isValidDescription, isValidMinInc, isValidTitle } from "./Validations";
 import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -11,12 +11,19 @@ import 'dayjs/locale/lt';
 import { checkTokenValidity, refreshAccessToken } from "../../services/AuthService";
 import PATHS from "../../utils/Paths";
 import { postAuction } from "../../services/AuctionService";
+import { getCategories } from "../../services/PartCategoryService";
+import { getParts } from "../../services/PartService";
 
 function CreateAuction() {
     const navigate = useNavigate();
     const theme = useTheme();
     const { role, setLogin, setLogout } = useUser();
     const openSnackbar = useContext(SnackbarContext);
+
+    const [categories, setCategories] = useState([]);
+    const [category, setCategory] = useState("");
+    const [categoryParts, setCategoryParts] = useState([]);
+    const [part, setPart] = useState('');
 
     const [condition, setCondition] = useState("New");
     const [selectedImage, setSelectedImage] = useState(null);
@@ -29,8 +36,20 @@ function CreateAuction() {
         endDate: null,
         minInc: null,
         condition: null,
-        image: null
+        image: null,
+        part: null
     });
+
+    const handleCategoryChange = async (e) => {
+        const categoryName = e.target.value;
+        setCategory(categoryName);
+
+        await fetchCategoryParts(categoryName);
+    }
+
+    const handlePartChange = async (part) => {
+        setPart(part);
+    }
 
     const handleConditionChange = (e) => {
         setCondition(e.target.value);
@@ -78,6 +97,7 @@ function CreateAuction() {
         if(condition === null || condition === "") errors.condition = "Condition must be set"
         if(selectedImage === null || selectedImage === "") errors.image = "Image must be selected";
         if(!imageType || !imageType.startsWith('image/')) errors.image = "Please select a valid image file";
+        if(part === "" || part === undefined || part == null) errors.part = "Please select a part for this auction";
 
         if (Object.keys(errors).length > 0) {
             setValidationErrors(errors);
@@ -98,6 +118,8 @@ function CreateAuction() {
         formData.append("condition", condition);
         formData.append("manufacturer", manufacturer);
         formData.append("image", imageFile);
+        formData.append("partCategory", category)
+        formData.append("partId", part.id);
 
         const accessToken = localStorage.getItem('accessToken');
         if (!checkTokenValidity(accessToken)) {
@@ -121,12 +143,30 @@ function CreateAuction() {
         }
     };
 
+    const fetchCategoryParts = async (categoryId) => {
+        const result = await getParts(categoryId);
+        setCategoryParts(result);
+    }
+
     useEffect(() => {
         if (!role.includes("RegisteredUser")) {
-            openSnackbar('You can not create auction!', 'error');
+            openSnackbar('You must login to create auctions!', 'error');
             navigate('/');
         }
-    });
+
+        const fetchCategoriesData = async () => {
+            const result = await getCategories();
+            setCategories(result);
+
+            const defaultCategory = "CPU";
+            setCategory(defaultCategory);
+
+            await fetchCategoryParts("CPU");
+        };
+
+
+        fetchCategoriesData();
+    }, [navigate, openSnackbar, role]);
 
     return (
         <Container component="main" maxWidth="sm">
@@ -168,6 +208,41 @@ function CreateAuction() {
                                 multiline
                                 rows={3}
                             />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <FormControl fullWidth>
+                                <InputLabel id="part-category-label">Part category *</InputLabel>
+                                <Select
+                                    labelId="part-category-label"
+                                    id="part-category"
+                                    label="Part category"
+                                    value={category}
+                                    onChange={handleCategoryChange}
+                                    required
+                                    sx={{ textAlign: 'left' }}
+                                >
+                                    {categories.map((category) => (
+                                        <MenuItem key={category.id} value={category.id}>
+                                            {category.id}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <FormControl fullWidth>
+                            <Autocomplete
+                                id="part-autocomplete"
+                                options={categoryParts.map(p => ({ id: p.id, label: p.name }))}
+                                getOptionLabel={(option) => option?.label || option}
+                                value={part}
+                                onChange={(event, newValue) => {
+                                    handlePartChange(newValue);
+                                }}
+                                renderInput={(params) => <TextField {...params} label="Part" error={Boolean(validationErrors.part)} helperText={validationErrors.part}  />}
+                                isOptionEqualToValue={(option, value) => { return true; }}
+                            />
+                            </FormControl>
                         </Grid>
                         <Grid item xs={12}>
                             <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="lt">

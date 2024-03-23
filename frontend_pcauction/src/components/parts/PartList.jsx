@@ -20,9 +20,14 @@ function PartList() {
 
     const openSnackbar = useContext(SnackbarContext);
     const navigate = useNavigate();
-    const { setLogin, setLogout } = useUser();
+    const { role, setLogin, setLogout } = useUser();
 
     useEffect(() => {
+        if (!role.includes("Admin")) {
+            openSnackbar('Only admins can access this page!', 'error');
+            navigate(PATHS.MAIN);
+        }
+
         const fetchCategoriesData = async () => {
             const result = await getCategories();
 
@@ -43,7 +48,7 @@ function PartList() {
 
         fetchCategoriesData();
 
-    }, []);
+    }, [navigate, openSnackbar, role]);
 
     const handleSearchChange = (event) => {
         setSearchTerm(event.target.value);

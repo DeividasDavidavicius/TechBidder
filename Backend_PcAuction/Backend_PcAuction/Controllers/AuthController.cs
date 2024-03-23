@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using static Backend_PcAuction.Auth.Models.AuthDto;
 
 namespace Backend_PcAuction.Controllers
 {

@@ -7,10 +7,13 @@ import { useUser } from "../../contexts/UserContext";
 import SnackbarContext from "../../contexts/SnackbarContext";
 import PATHS from "../../utils/Paths";
 import { postPart } from "../../services/PartService";
+import { getAllCategorySeries } from "../../services/SeriesService";
 
 function CreatePart() {
     const [categories, setCategories] = useState([]);
     const [partCategory, setPartCategory] = useState("");
+    const [categorySeries, setCategorySeries] = useState([]);
+    const [partSeries, setPartSeries] = useState("none");
     const [categoryFields, setCategoryFields] = useState(null);
     const [name, setName] = useState("");
     const [specValue1, setSpecValue1] = useState("");
@@ -29,16 +32,22 @@ function CreatePart() {
     });
 
     const navigate = useNavigate();
-    const { setLogin, setLogout } = useUser();
+    const { role, setLogin, setLogout } = useUser();
     const openSnackbar = useContext(SnackbarContext);
 
 
-    const handlePartCategoryChange = (e) => {
+    const handlePartCategoryChange = async (e) => {
         const categoryName = e.target.value;
         setPartCategory(categoryName);
         const categoryFields = categories.find(category => category.id === categoryName);
         setCategoryFields(categoryFields);
-    }
+        await fetchCategorySeries(categoryName);
+    };
+
+    const handlePartSeriesChange = (e) =>
+    {
+        setPartSeries(e.target.value);
+    };
 
     const handleNameChange = (e) => {
         setName(e.target.value);
@@ -94,10 +103,12 @@ function CreatePart() {
             return;
         }
 
+        const seriesId = partSeries === "none" ? null : partSeries;
+
         const postData = {name, specificationValue1: specValue1, specificationValue2: specValue2, specificationValue3: specValue3,
             specificationValue4: specValue4, specificationValue5: specValue5, specificationValue6: specValue6,
             specificationValue7: specValue7,  specificationValue8: specValue8, specificationValue9: specValue9,
-            specificationValue10: specValue10};
+            specificationValue10: specValue10, seriesId};
 
         const accessToken = localStorage.getItem('accessToken');
         if (!checkTokenValidity(accessToken)) {
@@ -122,7 +133,17 @@ function CreatePart() {
 
     };
 
+    const fetchCategorySeries = async(categoryId) => {
+        const result = await getAllCategorySeries(categoryId);
+        setCategorySeries(result);
+    };
+
     useEffect(() => {
+        if (!role.includes("Admin")) {
+            openSnackbar('Only admins can access this page!', 'error');
+            navigate(PATHS.MAIN);
+        }
+
         const fetchCategoriesData = async () => {
             const result = await getCategories();
             setCategories(result);
@@ -130,11 +151,12 @@ function CreatePart() {
             const defaultCategory = "CPU";
             setPartCategory(defaultCategory);
             setCategoryFields(result.find(category => category.id === defaultCategory));
+            await fetchCategorySeries("CPU");
         };
 
         fetchCategoriesData();
 
-    }, []);
+    }, [navigate, openSnackbar, role]);
 
     return (
         <Container component="main" maxWidth="sm">
@@ -168,6 +190,27 @@ function CreatePart() {
                                     {categories.map((category) => (
                                         <MenuItem key={category.id} value={category.id}>
                                             {category.id}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <FormControl fullWidth>
+                                <InputLabel id="part-category-label">Series</InputLabel>
+                                <Select
+                                    labelId="part-series-label"
+                                    id="part-series"
+                                    label="Series"
+                                    value={partSeries}
+                                    onChange={handlePartSeriesChange}
+                                    required
+                                    sx={{ textAlign: 'left' }}
+                                >
+                                    <MenuItem value = {"none"}>{"-"}</MenuItem>
+                                    {categorySeries.map((s) => (
+                                        <MenuItem key={s.id} value={s.id}>
+                                            {s.name}
                                         </MenuItem>
                                     ))}
                                 </Select>

@@ -13,7 +13,7 @@ function EditSeries() {
     });
 
     const navigate = useNavigate();
-    const { setLogin, setLogout } = useUser();
+    const { role, setLogin, setLogout } = useUser();
     const openSnackbar = useContext(SnackbarContext);
     const { seriesId } = useParams();
     const { categoryId } = useParams();
@@ -60,6 +60,11 @@ function EditSeries() {
     };
 
     useEffect(() => {
+        if (!role.includes("Admin")) {
+            openSnackbar('Only admins can access this page!', 'error');
+            navigate(PATHS.MAIN);
+        }
+
         const fetchSeriesData = async () => {
             const seriesData = await getSeries(categoryId, seriesId);
             setName(seriesData.name);
@@ -67,7 +72,7 @@ function EditSeries() {
 
         fetchSeriesData();
 
-    }, [categoryId, seriesId]);
+    }, [categoryId, seriesId, navigate, openSnackbar, role]);
 
     return (
         <Container component="main" maxWidth="sm">

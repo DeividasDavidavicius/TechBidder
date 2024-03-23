@@ -4,7 +4,7 @@ import RegisterIcon from '@mui/icons-material/PersonAdd';
 import LoginIcon from '@mui/icons-material/Login';
 import SettingsIcon from '@mui/icons-material/Settings';
 import SnackbarContext from "../contexts/SnackbarContext";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import './../App.css';
 import { useUser } from "../contexts/UserContext";
@@ -81,7 +81,19 @@ function Header() {
                 openSnackbar('Succesfully logged out!', 'success');
             }
         } catch { }
-    }
+    };
+
+    useEffect(() => {
+
+        const refreshToken = localStorage.getItem('refreshToken');
+        if(refreshToken === null || refreshToken === "empty")
+            return;
+        else if(!checkTokenValidity(refreshToken))
+        {
+            setLogout();
+            navigation(PATHS.LOGIN);
+        }
+    }, [navigation, setLogout]);
 
     return (
         <AppBar position="sticky" style={{ top: 0, zIndex: 1000, backgroundColor: '#138c94'}}>

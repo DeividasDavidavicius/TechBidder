@@ -15,13 +15,15 @@ namespace Backend_PcAuction.Controllers
     public class AuctionsController : ControllerBase
     {
         private readonly IAuctionsRepository _auctionsRepository;
+        private readonly IPartsRepository _partsRepository;
         private readonly IAuthorizationService _authorizationService;
         private readonly IAzureBlobStorageService _azureBlobStorageService;
 
 
-        public AuctionsController(IAuctionsRepository auctionsRepository, IAuthorizationService authorizationService, IAzureBlobStorageService azureBlobStorageService)
+        public AuctionsController(IAuctionsRepository auctionsRepository, IPartsRepository partsRepository, IAuthorizationService authorizationService, IAzureBlobStorageService azureBlobStorageService)
         {
             _auctionsRepository = auctionsRepository;
+            _partsRepository = partsRepository;
             _authorizationService = authorizationService;
             _azureBlobStorageService = azureBlobStorageService;
         }
@@ -62,6 +64,13 @@ namespace Backend_PcAuction.Controllers
                 return UnprocessableEntity("End date must be later than start date");
             }
 
+            var part = await _partsRepository.GetAsync(createAuctionDto.PartCategory, createAuctionDto.PartId);
+
+            if (part == null)
+            {
+                return NotFound("Part not found");
+            }
+
             // TODO Create and update, backend and frontend: Max auction length 7 days (or 14), min 1 hour (or 1 day)
 
             var auction = new Auction
@@ -76,14 +85,15 @@ namespace Backend_PcAuction.Controllers
                 Condition = createAuctionDto.Condition,
                 Manufacturer = createAuctionDto.Manufacturer,
                 ImageUri = imageUri,
-                UserId = User.FindFirstValue(JwtRegisteredClaimNames.Sub)
+                UserId = User.FindFirstValue(JwtRegisteredClaimNames.Sub),
+                Part = part
             };
 
             await _auctionsRepository.CreateAsync(auction);
 
             return Created($"/api/v1/auctions/{auction.Id}", 
                 new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate,auction.EndDate,
-                auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.UserId));
+                auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.UserId, auction.Part.Id));
         }
 
         [HttpGet]
@@ -98,7 +108,7 @@ namespace Backend_PcAuction.Controllers
             }
 
             return Ok(new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate,
-                auction.EndDate, auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.UserId));
+                auction.EndDate, auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.UserId, auction.Part.Id));
         }
 
         [HttpGet]
@@ -107,7 +117,7 @@ namespace Backend_PcAuction.Controllers
             var auctions = await _auctionsRepository.GetManyAsync();
             return Ok(auctions.Select(auction => 
             new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate, auction.EndDate,
-                auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.UserId)));
+                auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.UserId, auction.Part.Id)));
 
         }
 
@@ -120,7 +130,7 @@ namespace Backend_PcAuction.Controllers
 
             var resultAuctions = auctions.Select(auction =>
             new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate, auction.EndDate,
-                auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.UserId));
+                auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.UserId, auction.Part.Id));
 
             return Ok(new AuctionsWithPaginationDto(resultAuctions, auctionCount));
         }
@@ -192,7 +202,7 @@ namespace Backend_PcAuction.Controllers
             await _auctionsRepository.UpdateAsync(auction);
 
             return Ok(new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate,
-                auction.EndDate, auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.UserId));
+                auction.EndDate, auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.UserId, auction.Part.Id));
         }
 
         [HttpDelete]

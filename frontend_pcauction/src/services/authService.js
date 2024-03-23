@@ -45,7 +45,6 @@ export const login = async(data) => {
       }
   }
 
-
   export const refreshAccessToken = async () => {
     const refreshToken = localStorage.getItem('refreshToken');
     try {
