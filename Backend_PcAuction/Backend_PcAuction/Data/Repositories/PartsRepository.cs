@@ -29,7 +29,7 @@ namespace Backend_PcAuction.Data.Repositories
 
         public async Task<Part?> GetAsync(string categoryId, Guid partId)
         {
-            return await _context.Parts.Include(part => part.Series).FirstOrDefaultAsync(part => part.Id == partId && part.Category.Id == categoryId);
+            return await _context.Parts.Include(p => p.Series).Include(p => p.Category).FirstOrDefaultAsync(part => part.Id == partId && part.Category.Id == categoryId);
         }
 
         public async Task<IReadOnlyList<Part>> GetManyAsync(string categoryId)

@@ -3,6 +3,7 @@ using Backend_PcAuction.Data.Dtos;
 using Backend_PcAuction.Data.Entities;
 using Backend_PcAuction.Data.Repositories;
 using Backend_PcAuction.Services;
+using Backend_PcAuction.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
@@ -34,9 +35,9 @@ namespace Backend_PcAuction.Controllers
         {
             var imageUri = await _azureBlobStorageService.UploadImageAsync(createAuctionDto.Image);
 
-            if (createAuctionDto.Name.Length < 5 || createAuctionDto.Name.Length > 50)
+            if (createAuctionDto.Name.Length < 5 || createAuctionDto.Name.Length > 30)
             {
-                return UnprocessableEntity("Title must be at 5 - 50 characters long");
+                return UnprocessableEntity("Title must be at 5 - 30 characters long");
             }
 
             if (createAuctionDto.Description.Length < 10)
@@ -93,7 +94,8 @@ namespace Backend_PcAuction.Controllers
 
             return Created($"/api/v1/auctions/{auction.Id}", 
                 new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate,auction.EndDate,
-                auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.UserId, auction.Part.Id));
+                auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.UserId, auction.Part.Id,
+                auction.Part.Category.Id));
         }
 
         [HttpGet]
@@ -108,7 +110,8 @@ namespace Backend_PcAuction.Controllers
             }
 
             return Ok(new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate,
-                auction.EndDate, auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.UserId, auction.Part.Id));
+                auction.EndDate, auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.UserId,
+                auction.Part.Id, auction.Part.Category.Id));
         }
 
         [HttpGet]
@@ -117,7 +120,8 @@ namespace Backend_PcAuction.Controllers
             var auctions = await _auctionsRepository.GetManyAsync();
             return Ok(auctions.Select(auction => 
             new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate, auction.EndDate,
-                auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.UserId, auction.Part.Id)));
+                auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.UserId, auction.Part.Id,
+                auction.Part.Category.Id)));
 
         }
 
@@ -129,8 +133,9 @@ namespace Backend_PcAuction.Controllers
             var auctionCount = await _auctionsRepository.GetCountAsync();
 
             var resultAuctions = auctions.Select(auction =>
-            new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate, auction.EndDate,
-                auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.UserId, auction.Part.Id));
+            new AuctionPaginationDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate, auction.EndDate,
+                auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.UserId, auction.Part.Name,
+                auction.Part.Category.Id));
 
             return Ok(new AuctionsWithPaginationDto(resultAuctions, auctionCount));
         }
@@ -151,9 +156,9 @@ namespace Backend_PcAuction.Controllers
             if (!authorizationResult.Succeeded)
                 return Forbid();
 
-            if (updateAuctionDto.Name.Length < 5 || updateAuctionDto.Name.Length > 50)
+            if (updateAuctionDto.Name.Length < 5 || updateAuctionDto.Name.Length > 30)
             {
-                return UnprocessableEntity("Title must be at 5 - 50 characters long");
+                return UnprocessableEntity("Title must be at 5 - 30 characters long");
             }
 
             if (updateAuctionDto.Description.Length < 10)
@@ -166,19 +171,22 @@ namespace Backend_PcAuction.Controllers
                 return UnprocessableEntity("Minimum increment must 0 or a positive number");
             }
 
-            if(updateAuctionDto.StartDate <  DateTime.UtcNow) 
+            if (updateAuctionDto.StartDate < DateTime.UtcNow)
             {
                 return UnprocessableEntity("Start date must be later than current time");
             }
 
-            if (updateAuctionDto.EndDate < DateTime.UtcNow)
+            if (auction.Status == AuctionStatuses.New)
             {
-                return UnprocessableEntity("End date must be later than current time");
-            }
+                if (updateAuctionDto.EndDate < DateTime.UtcNow)
+                {
+                    return UnprocessableEntity("End date must be later than current time");
+                }
 
-            if (updateAuctionDto.EndDate < updateAuctionDto.StartDate)
-            {
-                return UnprocessableEntity("End date must be later than start date");
+                if (updateAuctionDto.EndDate < updateAuctionDto.StartDate)
+                {
+                    return UnprocessableEntity("End date must be later than start date");
+                }
             }
 
             if (updateAuctionDto.Image != null)
@@ -202,7 +210,8 @@ namespace Backend_PcAuction.Controllers
             await _auctionsRepository.UpdateAsync(auction);
 
             return Ok(new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate,
-                auction.EndDate, auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.UserId, auction.Part.Id));
+                auction.EndDate, auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.UserId,
+                auction.Part.Id, auction.Part.Category.Id));
         }
 
         [HttpDelete]
@@ -220,6 +229,8 @@ namespace Backend_PcAuction.Controllers
             var authorizationResult = await _authorizationService.AuthorizeAsync(User, auction, PolicyNames.ResourceOwner);
             if (!authorizationResult.Succeeded)
                 return Forbid();
+
+            await _azureBlobStorageService.DeleteImageAsync(auction.ImageUri);
 
             await _auctionsRepository.DeleteAsync(auction);
 

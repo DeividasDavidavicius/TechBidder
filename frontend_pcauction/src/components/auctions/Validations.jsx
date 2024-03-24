@@ -1,5 +1,5 @@
 export const isValidTitle = (title) => {
-    return title && title.length >= 5 && title.length <= 50;
+    return title && title.length >= 5 && title.length <= 30;
 }
 
 export const isValidDescription = (description) => {

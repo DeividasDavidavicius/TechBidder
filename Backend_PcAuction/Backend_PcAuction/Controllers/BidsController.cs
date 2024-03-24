@@ -64,6 +64,11 @@ namespace Backend_PcAuction.Controllers
                 return UnprocessableEntity("Bid can not exceed 50000€");
             }
 
+            if(DateTime.UtcNow > auction.EndDate)
+            {
+                return UnprocessableEntity("You can not bid because auction ended");
+            }
+
             var bid = new Bid
             {
                 Amount = createBidDto.Amount,

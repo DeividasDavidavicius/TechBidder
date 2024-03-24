@@ -1,4 +1,5 @@
 ﻿using Backend_PcAuction.Data.Entities;
+using Backend_PcAuction.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend_PcAuction.Data.Repositories
@@ -31,17 +32,17 @@ namespace Backend_PcAuction.Data.Repositories
 
         public async Task<Auction?> GetAsync(Guid auctionId)
         {
-            return await _context.Auctions.Include(auction => auction.Part).FirstOrDefaultAsync(a => a.Id == auctionId);
+            return await _context.Auctions.Include(a => a.Part).Include(a => a.Part.Category).FirstOrDefaultAsync(a => a.Id == auctionId);
         }
 
         public async Task<IReadOnlyList<Auction>> GetManyAsync()
         {
-            return await _context.Auctions.Include(auction => auction.Part).ToListAsync();
+            return await _context.Auctions.Include(a => a.Part).Include(a => a.Part.Category).ToListAsync();
         }
 
         public async Task<IReadOnlyList<Auction>> GetManyWithPaginationAsync(int page)
         {
-            return await _context.Auctions.Include(auction => auction.Part).Skip((page - 1) * 5).Take(5).ToListAsync();
+            return await _context.Auctions.Include(a => a.Part).Include(a => a.Part.Category).Skip((page - 1) * 5).Take(5).ToListAsync();
         }
 
         public async Task UpdateAsync(Auction auction)

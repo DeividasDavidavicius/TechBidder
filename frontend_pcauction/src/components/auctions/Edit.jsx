@@ -21,7 +21,6 @@ function EditAuction() {
     const [startingName, setStartingName] = useState("");
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
-    const [imageData, setImageData] = useState(null);
     const [startDateLocal, setStartDateLocal] = useState(null);
     const [endDateLocal, setEndDateLocal] = useState(null);
     const [manufacturer, setManufacturer] = useState("");
@@ -98,7 +97,7 @@ function EditAuction() {
 
         let errors = [];
         setValidationErrors(errors);
-        if (!isValidTitle(name)) errors.title = "Title must be at 5 - 50 characters long";
+        if (!isValidTitle(name)) errors.title = "Title must be at 5 - 30 characters long";
         if (!isValidDescription(description)) errors.description = "Description must be at least 10 characters long";
         if(!isDatePastNow(startDate)) errors.startDate = "Start date must be later than current time";
         if(!isDatePastNow(endDate)) errors.endDate = "End date must be later than current time";
@@ -162,14 +161,13 @@ function EditAuction() {
                     navigate('/');
                 }
 
-                setImageData(result.imageData);
                 setImageType("image/");
                 setStartingName(result.name);
                 setName(result.name);
                 setDescription(result.description);
                 setMinIncrement(result.minIncrement);
                 setCondition(result.condition);
-                setManufacturer(result.manufacturer);
+                setManufacturer(result.manufacturer ? result.manufacturer : null);
                 setImageUri(result.imageUri);
 
 

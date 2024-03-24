@@ -7,6 +7,10 @@ import PATHS from "../../utils/Paths";
 import { checkTokenValidity, refreshAccessToken } from "../../services/AuthService";
 import { useUser } from "../../contexts/UserContext";
 import { getHighestBid, postBid } from "../../services/BIdService";
+import { getCategory } from "../../services/PartCategoryService";
+import { getPart } from "../../services/PartService";
+import { getSeries } from "../../services/SeriesService";
+import CountdownTimer from "./CountdownTimer";
 
 function AuctionInfo() {
     const [auctionData, setAuctionData] = useState({});
@@ -20,6 +24,10 @@ function AuctionInfo() {
     const navigate = useNavigate();
     const { setLogin, setLogout } = useUser();
     const [bidAmountField, setBidAmountField] = useState(0);
+
+    const [partData, setPartData] = useState([]);
+    const [categoryData, setCategoryData] = useState([]);
+    const [seriesData, setSeriesData] = useState([]);
 
     const handleBidChange = (event) => {
         setBidAmountField(event.target.value);
@@ -89,11 +97,30 @@ function AuctionInfo() {
     };
 
     useEffect(() => {
-        const getAuctionData = async () => {
+        const fetchCategoryData = async (categoryId) => {
+            const result = await getCategory(categoryId);
+            setCategoryData(result);
+        };
+
+        const fetchPartData = async (categoryId, partId) => {
+            const result = await getPart(categoryId, partId);
+            setPartData(result);
+
+            if(result.seriesId != null)
+            {
+                fetchSeriesData(categoryId, result.seriesId);
+            }
+        };
+
+        const fetchSeriesData = async(categoryId, seriesId) => {
+            const result = await getSeries(categoryId, seriesId);
+            setSeriesData(result);
+        };
+
+        const fetchAuctionData = async () => {
             try {
                 const result = await getAuction(auctionId);
                 setAuctionData(result);
-
 
                 const offsetInMilliseconds = new Date().getTimezoneOffset() * 60000;
                 const utcDateStart = new Date(result.startDate);
@@ -106,14 +133,17 @@ function AuctionInfo() {
                 setStartDateLocal(localDateStart);
                 setEndDateLocal(localDateEnd);
                 setMinIncrement(result.minIncrement);
+
+                await fetchCategoryData(result.categoryId);
+                await fetchPartData(result.categoryId, result.partId)
             }
             catch {
                 openSnackbar('This auction does not exist!', 'error');
-                navigate(PATHS.MAIN);
+                //avigate(PATHS.MAIN);
             }
         };
 
-        const getHighestBidData = async () => {
+        const fetchHighestBidData = async () => {
             try {
                 const result = await getHighestBid(auctionId);
                 setHighestBid(result.amount);
@@ -124,8 +154,8 @@ function AuctionInfo() {
             }
         };
 
-        getAuctionData();
-        getHighestBidData();
+        fetchAuctionData();
+        fetchHighestBidData();
       }, [auctionId, navigate, openSnackbar]);
 
       return (
@@ -145,14 +175,14 @@ function AuctionInfo() {
                 </Box>
 
                 <Box
-                sx={{
-                    display: 'flex',
-                    flexDirection: { xs: 'column',sm: 'column', md: 'row', lg: 'row' },
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    textAlign: 'center',
-                    marginTop: 2
-                }}
+                    sx={{
+                        display: 'flex',
+                        flexDirection: { xs: 'column',sm: 'column', md: 'row', lg: 'row' },
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        textAlign: 'center',
+                        marginTop: 2
+                    }}
                 >
                     <Box
                         sx={{
@@ -283,26 +313,81 @@ function AuctionInfo() {
                                 </Button>
                             </Box>
                         </Grid>
+                        <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'stretch', marginTop: 2 }}>
+                                <Typography
+                                    component="span"
+                                    variant="subtitle1"
+                                    sx={{
+                                        fontWeight: 'bold',
+                                        fontSize: '20px',
+                                        fontFamily: 'Arial, sans-serif',
+                                        letterSpacing: '1px',
+                                        textTransform: 'uppercase',
+                                        color: '#3b9298' }}
+                                >
+                                    Time left: {" "}
+                                </Typography >
+                                <Typography
+                                    component="span"
+                                    variant="subtitle1"
+                                    sx={{
+                                        fontWeight: 'bold',
+                                        fontSize: '16px',
+                                        fontFamily: 'Arial, sans-serif',
+                                        color: '#333',
+                                        letterSpacing: '1px' }}
+                                >
+                                 <CountdownTimer targetDate={endDateLocal} />
+                                </Typography >
+                            </Box>
+                        </Grid>
+
                     </Box>
                 </Box>
 
                 <Box sx={{ padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left'}}>
-                    <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif'}}>
-                        Condition:&nbsp;
-                    </Typography>
-                    <Typography component="span" sx={{fontFamily: 'Arial, sans-serif' }}>{auctionData.condition}</Typography>
+                    <Box>
+                        <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
+                            Condition:&nbsp;
+                        </Typography>
+                        <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{auctionData.condition}</Typography>
+                    </Box>
+                    <Box sx={{ marginTop: '5px' }}>
+                        <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
+                            Part category:&nbsp;
+                        </Typography>
+                        <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{categoryData.id}</Typography>
+                    </Box>
+                    {seriesData.name? (
+                    <>
+                    <Box>
+                        <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
+                            Part series:&nbsp;
+                        </Typography>
+                        <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{seriesData.name}</Typography>
+                    </Box>
+                    </> ) : null}
+                    <Box>
+                        <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
+                            Part name:&nbsp;
+                        </Typography>
+                        <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{partData.name}</Typography>
+                    </Box>
                     {auctionData.manufacturer ? (
                     <>
-                    <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', marginTop: '5px' }}>
-                        Manufacturer:&nbsp;
-                    </Typography>
-                    <Typography component="span" sx={{fontFamily: 'Arial, sans-serif' }}>{auctionData.manufacturer}</Typography>
+                    <Box sx={{ marginTop: '5px' }}>
+                        <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
+                            Manufacturer:&nbsp;
+                        </Typography>
+                        <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{auctionData.manufacturer}</Typography>
+                    </Box>
                     </> ) : null}
                     <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', marginTop: '5px'}}>
                         Description:&nbsp;
                     </Typography>
-                    <Typography component="span" sx={{fontFamily: 'Arial, sans-serif' }}>{auctionData.description}</Typography>
-                    <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', marginTop: '30px', fontFamily: 'Arial, sans-serif' }}>
+                    <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', wordBreak: 'break-all' }}>{auctionData.description}</Typography>
+                    <Typography component="span"     ariant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', marginTop: '30px', fontFamily: 'Arial, sans-serif' }}>
                         Auction start date:&nbsp;
                     </Typography>
                     <Typography component="span" sx={{fontFamily: 'Arial, sans-serif' }}>{startDateLocal}</Typography>

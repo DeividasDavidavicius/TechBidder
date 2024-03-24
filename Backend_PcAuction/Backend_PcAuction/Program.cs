@@ -2,6 +2,7 @@ using Azure.Storage.Blobs;
 using Backend_PcAuction.Auth;
 using Backend_PcAuction.Auth.Model;
 using Backend_PcAuction.Auth.Models;
+using Backend_PcAuction.BackgroundServices;
 using Backend_PcAuction.Data;
 using Backend_PcAuction.Data.DbSeeders;
 using Backend_PcAuction.Data.Entities;
@@ -31,6 +32,7 @@ builder.Services.AddScoped<AuthDbSeeder>();
 builder.Services.AddScoped<PartCategorySeeder>();
 builder.Services.AddScoped<IAzureBlobStorageService, AzureBlobStorageService>();
 
+builder.Services.AddHostedService<AuctionStartBackgroundService>();
 
 builder.Services.AddAuthorization(options =>
 {

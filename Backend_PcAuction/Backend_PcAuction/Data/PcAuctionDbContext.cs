@@ -13,6 +13,7 @@ namespace Backend_PcAuction.Data
         public DbSet<Part> Parts { get; set; }
         public DbSet<PartCategory> PartCategories { get; set; }
         public DbSet<Series> Series { get; set; }
+        public DbSet<Log> Logs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

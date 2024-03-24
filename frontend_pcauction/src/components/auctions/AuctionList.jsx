@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import PATHS from "../../utils/Paths";
 import { Avatar, Box, Card, CardActionArea, CardContent, CardHeader, Container, CssBaseline, Pagination, Typography } from "@mui/material";
 import { getAuctionsWithPagination } from "../../services/AuctionService";
+import { timeLeft } from "../../utils/DateUtils";
 
 function AuctionList() {
     const navigate = useNavigate();
@@ -46,27 +47,56 @@ function AuctionList() {
       <Box
         sx={{
           marginTop: 8,
-          border: '1px solid #ccc',
-          borderRadius: '10px',
+          //border: '1px solid #ccc',
+          //borderRadius: '10px',
           padding: '20px',
         }}
       >
         <Box>
-          {auctions.map(auction => (
-            <Card key = {auction.id}  display="flex">
-               <CardActionArea onClick={() => handleCardClick(auction.id)} sx={{ width: '100%', marginBottom: 2, display: 'flex', '&:hover': { boxShadow: '0 0 10px rgba(0, 0, 0, 1)' } }}>
+          {auctions.map((auction, index) => (
+            <Card key = {auction.id}  display="flex" sx={{ marginBottom: 2, border: '1px solid #ddd' }}>
+               <CardActionArea onClick={() => handleCardClick(auction.id)} sx={{ width: '100%', display: 'flex', '&:hover': { boxShadow: '0 0 10px rgba(0, 0, 0, 1)' } }}>
               <Box sx={{ flexGrow: 1 }}>
                 <CardHeader
-                  title={<Typography variant="h6">{auction.name}</Typography>}
-                  sx={{ textAlign: 'left' }}
+                  title={<Typography variant="h6" sx ={{fontFamily: 'Arial, sans-serif', fontWeight: 'bold', fontSize: '22px', color: '#0d6267'}}>{auction.name}</Typography>}
+                  sx={{
+                    textAlign: 'left',
+                    wordBreak: 'break-all',
+                    overflow: 'hidden',
+                    paddingBottom: 0
+                }}
                 />
                 <CardContent>
+                <Typography
+                    variant="subtitle1"
+                    sx={{
+                      textAlign: 'left',
+                      fontWeight: 'bold',
+                      color: '#255e62',
+                      fontFamily: 'Arial, sans-serif',
+                    }}
+                  >
+                    {auction.partName}, {auction.categoryId}&nbsp;
+                  </Typography>
+                  <Box sx = {{textAlign: 'left',}}>
+                      <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
+                        Time left:&nbsp;
+                      </Typography>
+                      <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', fontWeight: 'bold', color: '#c21818', display: 'inline-block'}}>
+                      {timeLeft(auction.endDate, new Date().toISOString().slice(0, 19))}
+                      </Typography>
+                  </Box>
+
                   <Typography
                     variant="body2"
                     color="textSecondary"
                     component="p"
                     sx={{
                       textAlign: 'left',
+                      fontFamily: 'Arial, sans-serif',
+                      wordBreak: 'break-all',
+                      overflow: 'hidden',
+                      color: 'black'
                     }}
                   >
                     {truncateText(auction.description, 180)}
