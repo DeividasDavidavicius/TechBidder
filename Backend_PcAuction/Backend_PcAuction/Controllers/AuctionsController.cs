@@ -94,8 +94,8 @@ namespace Backend_PcAuction.Controllers
 
             return Created($"/api/v1/auctions/{auction.Id}", 
                 new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate,auction.EndDate,
-                auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.UserId, auction.Part.Id,
-                auction.Part.Category.Id));
+                auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.Status, auction.UserId,
+                auction.Part.Id, auction.Part.Category.Id));
         }
 
         [HttpGet]
@@ -110,8 +110,8 @@ namespace Backend_PcAuction.Controllers
             }
 
             return Ok(new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate,
-                auction.EndDate, auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.UserId,
-                auction.Part.Id, auction.Part.Category.Id));
+                auction.EndDate, auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.Status,
+                auction.UserId, auction.Part.Id, auction.Part.Category.Id));
         }
 
         [HttpGet]
@@ -120,8 +120,8 @@ namespace Backend_PcAuction.Controllers
             var auctions = await _auctionsRepository.GetManyAsync();
             return Ok(auctions.Select(auction => 
             new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate, auction.EndDate,
-                auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.UserId, auction.Part.Id,
-                auction.Part.Category.Id)));
+                auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.Status,
+                auction.UserId, auction.Part.Id, auction.Part.Category.Id)));
 
         }
 
@@ -134,7 +134,7 @@ namespace Backend_PcAuction.Controllers
 
             var resultAuctions = auctions.Select(auction =>
             new AuctionPaginationDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate, auction.EndDate,
-                auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.UserId, auction.Part.Name,
+                auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.Status, auction.UserId, auction.Part.Name,
                 auction.Part.Category.Id));
 
             return Ok(new AuctionsWithPaginationDto(resultAuctions, auctionCount));
@@ -171,22 +171,22 @@ namespace Backend_PcAuction.Controllers
                 return UnprocessableEntity("Minimum increment must 0 or a positive number");
             }
 
-            if (updateAuctionDto.StartDate < DateTime.UtcNow)
-            {
-                return UnprocessableEntity("Start date must be later than current time");
-            }
-
             if (auction.Status == AuctionStatuses.New)
             {
-                if (updateAuctionDto.EndDate < DateTime.UtcNow)
+                if (updateAuctionDto.StartDate < DateTime.UtcNow)
                 {
-                    return UnprocessableEntity("End date must be later than current time");
+                    return UnprocessableEntity("Start date must be later than current time");
                 }
+            }
 
-                if (updateAuctionDto.EndDate < updateAuctionDto.StartDate)
-                {
-                    return UnprocessableEntity("End date must be later than start date");
-                }
+            if (updateAuctionDto.EndDate < DateTime.UtcNow)
+            {
+                return UnprocessableEntity("End date must be later than current time");
+            }
+
+            if (updateAuctionDto.EndDate < updateAuctionDto.StartDate)
+            {
+                return UnprocessableEntity("End date must be later than start date");
             }
 
             if (updateAuctionDto.Image != null)
@@ -210,8 +210,8 @@ namespace Backend_PcAuction.Controllers
             await _auctionsRepository.UpdateAsync(auction);
 
             return Ok(new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate,
-                auction.EndDate, auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.UserId,
-                auction.Part.Id, auction.Part.Category.Id));
+                auction.EndDate, auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.Status,
+                auction.UserId, auction.Part.Id, auction.Part.Category.Id));
         }
 
         [HttpDelete]

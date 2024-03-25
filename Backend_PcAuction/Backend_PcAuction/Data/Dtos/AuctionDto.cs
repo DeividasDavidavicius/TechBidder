@@ -13,6 +13,7 @@ namespace Backend_PcAuction.Data.Dtos
         string Condition,
         string Manufacturer,
         string ImageUri,
+        string Status,
         string UserId,
         Guid PartId,
         string CategoryId
@@ -29,6 +30,7 @@ namespace Backend_PcAuction.Data.Dtos
     string Condition,
     string Manufacturer,
     string ImageUri,
+    string Status,
     string UserId,
     string PartName,
     string CategoryId

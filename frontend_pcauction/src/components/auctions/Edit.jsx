@@ -12,6 +12,7 @@ import dayjs from 'dayjs';
 import { checkTokenValidity, refreshAccessToken } from "../../services/AuthService";
 import PATHS from "../../utils/Paths";
 import { getAuction, putAuction } from "../../services/AuctionService";
+import { getHighestBid } from "../../services/BIdService";
 
 function EditAuction() {
     const navigate = useNavigate();
@@ -31,6 +32,7 @@ function EditAuction() {
     const [imageType, setImageType] = useState(null);
     const [imageFile, setImageFile] = useState(undefined);
     const [imageUri, setImageUri] = useState(null);
+    const [status, setStatus] = useState("");
     const [validationErrors, setValidationErrors] = useState({
         title: null,
         description: null,
@@ -99,7 +101,7 @@ function EditAuction() {
         setValidationErrors(errors);
         if (!isValidTitle(name)) errors.title = "Title must be at 5 - 30 characters long";
         if (!isValidDescription(description)) errors.description = "Description must be at least 10 characters long";
-        if(!isDatePastNow(startDate)) errors.startDate = "Start date must be later than current time";
+        if(!isDatePastNow(startDate) && status === "New") errors.startDate = "Start date must be later than current time";
         if(!isDatePastNow(endDate)) errors.endDate = "End date must be later than current time";
         if(!isEndDateLater(startDate, endDate)) errors.endDate = "End date must be later than start date";
         if(!isValidMinInc(minIncrement)) errors.minInc = "Minimum increment must 0 or a positive number";
@@ -154,22 +156,32 @@ function EditAuction() {
         const getAuctionData = async () => {
             try {
                 const result = await getAuction(auctionId);
+                const highestBid = await getHighestBid(auctionId);
 
                 if (!(role.includes("RegisteredUser") && result.userId === getUserId()) && !role.includes("Admin")) {
 
                     openSnackbar('You can not edit this auction!', 'error');
-                    navigate('/');
+                    navigate(PATHS.MAIN);
                 }
 
+                if(result.status != "New" && highestBid.amount != -1)
+                {
+                    openSnackbar('This auction can not be updated!', 'error');
+
+                    navigate(PATHS.AUCTIONINFO.replace(":auctionId", auctionId));
+                }
+
+                console.log(result.status);
+
+                setStatus(result.status);
                 setImageType("image/");
                 setStartingName(result.name);
                 setName(result.name);
                 setDescription(result.description);
                 setMinIncrement(result.minIncrement);
                 setCondition(result.condition);
-                setManufacturer(result.manufacturer ? result.manufacturer : null);
+                setManufacturer(result.manufacturer ? result.manufacturer : "");
                 setImageUri(result.imageUri);
-
 
                 const offsetInMilliseconds = new Date().getTimezoneOffset() * 60000;
                 const utcDateStart = new Date(result.startDate);
@@ -180,6 +192,7 @@ function EditAuction() {
 
                 setStartDateLocal(localDateStart.slice(0, -3));
                 setEndDateLocal(localDateEnd.slice(0, -3));
+
             }
             catch {
                 openSnackbar('This auction does not exist!', 'error');
@@ -236,6 +249,9 @@ function EditAuction() {
                                 onChange={handleDescriptionChange}
                                 />
                         </Grid>
+
+                        {status === "New" ? (
+                        <>
                         <Grid item xs={12}>
                             <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="lt">
                                 <DateTimePicker
@@ -253,6 +269,30 @@ function EditAuction() {
                                 />
                             </LocalizationProvider>
                         </Grid>
+                        </> )
+                        :
+                        (
+                            <>
+                            <Grid item xs={12}>
+                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="lt">
+                                    <DateTimePicker
+                                        label="Auction start date *"
+                                        value={dayjs(startDateLocal)}
+                                        onChange={handleStartDateChange}
+                                        sx={{ width: '100%' }}
+                                        disabled
+                                        name="startDate"
+                                        slotProps={{
+                                            textField: {
+                                              error: Boolean(validationErrors.startDate),
+                                              helperText: validationErrors.startDate,
+                                            },
+                                          }}
+                                    />
+                                </LocalizationProvider>
+                            </Grid>
+                            </> )
+                        }
                         <Grid item xs={12}>
                             <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="lt">
                                 <DateTimePicker
@@ -334,7 +374,7 @@ function EditAuction() {
                                 style={{ display: 'none' }}
                             />
                             <label htmlFor="image-input">
-                                <Button variant="contained" component="span" fullWidth sx={{ mt: 1, mb: 2, bgcolor: '#138c94' }}>
+                                <Button variant="contained" component="span" fullWidth sx={{ mt: 1, mb: 2, bgcolor: '#138c94', '&:hover': { backgroundColor: '#07383b'} }}>
                                     Select Image
                                 </Button>
                                 {validationErrors.image && <FormHelperText sx={{ color: theme.palette.error.main }}>{validationErrors.image}</FormHelperText>}
@@ -345,7 +385,7 @@ function EditAuction() {
                         type="submit"
                         fullWidth
                         variant="contained"
-                        sx={{ mt: 1, mb: 2, bgcolor: '#0d6267' }}
+                        sx={{ mt: 1, mb: 2, bgcolor: '#0d6267', '&:hover': { backgroundColor: '#07383b'} }}
                     >
                         Update auction
                     </Button>
