@@ -10,6 +10,9 @@ namespace Backend_PcAuction.Data.Repositories
         Task DeleteAsync(Auction auction);
         Task<Auction?> GetAsync(Guid auctionId);
         Task<IReadOnlyList<Auction>> GetManyAsync();
+        Task<List<Auction>> GetManyByPartAsync(Guid partId);
+        Task<List<Auction>> GetManyBySeriesAsync(Guid seriesId);
+        Task<List<Auction>> GetManyByCategoryAsync(string categoryId);
         Task<IReadOnlyList<Auction>> GetManyWithPaginationAsync(int page);
         Task UpdateAsync(Auction auction);
         Task<int> GetCountAsync();
@@ -32,7 +35,7 @@ namespace Backend_PcAuction.Data.Repositories
 
         public async Task<Auction?> GetAsync(Guid auctionId)
         {
-            return await _context.Auctions.Include(a => a.Part).Include(a => a.Part.Category).FirstOrDefaultAsync(a => a.Id == auctionId);
+            return await _context.Auctions.Include(a => a.Part).Include(a => a.Part.Category).Include(a => a.Part.Series).FirstOrDefaultAsync(a => a.Id == auctionId);
         }
 
         public async Task<IReadOnlyList<Auction>> GetManyAsync()
@@ -40,9 +43,24 @@ namespace Backend_PcAuction.Data.Repositories
             return await _context.Auctions.Include(a => a.Part).Include(a => a.Part.Category).ToListAsync();
         }
 
+        public async Task<List<Auction>> GetManyBySeriesAsync(Guid seriesId)
+        {
+            return await _context.Auctions.Include(a => a.Part).Include(a => a.Part.Category).Where(a => a.Part.Series.Id == seriesId).ToListAsync();
+        }
+
+        public async Task<List<Auction>> GetManyByPartAsync(Guid partId)
+        {
+            return await _context.Auctions.Include(a => a.Part).Include(a => a.Part.Category).Where(a => a.Part.Id == partId).ToListAsync();
+        }
+
+        public async Task<List<Auction>> GetManyByCategoryAsync(string categoryId)
+        {
+            return await _context.Auctions.Include(a => a.Part).Include(a => a.Part.Category).Where(a => a.Part.Category.Id == categoryId).ToListAsync();
+        }
+
         public async Task<IReadOnlyList<Auction>> GetManyWithPaginationAsync(int page)
         {
-            return await _context.Auctions.Include(a => a.Part).Include(a => a.Part.Category).Skip((page - 1) * 5).Take(5).ToListAsync();
+            return await _context.Auctions.Include(a => a.Part).Include(a => a.Part.Category).Where(a => a.Status == AuctionStatuses.Active).Skip((page - 1) * 5).Take(5).ToListAsync();
         }
 
         public async Task UpdateAsync(Auction auction)
@@ -59,7 +77,7 @@ namespace Backend_PcAuction.Data.Repositories
 
         public async Task<int> GetCountAsync()
         {
-            return await _context.Auctions.CountAsync();
+            return await _context.Auctions.Where(a => a.Status == AuctionStatuses.Active).CountAsync();
         }
     }
 }

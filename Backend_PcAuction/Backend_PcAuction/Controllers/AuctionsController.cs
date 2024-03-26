@@ -6,6 +6,7 @@ using Backend_PcAuction.Services;
 using Backend_PcAuction.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
@@ -19,14 +20,17 @@ namespace Backend_PcAuction.Controllers
         private readonly IPartsRepository _partsRepository;
         private readonly IAuthorizationService _authorizationService;
         private readonly IAzureBlobStorageService _azureBlobStorageService;
+        private readonly IAuctionService _auctionService;
 
 
-        public AuctionsController(IAuctionsRepository auctionsRepository, IPartsRepository partsRepository, IAuthorizationService authorizationService, IAzureBlobStorageService azureBlobStorageService)
+        public AuctionsController(IAuctionsRepository auctionsRepository, IPartsRepository partsRepository,IAuthorizationService authorizationService,
+            IAzureBlobStorageService azureBlobStorageService, IAuctionService auctionService)
         {
             _auctionsRepository = auctionsRepository;
             _partsRepository = partsRepository;
             _authorizationService = authorizationService;
             _azureBlobStorageService = azureBlobStorageService;
+            _auctionService = auctionService;
         }
 
         [HttpPost]
@@ -86,6 +90,7 @@ namespace Backend_PcAuction.Controllers
                 Condition = createAuctionDto.Condition,
                 Manufacturer = createAuctionDto.Manufacturer,
                 ImageUri = imageUri,
+                HighestBid = -1,
                 UserId = User.FindFirstValue(JwtRegisteredClaimNames.Sub),
                 Part = part
             };
@@ -235,6 +240,26 @@ namespace Backend_PcAuction.Controllers
             await _auctionsRepository.DeleteAsync(auction);
 
             return NoContent();
+        }
+
+        [HttpGet]
+        [Route("{auctionId}/recommendations")]
+        public async Task<ActionResult<IEnumerable<AuctionDto>>>GetRecommendations(Guid auctionId)
+        {
+            var auction = await _auctionsRepository.GetAsync(auctionId);
+
+            if (auction == null)
+            {
+                return NotFound();
+            }
+
+            var recommendations = await _auctionService.GenerateAuctionRecommendations(auction);
+
+            var resultAuctions = recommendations.Select(auction =>
+                new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate, auction.EndDate,
+                    auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.Status, auction.UserId, auction.Part.Id, auction.Part.Category.Id));
+
+            return Ok(resultAuctions);
         }
     }
 }

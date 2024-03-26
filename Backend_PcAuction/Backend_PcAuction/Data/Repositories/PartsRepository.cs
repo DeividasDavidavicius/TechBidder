@@ -8,6 +8,7 @@ namespace Backend_PcAuction.Data.Repositories
         Task CreateAsync(Part part);
         Task DeleteAsync(Part part);
         Task<Part?> GetAsync(string categoryId, Guid partId);
+        Task<Part?> GetForAnyCategoryAsync(Guid partId);
         Task<IReadOnlyList<Part>> GetManyAsync(string categoryId);
         Task UpdateAsync(Part part);
     }
@@ -30,6 +31,11 @@ namespace Backend_PcAuction.Data.Repositories
         public async Task<Part?> GetAsync(string categoryId, Guid partId)
         {
             return await _context.Parts.Include(p => p.Series).Include(p => p.Category).FirstOrDefaultAsync(part => part.Id == partId && part.Category.Id == categoryId);
+        }
+
+        public async Task<Part?> GetForAnyCategoryAsync(Guid partId)
+        {
+            return await _context.Parts.FirstOrDefaultAsync(part => part.Id == partId);
         }
 
         public async Task<IReadOnlyList<Part>> GetManyAsync(string categoryId)

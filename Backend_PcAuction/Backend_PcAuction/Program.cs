@@ -26,11 +26,15 @@ builder.Services.AddTransient<IAuctionsRepository, AuctionsRepository>();
 builder.Services.AddTransient<IBidsRepository, BidsRepository>();
 builder.Services.AddTransient<IPartCategoriesRepository, PartCategoriesRepository>();
 builder.Services.AddTransient<IPartsRepository, PartsRepository>();
+builder.Services.AddTransient<IPartsPricesRepository, PartsPricesRepository>();
 builder.Services.AddTransient<ISeriesRepository, SeriesRepository>();
 builder.Services.AddTransient<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<AuthDbSeeder>();
 builder.Services.AddScoped<PartCategorySeeder>();
+
 builder.Services.AddScoped<IAzureBlobStorageService, AzureBlobStorageService>();
+builder.Services.AddScoped<IPartPricesService, PartPricesService>();
+builder.Services.AddScoped<IAuctionService, AuctionService>();
 
 builder.Services.AddHostedService<AuctionStartBackgroundService>();
 

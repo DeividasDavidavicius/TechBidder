@@ -164,7 +164,7 @@ function EditAuction() {
                     navigate(PATHS.MAIN);
                 }
 
-                if(result.status != "New" && highestBid.amount != -1)
+                if(result.status !== "New" && highestBid.amount !== -1)
                 {
                     openSnackbar('This auction can not be updated!', 'error');
 

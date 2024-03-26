@@ -2,6 +2,7 @@
 using Backend_PcAuction.Data.Dtos;
 using Backend_PcAuction.Data.Entities;
 using Backend_PcAuction.Data.Repositories;
+using Backend_PcAuction.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
@@ -30,6 +31,11 @@ namespace Backend_PcAuction.Controllers
         public async Task<ActionResult<BidDto>> Create(Guid auctionId, CreateBidDto createBidDto)
         {
             var auction = await _auctionsRepository.GetAsync(auctionId);
+
+            if(auction.Status != AuctionStatuses.Active)
+            {
+                return UnprocessableEntity("Auction is not active");
+            }
 
             if (auction == null)
             {
@@ -164,6 +170,9 @@ namespace Backend_PcAuction.Controllers
             {
                 return Ok(new BidDto(new Guid(), -1, DateTime.UtcNow));
             }
+
+            auction.HighestBid = bid.Amount;
+            _auctionsRepository.UpdateAsync(auction);
 
             return Ok(new BidDto(bid.Id, bid.Amount, bid.CreationDate));
         }

@@ -23,10 +23,14 @@ const CountdownTimer = ({ targetDate }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setTimeLeft(calculateTimeLeft());
-    }, 1000);
+    }, 500);
 
     return () => clearTimeout(timer);
   });
+
+  useEffect(() => {
+    setTimeLeft(calculateTimeLeft());
+  }, []);
 
   const timerComponents = [];
 

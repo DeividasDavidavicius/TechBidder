@@ -3,7 +3,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Backend_PcAuction.Data.Repositories
 {
-    public class PartsPricesRepository
+    public interface IPartsPricesRepository
+    {
+        Task CreateAsync(PartPrice partPrice);
+        Task DeleteAsync(PartPrice partPrice);
+        Task<PartPrice?> GetAsync(Guid partId, string type);
+        Task<IReadOnlyList<PartPrice>> GetManyAsync(Guid partId, string type);
+    }
+
+    public class PartsPricesRepository : IPartsPricesRepository
     {
         private readonly PcAuctionDbContext _context;
 
