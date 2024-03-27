@@ -48,3 +48,14 @@ export const postAuction = async (data) => {
       throw error;
     }
   };
+
+
+  export const getAuctionRecommendations = async (id) => {
+    try {
+      const response = await axios.get(`${API_URL}/auctions/${id}/recommendations`);
+      return response.data;
+    } catch (error) {
+      console.error('Error getting auction:', error);
+      throw error;
+    }
+  };

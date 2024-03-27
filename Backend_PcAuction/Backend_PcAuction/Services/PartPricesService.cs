@@ -47,8 +47,9 @@ namespace Backend_PcAuction.Services
                 return -1;
             }
 
+            var ebayAvgAmount = ebayPriceAvg != null ? ebayPriceAvg.Price : 0;
             var partAuctionAvg = salesOnPartAuction.Count > 0 ? sumOfSales / salesOnPartAuction.Count : 0;
-            var totalAverage = (ebayPriceAvg.Price + partAuctionAvg) / factors;
+            var totalAverage = (ebayAvgAmount + partAuctionAvg) / factors;
 
             return Math.Truncate(totalAverage);
         }

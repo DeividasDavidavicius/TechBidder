@@ -85,6 +85,9 @@ namespace Backend_PcAuction.Controllers
 
             await _bidsRepository.CreateAsync(bid);
 
+            auction.HighestBid = bid.Amount;
+            _auctionsRepository.UpdateAsync(auction);
+
             return Created($"/api/v1/auctions/{auctionId}/bids/{bid.Id}", 
                 new BidDto(bid.Id, bid.Amount, bid.CreationDate));
         }
@@ -170,9 +173,6 @@ namespace Backend_PcAuction.Controllers
             {
                 return Ok(new BidDto(new Guid(), -1, DateTime.UtcNow));
             }
-
-            auction.HighestBid = bid.Amount;
-            _auctionsRepository.UpdateAsync(auction);
 
             return Ok(new BidDto(bid.Id, bid.Amount, bid.CreationDate));
         }

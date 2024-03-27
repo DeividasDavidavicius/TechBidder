@@ -138,7 +138,7 @@ namespace Backend_PcAuction.Controllers
             var auctionCount = await _auctionsRepository.GetCountAsync();
 
             var resultAuctions = auctions.Select(auction =>
-            new AuctionPaginationDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate, auction.EndDate,
+            new AuctionWithPartNameDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate, auction.EndDate,
                 auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.Status, auction.UserId, auction.Part.Name,
                 auction.Part.Category.Id));
 
@@ -256,8 +256,8 @@ namespace Backend_PcAuction.Controllers
             var recommendations = await _auctionService.GenerateAuctionRecommendations(auction);
 
             var resultAuctions = recommendations.Select(auction =>
-                new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate, auction.EndDate,
-                    auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.Status, auction.UserId, auction.Part.Id, auction.Part.Category.Id));
+                new AuctionWithPartNameDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate, auction.EndDate,
+                    auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.Status, auction.UserId, auction.Part.Name, auction.Part.Category.Id));
 
             return Ok(resultAuctions);
         }

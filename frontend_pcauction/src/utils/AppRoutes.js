@@ -12,6 +12,7 @@ import EditPart from "../components/parts/EditPart";
 import SeriesList from "../components/series/SeriesList";
 import CreateSeries from "../components/series/CreateSeries";
 import EditSeries from "../components/series/EditSeries";
+import AuctionRecommendations from "../components/auctions/AuctionRecommendations";
 
 
 const AppRoutes = [
@@ -28,7 +29,8 @@ const AppRoutes = [
     { path: PATHS.EDITPART, element: <EditPart/> },
     { path: PATHS.SERIES, element: <SeriesList/>},
     { path: PATHS.CREATESERIES, element: <CreateSeries/>},
-    { path: PATHS.EDITSERIES, element: <EditSeries/> }
+    { path: PATHS.EDITSERIES, element: <EditSeries/> },
+    { path: PATHS.AUCTIONRECOMMENDATIONS, element: <AuctionRecommendations/> }
 ];
 
 export default AppRoutes;

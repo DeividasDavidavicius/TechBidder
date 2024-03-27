@@ -19,22 +19,22 @@ namespace Backend_PcAuction.Data.Dtos
         string CategoryId
     );
 
-    public record AuctionPaginationDto(
-    Guid Id,
-    string Name,
-    string Description,
-    DateTime CreationDate,
-    DateTime StartDate,
-    DateTime EndDate,
-    double MinIncrement,
-    string Condition,
-    string Manufacturer,
-    string ImageUri,
-    string Status,
-    string UserId,
-    string PartName,
-    string CategoryId
-);
+    public record AuctionWithPartNameDto(
+        Guid Id,
+        string Name,
+        string Description,
+        DateTime CreationDate,
+        DateTime StartDate,
+        DateTime EndDate,
+        double MinIncrement,
+        string Condition,
+        string Manufacturer,
+        string ImageUri,
+        string Status,
+        string UserId,
+        string PartName,
+        string CategoryId
+    );
 
     public record CreateAuctionDto(
         [Required]string Name,
@@ -61,7 +61,7 @@ namespace Backend_PcAuction.Data.Dtos
     );
     
     public record AuctionsWithPaginationDto(
-        IEnumerable<AuctionPaginationDto> Auctions,
+        IEnumerable<AuctionWithPartNameDto> Auctions,
         int AuctionCount
     );
 }
