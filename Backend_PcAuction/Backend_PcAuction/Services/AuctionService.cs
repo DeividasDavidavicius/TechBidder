@@ -29,17 +29,9 @@ namespace Backend_PcAuction.Services
             List<Auction> recommendations = new List<Auction>();
             Random random = new Random();
 
-            var highestBid = auction.HighestBid;
 
-            if(highestBid == -1)
-            {
-                return recommendations; ;
-            }
-
-            var partAveragePrice = await _partPricesService.GetPriceAverageAsync(auction.Part.Id);
-
-            var samePartAuctions = await _auctionsRepository.GetManyByPartAsync(auction.Part.Id);
-            var samePartAuctionsFiltered = samePartAuctions.Where(a => a.HighestBid < highestBid && a.HighestBid < partAveragePrice).ToList();
+            var samePartAuctions = await _auctionsRepository.GetManyByPartAsync(auction);
+            var samePartAuctionsFiltered = samePartAuctions.Where(a => a.HighestBid < 1000).ToList(); // replace 1000 with average price
 
             for (int i = 0; i < 2 && samePartAuctionsFiltered.Count > 0; i++)
             {
@@ -49,8 +41,9 @@ namespace Backend_PcAuction.Services
             }
 
             var sameSeriesAuctions = (auction.Part.Series != null ? await _auctionsRepository.GetManyBySeriesDifferentPartAsync(auction) : new List<Auction>());
-            var sameSeriesAuctionsFiltered = sameSeriesAuctions.Where(a => a.HighestBid < highestBid && a.HighestBid < partAveragePrice).ToList();
+            var sameSeriesAuctionsFiltered = sameSeriesAuctions.Where(a => a.HighestBid < 1000).ToList(); // replace 1000 with average price
 
+            
             for (int i = 0; i < 2 && sameSeriesAuctionsFiltered.Count > 0; i++)
             {
                 int randomIndex = random.Next(0, sameSeriesAuctionsFiltered.Count);
@@ -59,27 +52,19 @@ namespace Backend_PcAuction.Services
             }
 
             var sameCategoryAuctions = auction.Part.Series != null ?  await _auctionsRepository.GetManyByCategoryDifferentSeriesAsync(auction) : await _auctionsRepository.GetManyByCategoryDifferentPartAsync(auction);
-            var sameCategoryAuctionsFiltered = sameCategoryAuctions.Where(a => a.HighestBid < highestBid && a.HighestBid < partAveragePrice).ToList();
+            var sameCategoryAuctionsFiltered = sameCategoryAuctions.Where(a => a.HighestBid < 1000).ToList(); // replace 1000 with average price
 
-            while(recommendations.Count < 7 && sameCategoryAuctionsFiltered.Count > 0)
-            {
-                int randomIndex = random.Next(0, sameCategoryAuctionsFiltered.Count);
-                recommendations.Add(sameCategoryAuctionsFiltered[randomIndex]);
-                sameCategoryAuctionsFiltered.RemoveAt(randomIndex);
-            }
+            var allRemainingAuctions = new List<Auction>();
 
-            while (recommendations.Count < 7 && samePartAuctionsFiltered.Count > 0)
-            {
-                int randomIndex = random.Next(0, samePartAuctionsFiltered.Count);
-                recommendations.Add(samePartAuctionsFiltered[randomIndex]);
-                samePartAuctionsFiltered.RemoveAt(randomIndex);
-            }
+            allRemainingAuctions.AddRange(samePartAuctionsFiltered);
+            allRemainingAuctions.AddRange(sameSeriesAuctionsFiltered);
+            allRemainingAuctions.AddRange(sameCategoryAuctionsFiltered);
 
-            while (recommendations.Count < 7 && sameSeriesAuctionsFiltered.Count > 0)
+            while (recommendations.Count < 7 && allRemainingAuctions.Count > 0)
             {
-                int randomIndex = random.Next(0, sameSeriesAuctionsFiltered.Count);
-                recommendations.Add(sameSeriesAuctionsFiltered[randomIndex]);
-                sameSeriesAuctionsFiltered.RemoveAt(randomIndex);
+                int randomIndex = random.Next(0, allRemainingAuctions.Count);
+                recommendations.Add(allRemainingAuctions[randomIndex]);
+                allRemainingAuctions.RemoveAt(randomIndex);
             }
 
             return recommendations;

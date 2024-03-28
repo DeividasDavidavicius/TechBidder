@@ -1,31 +1,22 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import PATHS from "../../utils/Paths";
-import { Avatar, Box, Card, CardActionArea, CardContent, CardHeader, Container, CssBaseline, Pagination, Typography } from "@mui/material";
-import { getAuction, getAuctionRecommendations } from "../../services/AuctionService";
+import { Avatar, Box, Card, CardActionArea, CardContent, CardHeader, Container, CssBaseline, Typography } from "@mui/material";
+import { getAuctionRecommendations } from "../../services/AuctionService";
 import { timeLeft } from "../../utils/DateUtils";
 
-function AuctionRecommendations() {
+const AuctionRecommendations = ({auctionId}) => {
     const navigate = useNavigate();
-    const { auctionId } = useParams();
     const [auctions, setAuctions] = useState([]);
-    const [auctionData, setAuctionData] = useState({});
 
     useEffect(() => {
         const fetchAuctionsData = async () => {
             const result = await getAuctionRecommendations(auctionId);
             setAuctions(result);
-
-            await fetchAuctionData();
         };
 
-        const fetchAuctionData = async () => {
-            const result = await getAuction(auctionId);
-            setAuctionData(result);
-        }
-
         fetchAuctionsData();
-    }, []);
+    }, [auctionId]);
 
     const truncateText = (text, maxLength) => {
         if (text.length <= maxLength) return text;
@@ -39,18 +30,17 @@ function AuctionRecommendations() {
     return (
     <Container component="main" maxWidth="lg">
       <CssBaseline />
+      {auctions.length ? (
       <Box
         sx={{
           marginTop: 8,
-          border: '1px solid #ccc',
-          borderRadius: '10px',
           padding: '20px',
         }}
       >
         <Box sx={{ marginTop: 2, marginBottom: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <Typography component="h1" variant="h5" sx={{ fontSize: '26px', fontWeight: 'bold', fontFamily: 'Arial, sans-serif', color: '#0d6267' }}>
-                Auction '{auctionData.name}' recommendations
-            </Typography>
+          <Typography component="h1" variant="h5" sx={{ fontSize: '26px', fontWeight: 'bold', fontFamily: 'Arial, sans-serif', color: '#0d6267' }}>
+            SIMILAR AUCTIONS
+          </Typography>
         </Box>
         <Box>
           {auctions.map((auction, index) => (
@@ -117,6 +107,9 @@ function AuctionRecommendations() {
           ))}
         </Box>
       </Box>
+      ) : (
+        null
+      )}
     </Container>
     );
 };

@@ -12,7 +12,6 @@ const PATHS = {
     SERIES: '/admin/series',
     CREATESERIES: '/admin/series/create',
     EDITSERIES: '/admin/categories/:categoryId/series/:seriesId',
-    AUCTIONRECOMMENDATIONS: '/auctions/:auctionId/recommendations',
     ANY: '*'
 }
 

@@ -171,8 +171,6 @@ function EditAuction() {
                     navigate(PATHS.AUCTIONINFO.replace(":auctionId", auctionId));
                 }
 
-                console.log(result.status);
-
                 setStatus(result.status);
                 setImageType("image/");
                 setStartingName(result.name);

@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { getAuction } from "../../services/AuctionService";
 import SnackbarContext from "../../contexts/SnackbarContext";
 import { Avatar, Box, Button, Container, CssBaseline, Grid, TextField, Typography } from "@mui/material";
@@ -11,6 +11,7 @@ import { getCategory } from "../../services/PartCategoryService";
 import { getPart } from "../../services/PartService";
 import { getSeries } from "../../services/SeriesService";
 import CountdownTimer from "./CountdownTimer";
+import AuctionRecommendations from "./AuctionRecommendations";
 
 function AuctionInfo() {
     const [auctionData, setAuctionData] = useState({});
@@ -94,10 +95,6 @@ function AuctionInfo() {
         setHighestBid(bidAmount);
         //window.location.reload();
         // navigate(PATHS.AUCTIONINFO.replace(":auctionId", auctionId));
-    };
-
-    const getRecommendations = () => {
-
     };
 
     useEffect(() => {
@@ -346,29 +343,6 @@ function AuctionInfo() {
                                 </Typography >
                             </Box>
                         </Grid>
-                        <Grid item xs={12} sx={{marginTop: 1, alignContent: 'left'}}>
-                            <Link to={PATHS.AUCTIONRECOMMENDATIONS.replace(':auctionId', auctionId)}>
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={ () => getRecommendations()}
-                                    sx={{
-                                        borderTopLeftRadius: '10px',
-                                        borderBottomLeftRadius: '10px',
-                                        borderTopRightRadius: '10px',
-                                        borderBottomRightRadius: '10px',
-                                        bgcolor: '#0d6267',
-                                        fontSize: '14px',
-                                        fontWeight: 'bold',
-                                        '&:hover': {
-                                            backgroundColor: '#3d8185',
-                                        },
-                                    }}
-                                >
-                                    GET RECOMMENDATIONS
-                                </Button>
-                            </Link>
-                        </Grid>
                     </Box>
                 </Box>
 
@@ -422,6 +396,7 @@ function AuctionInfo() {
                     </Typography>
                     <Typography component="span" sx={{fontFamily: 'Arial, sans-serif' }}>{endDateLocal}</Typography>
                 </Box>
+                <AuctionRecommendations auctionId = {auctionId}/>
             </Box>
         </Container>
     );

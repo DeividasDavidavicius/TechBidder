@@ -10,7 +10,7 @@ namespace Backend_PcAuction.Data.Repositories
         Task DeleteAsync(Auction auction);
         Task<Auction?> GetAsync(Guid auctionId);
         Task<IReadOnlyList<Auction>> GetManyAsync();
-        Task<List<Auction>> GetManyByPartAsync(Guid partId);
+        Task<List<Auction>> GetManyByPartAsync(Auction auction);
         Task<List<Auction>> GetManyBySeriesDifferentPartAsync(Auction auction);
         Task<List<Auction>> GetManyByCategoryDifferentSeriesAsync(Auction auction);
         Task<List<Auction>> GetManyByCategoryDifferentPartAsync(Auction auction);
@@ -44,9 +44,9 @@ namespace Backend_PcAuction.Data.Repositories
             return await _context.Auctions.Include(a => a.Part).Include(a => a.Part.Category).ToListAsync();
         }
 
-        public async Task<List<Auction>> GetManyByPartAsync(Guid partId)
+        public async Task<List<Auction>> GetManyByPartAsync(Auction auction)
         {
-            return await _context.Auctions.Include(a => a.Part).Include(a => a.Part.Category).Where(a => a.Status == AuctionStatuses.Active && a.Part.Id == partId).ToListAsync();
+            return await _context.Auctions.Include(a => a.Part).Include(a => a.Part.Category).Where(a => a.Status == AuctionStatuses.Active && a.Part.Id == auction.Part.Id && a.Id != auction.Id).ToListAsync();
         }
 
         public async Task<List<Auction>> GetManyBySeriesDifferentPartAsync(Auction auction)
