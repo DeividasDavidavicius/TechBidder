@@ -8,7 +8,7 @@ import { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import './../App.css';
 import { useUser } from "../contexts/UserContext";
-import { checkTokenValidity, logout, refreshAccessToken } from "../services/AuthService";
+import { checkTokenValidity, logout, refreshAccessToken } from "../services/AuthenticationService";
 import PATHS from "../utils/Paths";
 
 function Header() {

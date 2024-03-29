@@ -8,7 +8,7 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import PATHS from "../../utils/Paths";
 import { Link, useNavigate } from "react-router-dom";
-import { checkTokenValidity, refreshAccessToken } from "../../services/AuthService";
+import { checkTokenValidity, refreshAccessToken } from "../../services/AuthenticationService";
 import SnackbarContext from "../../contexts/SnackbarContext";
 import { useUser } from "../../contexts/UserContext";
 

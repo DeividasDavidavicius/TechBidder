@@ -32,7 +32,7 @@ namespace Backend_PcAuction.BackgroundServices
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<PcAuctionDbContext>();
 
-                var auctions = await dbContext.Auctions.Where(a => a.Status == AuctionStatuses.New).ToListAsync();
+                var auctions = await dbContext.Auctions.Where(a => a.Status == AuctionStatuses.New || a.Status == AuctionStatuses.NewNA).ToListAsync();
 
                 var currentTime = DateTime.UtcNow;
 
@@ -40,7 +40,7 @@ namespace Backend_PcAuction.BackgroundServices
                 {
                     if (auction.StartDate <= currentTime)
                     {
-                        auction.Status = AuctionStatuses.Active;
+                        auction.Status = auction.Status == AuctionStatuses.New ? AuctionStatuses.Active : AuctionStatuses.ActiveNA;
                         dbContext.Auctions.Update(auction);
 
                         var log = new Log

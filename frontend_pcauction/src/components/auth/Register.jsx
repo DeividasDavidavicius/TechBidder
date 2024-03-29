@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "../../contexts/UserContext";
 import { useContext, useEffect, useState } from "react";
 import SnackbarContext from "../../contexts/SnackbarContext";
-import { login, register } from "../../services/AuthService";
+import { login, register } from "../../services/AuthenticationService";
 import PATHS from "../../utils/Paths";
 
 function Register() {

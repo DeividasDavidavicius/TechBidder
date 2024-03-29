@@ -9,7 +9,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { useTheme } from '@mui/material/styles';
 import 'dayjs/locale/lt';
 import dayjs from 'dayjs';
-import { checkTokenValidity, refreshAccessToken } from "../../services/AuthService";
+import { checkTokenValidity, refreshAccessToken } from "../../services/AuthenticationService";
 import PATHS from "../../utils/Paths";
 import { getAuction, putAuction } from "../../services/AuctionService";
 import { getHighestBid } from "../../services/BIdService";

@@ -2,13 +2,13 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "../../contexts/UserContext";
 import { useContext, useEffect, useState } from "react";
 import SnackbarContext from "../../contexts/SnackbarContext";
-import { Autocomplete, Box, Button, Container, CssBaseline,  FormControl, FormHelperText, Grid, Input, InputLabel, MenuItem, Select, Skeleton, TextField, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, Checkbox, Container, CssBaseline,  FormControl, FormControlLabel, FormHelperText, Grid, Input, InputLabel, MenuItem, Select, Skeleton, TextField, Typography } from "@mui/material";
 import { isDatePastNow, isEndDateLater, isValidDescription, isValidMinInc, isValidTitle } from "./Validations";
 import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { useTheme } from '@mui/material/styles';
 import 'dayjs/locale/lt';
-import { checkTokenValidity, refreshAccessToken } from "../../services/AuthService";
+import { checkTokenValidity, refreshAccessToken } from "../../services/AuthenticationService";
 import PATHS from "../../utils/Paths";
 import { postAuction } from "../../services/AuctionService";
 import { getCategories } from "../../services/PartCategoryService";
@@ -23,12 +23,13 @@ function CreateAuction() {
     const [categories, setCategories] = useState([]);
     const [category, setCategory] = useState("");
     const [categoryParts, setCategoryParts] = useState([]);
-    const [part, setPart] = useState('');
+    const [part, setPart] = useState(null);
 
     const [condition, setCondition] = useState("New");
     const [selectedImage, setSelectedImage] = useState(null);
     const [imageType, setImageType] = useState(null);
     const [imageFile, setImageFile] = useState(undefined);
+    const [checkBox, setCheckbox] = useState(false);
     const [validationErrors, setValidationErrors] = useState({
         title: null,
         description: null,
@@ -37,7 +38,8 @@ function CreateAuction() {
         minInc: null,
         condition: null,
         image: null,
-        part: null
+        part: null,
+        partName: null
     });
 
     const handleCategoryChange = async (e) => {
@@ -83,6 +85,7 @@ function CreateAuction() {
         const endDate = e.target.endDate.value;
         const minInc = e.target.minInc.value;
         const manufacturer = e.target.manufacturer.value ? e.target.manufacturer.value : "";
+        const partName = e.target.partName?.value ? e.target.partName.value : "";
 
         let errors = [];
         setValidationErrors(errors);
@@ -98,6 +101,7 @@ function CreateAuction() {
         if(selectedImage === null || selectedImage === "") errors.image = "Image must be selected";
         if(!imageType || !imageType.startsWith('image/')) errors.image = "Please select a valid image file";
         if(part === "" || part === undefined || part == null) errors.part = "Please select a part for this auction";
+        if(partName === "") errors.partName = "Part name must be set";
 
         if (Object.keys(errors).length > 0) {
             setValidationErrors(errors);
@@ -135,8 +139,8 @@ function CreateAuction() {
         }
 
         try {
-            await postAuction(formData);
-            navigate(PATHS.MAIN); // TODO: Pakeisti i listo view'a  o  ne main page, arba auction info vidu
+            const result = await postAuction(formData);
+            navigate(PATHS.AUCTIONINFO.replace(":auctionId", result.data.id));
             openSnackbar('Auction created successfully!', 'success');
         } catch(error) {
             openSnackbar(error.response.data.errorMessage, "error")
@@ -147,6 +151,11 @@ function CreateAuction() {
         const result = await getParts(categoryId);
         setCategoryParts(result);
     }
+
+    const handleCheckboxChange = (event) => {
+        console.log(event.target.checked);
+        setCheckbox(event.target.checked);
+      };
 
     useEffect(() => {
         if (!role.includes("RegisteredUser")) {
@@ -229,6 +238,8 @@ function CreateAuction() {
                                 </Select>
                             </FormControl>
                         </Grid>
+                        { checkBox === false ? (
+                        <>
                         <Grid item xs={12}>
                             <FormControl fullWidth>
                             <Autocomplete
@@ -239,10 +250,31 @@ function CreateAuction() {
                                 onChange={(event, newValue) => {
                                     handlePartChange(newValue);
                                 }}
-                                renderInput={(params) => <TextField {...params} label="Part" error={Boolean(validationErrors.part)} helperText={validationErrors.part}  />}
+                                required
+                                renderInput={(params) => <TextField {...params} label="Part *" error={Boolean(validationErrors.part)} helperText={validationErrors.part}  />}
                                 isOptionEqualToValue={(option, value) => { return true; }}
                             />
                             </FormControl>
+                        </Grid>
+                        </> ) : (
+                        <>
+                            <Grid item xs={12}>
+                                <TextField
+                                    error={Boolean(validationErrors.partName)}
+                                    helperText={validationErrors.partName}
+                                    required
+                                    fullWidth
+                                    id="partname"
+                                    label="Part name"
+                                    name="partname"
+                                />
+                            </Grid>
+                        </>) }
+                        <Grid item xs={12} container alignItems="center">
+                            <FormControlLabel
+                                control={<Checkbox checked={checkBox} onChange={handleCheckboxChange} />}
+                                label={<Typography variant="body1" style={{ fontSize: '1.2rem', marginTop: 0 }}>Part not in the list</Typography>}
+                            />
                         </Grid>
                         <Grid item xs={12}>
                             <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="lt">

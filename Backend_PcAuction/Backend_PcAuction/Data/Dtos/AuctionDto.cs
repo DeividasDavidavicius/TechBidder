@@ -46,7 +46,8 @@ namespace Backend_PcAuction.Data.Dtos
         string? Manufacturer,
         [Required] IFormFile? Image,
         string PartCategory,
-        Guid PartId
+        Guid? PartId,
+        string? PartName
     );
     
     public record UpdateAuctionDto(

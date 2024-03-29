@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { getCategory } from "../../services/PartCategoryService";
 import { Box, Button, Container, CssBaseline, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
-import { checkTokenValidity, refreshAccessToken } from "../../services/AuthService";
+import { checkTokenValidity, refreshAccessToken } from "../../services/AuthenticationService";
 import { useNavigate, useParams } from "react-router-dom";
 import { useUser } from "../../contexts/UserContext";
 import SnackbarContext from "../../contexts/SnackbarContext";

@@ -176,7 +176,7 @@ namespace Backend_PcAuction.Controllers
                 return UnprocessableEntity("Minimum increment must 0 or a positive number");
             }
 
-            if (auction.Status == AuctionStatuses.New)
+            if (auction.Status == AuctionStatuses.New || auction.Status == AuctionStatuses.NewNA)
             {
                 if (updateAuctionDto.StartDate < DateTime.UtcNow)
                 {

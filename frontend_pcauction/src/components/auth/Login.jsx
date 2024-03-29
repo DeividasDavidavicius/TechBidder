@@ -3,7 +3,7 @@ import LockPersonTwoToneIcon from '@mui/icons-material/LockPersonTwoTone';
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../contexts/UserContext";
-import { login } from "../../services/AuthService";
+import { login } from "../../services/AuthenticationService";
 import SnackbarContext from '../../contexts/SnackbarContext';
 import PATHS from "../../utils/Paths";
 

@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { Box, Button, Container, CssBaseline, Grid, TextField, Typography } from "@mui/material";
-import { checkTokenValidity, refreshAccessToken } from "../../services/AuthService";
+import { checkTokenValidity, refreshAccessToken } from "../../services/AuthenticationService";
 import { useNavigate, useParams } from "react-router-dom";
 import { useUser } from "../../contexts/UserContext";
 import SnackbarContext from "../../contexts/SnackbarContext";

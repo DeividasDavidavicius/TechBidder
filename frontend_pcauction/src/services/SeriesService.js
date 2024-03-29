@@ -1,5 +1,5 @@
 import axios from "axios";
-import { API_URL } from "../utils/Constants";
+import { API_URL } from "../utils/ApiConstant";
 
 export const getSeries = async (partCategoryId, seriesId) => {
   try {

@@ -1,10 +1,10 @@
 import axios from 'axios';
-import { API_URL } from '../utils/Constants';
+import { API_URL } from '../utils/ApiConstant';
 
 export const postAuction = async (data) => {
     try {
       const accessToken = localStorage.getItem('accessToken');
-      await axios.post(`${API_URL}/auctions`, data, {
+      return await axios.post(`${API_URL}/auctions`, data, {
         headers: {
           "Authorization": `Bearer ${accessToken}`
         }

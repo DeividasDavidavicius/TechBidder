@@ -4,7 +4,7 @@ import { getAuction } from "../../services/AuctionService";
 import SnackbarContext from "../../contexts/SnackbarContext";
 import { Avatar, Box, Button, Container, CssBaseline, Grid, TextField, Typography } from "@mui/material";
 import PATHS from "../../utils/Paths";
-import { checkTokenValidity, refreshAccessToken } from "../../services/AuthService";
+import { checkTokenValidity, refreshAccessToken } from "../../services/AuthenticationService";
 import { useUser } from "../../contexts/UserContext";
 import { getHighestBid, postBid } from "../../services/BIdService";
 import { getCategory } from "../../services/PartCategoryService";
