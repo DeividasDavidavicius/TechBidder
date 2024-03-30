@@ -20,7 +20,6 @@ namespace Backend_PcAuction.Data.Seeders
             await AddRoles();
             await AddAdmin("admin");
             await AddAdmin("admin2");
-            Console.WriteLine("Added");
         }
 
         private async Task AddRoles()

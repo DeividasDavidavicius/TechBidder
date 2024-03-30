@@ -31,7 +31,7 @@ namespace Backend_PcAuction.Services
 
 
             var samePartAuctions = await _auctionsRepository.GetManyByPartAsync(auction);
-            var samePartAuctionsFiltered = samePartAuctions.Where(a => a.HighestBid < 1000).ToList(); // replace 1000 with average price
+            var samePartAuctionsFiltered = samePartAuctions.Where(a => a.HighestBid < 1000).ToList(); // TODO replace 1000 with average price
 
             for (int i = 0; i < 2 && samePartAuctionsFiltered.Count > 0; i++)
             {
@@ -41,7 +41,7 @@ namespace Backend_PcAuction.Services
             }
 
             var sameSeriesAuctions = (auction.Part.Series != null ? await _auctionsRepository.GetManyBySeriesDifferentPartAsync(auction) : new List<Auction>());
-            var sameSeriesAuctionsFiltered = sameSeriesAuctions.Where(a => a.HighestBid < 1000).ToList(); // replace 1000 with average price
+            var sameSeriesAuctionsFiltered = sameSeriesAuctions.Where(a => a.HighestBid < 1000).ToList(); // TODO replace 1000 with average price
 
             
             for (int i = 0; i < 2 && sameSeriesAuctionsFiltered.Count > 0; i++)
@@ -52,7 +52,7 @@ namespace Backend_PcAuction.Services
             }
 
             var sameCategoryAuctions = auction.Part.Series != null ?  await _auctionsRepository.GetManyByCategoryDifferentSeriesAsync(auction) : await _auctionsRepository.GetManyByCategoryDifferentPartAsync(auction);
-            var sameCategoryAuctionsFiltered = sameCategoryAuctions.Where(a => a.HighestBid < 1000).ToList(); // replace 1000 with average price
+            var sameCategoryAuctionsFiltered = sameCategoryAuctions.Where(a => a.HighestBid < 1000).ToList(); // TODO replace 1000 with average price
 
             var allRemainingAuctions = new List<Auction>();
 

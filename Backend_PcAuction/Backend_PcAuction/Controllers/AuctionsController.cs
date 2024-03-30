@@ -18,16 +18,18 @@ namespace Backend_PcAuction.Controllers
     {
         private readonly IAuctionsRepository _auctionsRepository;
         private readonly IPartsRepository _partsRepository;
+        private readonly IPartCategoriesRepository _partCategoriesRepository;
         private readonly IAuthorizationService _authorizationService;
         private readonly IAzureBlobStorageService _azureBlobStorageService;
         private readonly IAuctionService _auctionService;
 
 
-        public AuctionsController(IAuctionsRepository auctionsRepository, IPartsRepository partsRepository,IAuthorizationService authorizationService,
-            IAzureBlobStorageService azureBlobStorageService, IAuctionService auctionService)
+        public AuctionsController(IAuctionsRepository auctionsRepository, IPartsRepository partsRepository, IPartCategoriesRepository partCategoriesRepository,
+            IAuthorizationService authorizationService, IAzureBlobStorageService azureBlobStorageService, IAuctionService auctionService)
         {
             _auctionsRepository = auctionsRepository;
             _partsRepository = partsRepository;
+            _partCategoriesRepository = partCategoriesRepository;
             _authorizationService = authorizationService;
             _azureBlobStorageService = azureBlobStorageService;
             _auctionService = auctionService;
@@ -69,12 +71,32 @@ namespace Backend_PcAuction.Controllers
                 return UnprocessableEntity("End date must be later than start date");
             }
 
-            var part = await _partsRepository.GetAsync(createAuctionDto.PartCategory, createAuctionDto.PartId);
+            var part = new Part();
+            var status = AuctionStatuses.New;
 
-            if (part == null)
+            if(createAuctionDto.PartId !=  null)
             {
-                return NotFound("Part not found");
+                var partId = createAuctionDto.PartId;
+                part = await _partsRepository.GetAsync(createAuctionDto.PartCategory, createAuctionDto.PartId);
+
+                if (part == null)
+                {
+                    return NotFound("Part not found");
+                }
             }
+            else if (createAuctionDto.PartName != null && createAuctionDto.PartCategoryName != null)
+            {
+                var category = await _partCategoriesRepository.GetAsync(createAuctionDto.PartCategoryName);
+
+                if (category == null)
+                {
+                    return NotFound();
+                }
+
+                status = AuctionStatuses.NewNA;
+                part = new Part { Name = createAuctionDto.Name, Type = PartTypes.Temporary, Category = category };
+            }
+
 
             // TODO Create and update, backend and frontend: Max auction length 7 days (or 14), min 1 hour (or 1 day)
 
@@ -86,7 +108,7 @@ namespace Backend_PcAuction.Controllers
                 StartDate = createAuctionDto.StartDate,
                 EndDate = createAuctionDto.EndDate,
                 MinIncrement = createAuctionDto.MinIncrement,
-                Status = "New",
+                Status = status,
                 Condition = createAuctionDto.Condition,
                 Manufacturer = createAuctionDto.Manufacturer,
                 ImageUri = imageUri,
@@ -240,6 +262,56 @@ namespace Backend_PcAuction.Controllers
             await _auctionsRepository.DeleteAsync(auction);
 
             return NoContent();
+        }
+
+        [HttpGet]
+        [Route("part/{partId}")]
+        [Authorize(Roles = UserRoles.Admin)]
+        public async Task<ActionResult<AuctionDto>> GetWithPart(Guid partId)
+        {
+            var auction = await _auctionsRepository.GetWithPartAsync(partId);
+
+            if(auction == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate,
+                auction.EndDate, auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.Status,
+                auction.UserId, auction.Part.Id, auction.Part.Category.Id));
+        }
+
+        [HttpPatch]
+        [Route("{auctionId}")]
+        [Authorize(Roles = UserRoles.Admin)]
+        public async Task<ActionResult<AuctionDto>> UpdateAuctionsPart(Guid auctionId, UpdateAuctionPartDto updateAuctionPartDto)
+        {
+            var auction = await _auctionsRepository.GetAsync(auctionId);
+
+            if (auction == null)
+            {
+                return NotFound();
+            }
+
+            var part = await _partsRepository.GetAsync(updateAuctionPartDto.CategoryId, updateAuctionPartDto.PartId);
+
+            if (part == null)
+            {
+                return NotFound();
+            }
+
+            auction.Part = part;
+
+            if (auction.Status == AuctionStatuses.NewNA)
+                auction.Status = AuctionStatuses.New;
+            if (auction.Status == AuctionStatuses.ActiveNA)
+                auction.Status = AuctionStatuses.Active;
+
+            await _auctionsRepository.UpdateAsync(auction);
+
+            return Ok(new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate,
+                auction.EndDate, auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.Status,
+                auction.UserId, auction.Part.Id, auction.Part.Category.Id));
         }
 
         [HttpGet]

@@ -3,6 +3,7 @@ using Backend_PcAuction.Auth.Models;
 using Backend_PcAuction.Data.Dtos;
 using Backend_PcAuction.Data.Entities;
 using Backend_PcAuction.Data.Repositories;
+using Backend_PcAuction.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -44,6 +45,7 @@ namespace Backend_PcAuction.Controllers
             var part = new Part
             {
                 Name = createPartDto.Name,
+                Type = PartTypes.Permanent,
                 SpecificationValue1 = createPartDto.SpecificationValue1,
                 SpecificationValue2 = createPartDto.SpecificationValue2,
                 SpecificationValue3 = createPartDto.SpecificationValue3,
@@ -100,6 +102,24 @@ namespace Backend_PcAuction.Controllers
             }
 
             var parts = await _partsRepository.GetManyAsync(categoryId);
+
+            return Ok(parts.Select(part => new PartDto(part.Id, part.Name, part.SpecificationValue1, part.SpecificationValue2, part.SpecificationValue3,
+                 part.SpecificationValue4, part.SpecificationValue5, part.SpecificationValue6, part.SpecificationValue7,
+                 part.SpecificationValue8, part.SpecificationValue9, part.SpecificationValue10, part.Category.Id, part.Series?.Id)));
+        }
+
+        [HttpGet]
+        [Route("requests")]
+        public async Task<ActionResult<IEnumerable<PartDto>>> GetManyTemp(string categoryId)
+        {
+            var category = await _partCategoriesRepository.GetAsync(categoryId);
+
+            if (category == null)
+            {
+                return NotFound();
+            }
+
+            var parts = await _partsRepository.GetManyTempAsync(categoryId);
 
             return Ok(parts.Select(part => new PartDto(part.Id, part.Name, part.SpecificationValue1, part.SpecificationValue2, part.SpecificationValue3,
                  part.SpecificationValue4, part.SpecificationValue5, part.SpecificationValue6, part.SpecificationValue7,

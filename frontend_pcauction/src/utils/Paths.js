@@ -12,6 +12,8 @@ const PATHS = {
     SERIES: '/admin/series',
     CREATESERIES: '/admin/series/create',
     EDITSERIES: '/admin/categories/:categoryId/series/:seriesId',
+    PARTREQUESTS: '/admin/parts/requests',
+    PARTREQUESTCREATE: '/admin/categories/requests/:categoryId/parts/:partId',
     ANY: '*'
 }
 

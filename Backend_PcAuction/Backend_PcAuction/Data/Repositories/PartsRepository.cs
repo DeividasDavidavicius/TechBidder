@@ -1,4 +1,5 @@
 ﻿using Backend_PcAuction.Data.Entities;
+using Backend_PcAuction.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend_PcAuction.Data.Repositories
@@ -7,9 +8,10 @@ namespace Backend_PcAuction.Data.Repositories
     {
         Task CreateAsync(Part part);
         Task DeleteAsync(Part part);
-        Task<Part?> GetAsync(string categoryId, Guid partId);
+        Task<Part?> GetAsync(string categoryId, Guid? partId);
         Task<Part?> GetForAnyCategoryAsync(Guid partId);
         Task<IReadOnlyList<Part>> GetManyAsync(string categoryId);
+        Task<IReadOnlyList<Part>> GetManyTempAsync(string categoryId);
         Task UpdateAsync(Part part);
     }
 
@@ -28,7 +30,7 @@ namespace Backend_PcAuction.Data.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<Part?> GetAsync(string categoryId, Guid partId)
+        public async Task<Part?> GetAsync(string categoryId, Guid? partId)
         {
             return await _context.Parts.Include(p => p.Series).Include(p => p.Category).FirstOrDefaultAsync(part => part.Id == partId && part.Category.Id == categoryId);
         }
@@ -40,7 +42,12 @@ namespace Backend_PcAuction.Data.Repositories
 
         public async Task<IReadOnlyList<Part>> GetManyAsync(string categoryId)
         {
-            return await _context.Parts.Include(part => part.Series).Where(part => part.Category.Id == categoryId).ToListAsync();
+            return await _context.Parts.Include(part => part.Series).Where(part => part.Category.Id == categoryId && part.Type == PartTypes.Permanent).OrderBy(part => part.Name).ToListAsync();
+        }
+
+        public async Task<IReadOnlyList<Part>> GetManyTempAsync(string categoryId)
+        {
+            return await _context.Parts.Include(part => part.Series).Where(part => part.Category.Id == categoryId && part.Type == PartTypes.Temporary).OrderBy(part => part.Name).ToListAsync();
         }
 
         public async Task UpdateAsync(Part part)

@@ -32,7 +32,7 @@ namespace Backend_PcAuction.Controllers
         {
             var auction = await _auctionsRepository.GetAsync(auctionId);
 
-            if(auction.Status != AuctionStatuses.Active)
+            if(auction.Status != AuctionStatuses.Active && auction.Status != AuctionStatuses.ActiveNA)
             {
                 return UnprocessableEntity("Auction is not active");
             }

@@ -12,6 +12,8 @@ import EditPart from "../components/parts/EditPart";
 import SeriesList from "../components/series/SeriesList";
 import CreateSeries from "../components/series/CreateSeries";
 import EditSeries from "../components/series/EditSeries";
+import PartRequestList from "../components/parts/PartRequestList";
+import PartRequestsCreate from "../components/parts/PartRequestsCreate";
 
 const AppRoutes = [
     { index: true, path: PATHS.MAIN, element: <MainPage/> },
@@ -27,7 +29,9 @@ const AppRoutes = [
     { path: PATHS.EDITPART, element: <EditPart/> },
     { path: PATHS.SERIES, element: <SeriesList/>},
     { path: PATHS.CREATESERIES, element: <CreateSeries/>},
-    { path: PATHS.EDITSERIES, element: <EditSeries/> }
+    { path: PATHS.EDITSERIES, element: <EditSeries/> },
+    { path: PATHS.PARTREQUESTS, element: <PartRequestList/> },
+    { path: PATHS.PARTREQUESTCREATE, element: <PartRequestsCreate/> }
 ];
 
 export default AppRoutes;

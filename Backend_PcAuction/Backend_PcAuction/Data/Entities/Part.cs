@@ -4,6 +4,7 @@
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
+        public string Type { get; set; }
         public string? SpecificationValue1 { get; set; }
         public string? SpecificationValue2 { get; set; }
         public string? SpecificationValue3 { get; set; }

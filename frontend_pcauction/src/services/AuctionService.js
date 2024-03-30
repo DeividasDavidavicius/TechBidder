@@ -25,9 +25,25 @@ export const postAuction = async (data) => {
     }
   };
 
+  export const getAuctionForPart = async (id) => {
+    try {
+      const accessToken = localStorage.getItem('accessToken');
+      const response = await axios.get(`${API_URL}/auctions/part/${id}`, {
+        headers: {
+          "Authorization": `Bearer ${accessToken}`
+        }}
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error getting auction:', error);
+      throw error;
+    }
+  };
+
   export const getAuctionsWithPagination = async (page) => {
     try {
-      const response = await axios.get(`${API_URL}/auctions/pagination?page=${page}`);
+      const response = await axios.get(`${API_URL}/auctions/pagination?page=${page}`
+      );
       return response.data;
     } catch (error) {
       console.error('Error getting auction:', error);
@@ -49,6 +65,19 @@ export const postAuction = async (data) => {
     }
   };
 
+  export const patchAuction = async (data, id) => {
+    try {
+      const accessToken = localStorage.getItem('accessToken');
+      await axios.patch(`${API_URL}/auctions/${id}`, data, {
+        headers: {
+          "Authorization": `Bearer ${accessToken}`
+        }
+      })
+    } catch (error) {
+      console.error("Error updating auctions part", error);
+      throw error;
+    }
+  };
 
   export const getAuctionRecommendations = async (id) => {
     try {

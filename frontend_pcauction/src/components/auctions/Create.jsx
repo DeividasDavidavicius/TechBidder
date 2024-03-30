@@ -85,7 +85,7 @@ function CreateAuction() {
         const endDate = e.target.endDate.value;
         const minInc = e.target.minInc.value;
         const manufacturer = e.target.manufacturer.value ? e.target.manufacturer.value : "";
-        const partName = e.target.partName?.value ? e.target.partName.value : "";
+        const partName = e.target.partname?.value ? e.target.partname.value : "";
 
         let errors = [];
         setValidationErrors(errors);
@@ -100,8 +100,8 @@ function CreateAuction() {
         if(condition === null || condition === "") errors.condition = "Condition must be set"
         if(selectedImage === null || selectedImage === "") errors.image = "Image must be selected";
         if(!imageType || !imageType.startsWith('image/')) errors.image = "Please select a valid image file";
-        if(part === "" || part === undefined || part == null) errors.part = "Please select a part for this auction";
-        if(partName === "") errors.partName = "Part name must be set";
+        if((part === "" || part === undefined || part == null) && checkBox === false) errors.part = "Please select a part for this auction";
+        if(partName === "" && checkBox === true) errors.partName = "Part name must be set";
 
         if (Object.keys(errors).length > 0) {
             setValidationErrors(errors);
@@ -123,7 +123,9 @@ function CreateAuction() {
         formData.append("manufacturer", manufacturer);
         formData.append("image", imageFile);
         formData.append("partCategory", category)
-        formData.append("partId", part.id);
+        formData.append("partId", part ? part.id : "");
+        formData.append("partName", partName ? partName: "");
+        formData.append("partCategoryName", category);
 
         const accessToken = localStorage.getItem('accessToken');
         if (!checkTokenValidity(accessToken)) {
@@ -153,7 +155,6 @@ function CreateAuction() {
     }
 
     const handleCheckboxChange = (event) => {
-        console.log(event.target.checked);
         setCheckbox(event.target.checked);
       };
 
@@ -262,7 +263,6 @@ function CreateAuction() {
                                 <TextField
                                     error={Boolean(validationErrors.partName)}
                                     helperText={validationErrors.partName}
-                                    required
                                     fullWidth
                                     id="partname"
                                     label="Part name"

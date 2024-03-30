@@ -4,7 +4,9 @@
     {
         public const string New = nameof(New);
         public const string Active = nameof(Active);
-        public const string NewNA = nameof(NewNA); // NA = Not approved (part which has not been approved by an admin yet)
+
+        // NA = Not approved (auction which has a part which has not been approved by an admin yet)
+        public const string NewNA = nameof(NewNA);
         public const string ActiveNA = nameof(ActiveNA);
     }
 }

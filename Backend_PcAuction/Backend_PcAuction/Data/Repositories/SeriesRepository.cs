@@ -34,7 +34,7 @@ namespace Backend_PcAuction.Data.Repositories
 
         public async Task<IReadOnlyList<Series>> GetManyAsync(string categoryId)
         {
-            return await _context.Series.Where(series => series.PartCategory.Id == categoryId).ToListAsync();
+            return await _context.Series.Where(series => series.PartCategory.Id == categoryId).OrderBy(series => series.Name).ToListAsync();
         }
 
         public async Task UpdateAsync(Series series)

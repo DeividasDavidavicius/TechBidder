@@ -1,22 +1,19 @@
-import { Box, Button, Container, CssBaseline, Dialog, DialogActions, DialogTitle, Table, TableBody, TableCell, TableHead, TableRow, TextField } from "@mui/material";
+import { Box, Button, Container, CssBaseline, Dialog, DialogActions, DialogTitle, Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 import { getCategories } from "../../services/PartCategoryService";
-import { deletePart, getParts } from "../../services/PartService";
+import { deletePart, getPartRequests } from "../../services/PartService";
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+import AddIcon from '@mui/icons-material/Add';
 import PATHS from "../../utils/Paths";
 import { Link, useNavigate } from "react-router-dom";
 import { checkTokenValidity, refreshAccessToken } from "../../services/AuthenticationService";
 import SnackbarContext from "../../contexts/SnackbarContext";
 import { useUser } from "../../contexts/UserContext";
 
-function PartList() {
+function PartRequestList() {
     const [parts, setParts] = useState([]);
     const [currentPart, setCurrentPart] = useState({});
-    const [searchTerm, setSearchTerm] = useState('');
     const [openRemoveModal, setOpenRemoveModal] = useState(false);
 
     const openSnackbar = useContext(SnackbarContext);
@@ -39,7 +36,7 @@ function PartList() {
         const fetchPartsData = async (categoryIds) => {
             if (categoryIds.length === 0) return;
 
-            const partsPromises = categoryIds.map(category => getParts(category));
+            const partsPromises = categoryIds.map(category => getPartRequests(category));
             const results = await Promise.all(partsPromises);
 
             const flattenedParts = results.reduce((acc, curr) => acc.concat(curr), []);
@@ -50,19 +47,6 @@ function PartList() {
         fetchCategoriesData();
 
     }, [navigate, openSnackbar, role]);
-
-    const handleSearchChange = (event) => {
-        setSearchTerm(event.target.value);
-    };
-
-    const filteredParts = parts.filter(part =>
-        part.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    const handleOpenRemove = (part) => {
-        setCurrentPart(part);
-        setOpenRemoveModal(true);
-    };
 
     const handleCloseRemove = () => {
         setOpenRemoveModal(false);
@@ -105,30 +89,6 @@ function PartList() {
             padding: '10px',
           }}
         >
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
-                <TextField
-                    label="Search Parts"
-                    variant="outlined"
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                    fullWidth
-                    margin="none"
-                    size="small"
-                    sx={{ width: 'calc(50% - 40px)' }}
-                />
-                <Box>
-                    <Link to={PATHS.PARTREQUESTS}>
-                        <Button startIcon={<HelpOutlineIcon />} sx={{ color: '#138c94', fontWeight: 'bold' }}>
-                            REQUESTS
-                        </Button>
-                    </Link>
-                    <Link to={PATHS.CREATEPART}>
-                        <Button startIcon={<AddCircleOutlineIcon />} sx={{ color: '#138c94', fontWeight: 'bold' }}>
-                            CREATE PART
-                        </Button>
-                    </Link>
-                </Box>
-            </Box>
             <Table size="small">
                 <TableHead>
                     <TableRow>
@@ -138,22 +98,16 @@ function PartList() {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                {filteredParts.map((part, index) => (
+                {parts.map((part, index) => (
                     <TableRow key={index}>
                         <TableCell>{part.categoryId}</TableCell>
                         <TableCell>{part.name}</TableCell>
                         <TableCell>
-                            <Link to={PATHS.EDITPART.replace(':partId', part.id).replace(':categoryId', part.categoryId)}>
-                                <Button startIcon={<ModeEditIcon />} sx={{ marginRight: 3, color: '#138c94', fontWeight: 'bold' }}>
-                                    Edit
+                            <Link to={PATHS.PARTREQUESTCREATE.replace(':partId', part.id).replace(':categoryId', part.categoryId)}>
+                                <Button startIcon={<AddIcon />} sx={{ marginRight: 3, color: '#138c94', fontWeight: 'bold' }}>
+                                    CREATE
                                 </Button>
                             </Link>
-                            <Button startIcon={<DeleteIcon />}
-                                sx={{ marginRight: 0, color: '#138c94', fontWeight: 'bold' }}
-                                onClick={ () => handleOpenRemove(part)}
-                            >
-                                Delete
-                            </Button>
                         </TableCell>
                     </TableRow>
                 ))}
@@ -175,4 +129,4 @@ function PartList() {
       );
 }
 
-export default PartList;
+export default PartRequestList;
