@@ -20,6 +20,9 @@ namespace Backend_PcAuction.Data.DbSeeders
             await CreateCPU();
             await CreateGPU();
             await CreateRAM();
+            await CreatePSU();
+            await CreateHDD();
+            await CreateSSD();
         }
 
         private async Task CreateCPU()
@@ -75,6 +78,58 @@ namespace Backend_PcAuction.Data.DbSeeders
                     SpecificationName1 = "Memory size (GB)",
                     SpecificationName2 = "Memory speed (MHz)",
                     SpecificationName3 = "DDR version",
+                    SpecificationName10 = "Wattage (W)"
+                };
+
+                await _partCategoriesRepository.CreateAsync(categoryCPU);
+            }
+        }
+
+        private async Task CreatePSU()
+        {
+            var existingCategory = await _partCategoriesRepository.GetAsync("PSU");
+            if (existingCategory == null)
+            {
+                var categoryCPU = new PartCategory
+                {
+                    Id = "PSU",
+                    SpecificationName1 = "Wattage (W)"
+                };
+
+                await _partCategoriesRepository.CreateAsync(categoryCPU);
+            }
+        }
+
+        private async Task CreateHDD()
+        {
+            var existingCategory = await _partCategoriesRepository.GetAsync("HDD");
+            if (existingCategory == null)
+            {
+                var categoryCPU = new PartCategory
+                {
+                    Id = "HDD",
+                    SpecificationName1 = "Capacity (GB)",
+                    SpecificationName2 = "RPM",
+                    SpecificationName10 = "Wattage (W)"
+                };
+
+                await _partCategoriesRepository.CreateAsync(categoryCPU);
+            }
+        }
+
+        private async Task CreateSSD()
+        {
+            var existingCategory = await _partCategoriesRepository.GetAsync("SSD");
+            if (existingCategory == null)
+            {
+                var categoryCPU = new PartCategory
+                {
+                    Id = "SSD",
+                    SpecificationName1 = "Capacity (GB)",
+                    SpecificationName2 = "NVMe Generation",
+                    SpecificationName3 = "SATA interface",
+                    SpecificationName4 = "Reading speed",
+                    SpecificationName5 = "Writing speed",
                     SpecificationName10 = "Wattage (W)"
                 };
 
