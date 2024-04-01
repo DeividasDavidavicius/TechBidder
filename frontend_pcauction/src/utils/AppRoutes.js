@@ -15,6 +15,7 @@ import EditSeries from "../components/series/EditSeries";
 import PartRequestList from "../components/parts/PartRequestList";
 import PartRequestsCreate from "../components/parts/PartRequestsCreate";
 import PsuCalculator from "../components/parts/PsuCalculator";
+import PcBuildGenerator from "../components/parts/PcBuildGenerator";
 
 const AppRoutes = [
     { index: true, path: PATHS.MAIN, element: <MainPage/> },
@@ -33,7 +34,8 @@ const AppRoutes = [
     { path: PATHS.EDITSERIES, element: <EditSeries/> },
     { path: PATHS.PARTREQUESTS, element: <PartRequestList/> },
     { path: PATHS.PARTREQUESTCREATE, element: <PartRequestsCreate/> },
-    { path: PATHS.PSUCALCULATOR, element: <PsuCalculator/> }
+    { path: PATHS.PSUCALCULATOR, element: <PsuCalculator/> },
+    { path: PATHS.PCBUILDGENERATOR, element: <PcBuildGenerator/> }
 ];
 
 export default AppRoutes;

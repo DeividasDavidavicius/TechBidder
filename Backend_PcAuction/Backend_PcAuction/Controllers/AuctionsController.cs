@@ -41,9 +41,9 @@ namespace Backend_PcAuction.Controllers
         {
             var imageUri = await _azureBlobStorageService.UploadImageAsync(createAuctionDto.Image);
 
-            if (createAuctionDto.Name.Length < 5 || createAuctionDto.Name.Length > 30)
+            if (createAuctionDto.Name.Length < 5 || createAuctionDto.Name.Length > 45)
             {
-                return UnprocessableEntity("Title must be at 5 - 30 characters long");
+                return UnprocessableEntity("Title must be 5 - 45 characters long");
             }
 
             if (createAuctionDto.Description.Length < 10)
@@ -183,9 +183,9 @@ namespace Backend_PcAuction.Controllers
             if (!authorizationResult.Succeeded)
                 return Forbid();
 
-            if (updateAuctionDto.Name.Length < 5 || updateAuctionDto.Name.Length > 30)
+            if (updateAuctionDto.Name.Length < 5 || updateAuctionDto.Name.Length > 45)
             {
-                return UnprocessableEntity("Title must be at 5 - 30 characters long");
+                return UnprocessableEntity("Title must be 5 - 45 characters long");
             }
 
             if (updateAuctionDto.Description.Length < 10)

@@ -99,7 +99,7 @@ function EditAuction() {
 
         let errors = [];
         setValidationErrors(errors);
-        if (!isValidTitle(name)) errors.title = "Title must be at 5 - 30 characters long";
+        if (!isValidTitle(name)) errors.title = "Title must be 5 - 45 characters long";
         if (!isValidDescription(description)) errors.description = "Description must be at least 10 characters long";
         if(!isDatePastNow(startDate) && status === "New") errors.startDate = "Start date must be later than current time";
         if(!isDatePastNow(endDate)) errors.endDate = "End date must be later than current time";

@@ -15,6 +15,7 @@ const PATHS = {
     PARTREQUESTS: '/admin/parts/requests',
     PARTREQUESTCREATE: '/admin/categories/requests/:categoryId/parts/:partId',
     PSUCALCULATOR: '/psuCalculator',
+    PCBUILDGENERATOR: '/pcbuildgenerator',
     ANY: '*'
 }
 

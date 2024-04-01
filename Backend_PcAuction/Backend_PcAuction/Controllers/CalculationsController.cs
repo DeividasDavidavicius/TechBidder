@@ -22,7 +22,7 @@ namespace Backend_PcAuction.Controllers
 
         [HttpPost]
         [Route("psucalculator")]
-        public async Task<ActionResult<PsuCalcResultDto>> Get(PsuCalcDataDto psuCalcDataDto)
+        public async Task<ActionResult<PsuCalcResultDto>> GetRecommendedPsu(PsuCalcDataDto psuCalcDataDto)
         {
             Part motherboard = await _partsRepository.GetAsync(PartCategories.Motherboard, psuCalcDataDto.MotherboardId);
             Part cpu = await _partsRepository.GetAsync(PartCategories.CPU, psuCalcDataDto.CpuId);
@@ -51,6 +51,18 @@ namespace Backend_PcAuction.Controllers
 
             var result = _calculationsService.CalculatePSU(motherboard, cpu, gpu, ram, ssd, hdd);
             return result;
+        }
+
+        [HttpPost]
+        [Route("pcbuildgenerator")]
+        public async Task<ActionResult<PcBuilderResultDto>> GetPcBuild(PcBuilderDataDto pcBuilderDataDto)
+        {
+            if(pcBuilderDataDto.MotherboardId == null)
+                return NotFound();
+
+            var result = await _calculationsService.GeneratePcBuild(pcBuilderDataDto);
+
+            return null;
         }
     }
 }
