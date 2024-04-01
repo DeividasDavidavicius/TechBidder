@@ -14,6 +14,7 @@ const PATHS = {
     EDITSERIES: '/admin/categories/:categoryId/series/:seriesId',
     PARTREQUESTS: '/admin/parts/requests',
     PARTREQUESTCREATE: '/admin/categories/requests/:categoryId/parts/:partId',
+    PSUCALCULATOR: '/psuCalculator',
     ANY: '*'
 }
 

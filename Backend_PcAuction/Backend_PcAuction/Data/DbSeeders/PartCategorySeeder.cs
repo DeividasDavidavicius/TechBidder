@@ -2,6 +2,7 @@
 using Backend_PcAuction.Data.Dtos;
 using Backend_PcAuction.Data.Entities;
 using Backend_PcAuction.Data.Repositories;
+using Backend_PcAuction.Utils;
 using Microsoft.AspNetCore.Identity;
 
 namespace Backend_PcAuction.Data.DbSeeders
@@ -23,16 +24,17 @@ namespace Backend_PcAuction.Data.DbSeeders
             await CreatePSU();
             await CreateHDD();
             await CreateSSD();
+            await CreateMotherboard();
         }
 
         private async Task CreateCPU()
         {
-            var existingCategory = await _partCategoriesRepository.GetAsync("CPU");
+            var existingCategory = await _partCategoriesRepository.GetAsync(PartCategories.CPU);
             if (existingCategory == null)
             {
                 var categoryCPU = new PartCategory
                 {
-                    Id = "CPU",
+                    Id = PartCategories.CPU,
                     SpecificationName1 = "Socket type",
                     SpecificationName2 = "Number of cores",
                     SpecificationName3 = "Number of threads",
@@ -49,12 +51,12 @@ namespace Backend_PcAuction.Data.DbSeeders
 
         private async Task CreateGPU()
         {
-            var existingCategory = await _partCategoriesRepository.GetAsync("GPU");
+            var existingCategory = await _partCategoriesRepository.GetAsync(PartCategories.GPU);
             if (existingCategory == null)
             {
                 var categoryCPU = new PartCategory
                 {
-                    Id = "GPU",
+                    Id = PartCategories.GPU,
                     SpecificationName1 = "Memory size (GB)", // probably 2nd important
                     SpecificationName2 = "Core count", // probably most important
                     SpecificationName3 = "Transistor count (million)", // can skip in calculations
@@ -69,15 +71,16 @@ namespace Backend_PcAuction.Data.DbSeeders
 
         private async Task CreateRAM()
         {
-            var existingCategory = await _partCategoriesRepository.GetAsync("RAM");
+            var existingCategory = await _partCategoriesRepository.GetAsync(PartCategories.RAM);
             if (existingCategory == null)
             {
                 var categoryCPU = new PartCategory
                 {
-                    Id = "RAM",
+                    Id = PartCategories.RAM,
                     SpecificationName1 = "Memory size (GB)",
                     SpecificationName2 = "Memory speed (MHz)",
                     SpecificationName3 = "DDR version",
+                    SpecificationName4 = "Module count",
                     SpecificationName10 = "Wattage (W)"
                 };
 
@@ -87,12 +90,12 @@ namespace Backend_PcAuction.Data.DbSeeders
 
         private async Task CreatePSU()
         {
-            var existingCategory = await _partCategoriesRepository.GetAsync("PSU");
+            var existingCategory = await _partCategoriesRepository.GetAsync(PartCategories.PSU);
             if (existingCategory == null)
             {
                 var categoryCPU = new PartCategory
                 {
-                    Id = "PSU",
+                    Id = PartCategories.PSU,
                     SpecificationName1 = "Wattage (W)"
                 };
 
@@ -102,12 +105,12 @@ namespace Backend_PcAuction.Data.DbSeeders
 
         private async Task CreateHDD()
         {
-            var existingCategory = await _partCategoriesRepository.GetAsync("HDD");
+            var existingCategory = await _partCategoriesRepository.GetAsync(PartCategories.HDD);
             if (existingCategory == null)
             {
                 var categoryCPU = new PartCategory
                 {
-                    Id = "HDD",
+                    Id = PartCategories.HDD,
                     SpecificationName1 = "Capacity (GB)",
                     SpecificationName2 = "RPM",
                     SpecificationName10 = "Wattage (W)"
@@ -119,17 +122,41 @@ namespace Backend_PcAuction.Data.DbSeeders
 
         private async Task CreateSSD()
         {
-            var existingCategory = await _partCategoriesRepository.GetAsync("SSD");
+            var existingCategory = await _partCategoriesRepository.GetAsync(PartCategories.SSD);
             if (existingCategory == null)
             {
                 var categoryCPU = new PartCategory
                 {
-                    Id = "SSD",
+                    Id = PartCategories.SSD,
                     SpecificationName1 = "Capacity (GB)",
-                    SpecificationName2 = "NVMe Generation",
+                    SpecificationName2 = "NVMe generation",
                     SpecificationName3 = "SATA interface",
-                    SpecificationName4 = "Reading speed",
-                    SpecificationName5 = "Writing speed",
+                    SpecificationName4 = "Reading speed (MB/s)",
+                    SpecificationName5 = "Writing speed (MB/s)",
+                    SpecificationName10 = "Wattage (W)"
+                };
+
+                await _partCategoriesRepository.CreateAsync(categoryCPU);
+            }
+        }
+
+        private async Task CreateMotherboard()
+        {
+            var existingCategory = await _partCategoriesRepository.GetAsync(PartCategories.Motherboard);
+            if (existingCategory == null)
+            {
+                var categoryCPU = new PartCategory
+                {
+                    Id = PartCategories.Motherboard,
+                    SpecificationName1 = "CPU socket type",
+                    SpecificationName2 = "Memory DDR version",
+                    SpecificationName3 = "Memory slots",
+                    SpecificationName4 = "Maximum memory capacity (GB)",
+                    SpecificationName5 = "NVMe generation (1)",
+                    SpecificationName6 = "NVMe slots (1)",
+                    SpecificationName7 = "NVMe generation (2)",
+                    SpecificationName8 = "NVMe slots (2)",
+                    SpecificationName9 = "Sata slots",
                     SpecificationName10 = "Wattage (W)"
                 };
 

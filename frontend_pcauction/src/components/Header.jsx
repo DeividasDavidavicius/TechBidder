@@ -21,7 +21,8 @@ function Header() {
         { name: 'CREATE', route: PATHS.CREATEAUCTION },
         { name: "AUCTIONS", route: PATHS.AUCTIONS + "?page=1" },
         { name: "PARTS", route: PATHS.PARTS },
-        { name: "SERIES", route: PATHS.SERIES }
+        { name: "SERIES", route: PATHS.SERIES },
+        { name: "PSU CALCULATOR", route: PATHS.PSUCALCULATOR }
     ];
 
     let navOptions = [];
@@ -137,7 +138,7 @@ function Header() {
 
                     <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                         {pages.map((page, index) => (
-                            <Link key={page.name} to={page.route} style={{ textDecoration: 'none', color: 'white', fontWeight: 'bold', colorborderBottom: '2px solid transparent', marginRight: index !== pages.length - 1 ? '15px' : 0}} className="header-link" >
+                            <Link key={page.name} to={page.route} style={{ textDecoration: 'none', color: 'white', fontWeight: 'bold', colorborderBottom: '2px solid transparent', marginRight: index !== pages.length - 1 ? '20px' : 0}} className="header-link" >
                                 {page.name}
                             </Link>
                         ))}

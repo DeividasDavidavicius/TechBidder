@@ -35,6 +35,7 @@ builder.Services.AddScoped<PartCategorySeeder>();
 builder.Services.AddScoped<IAzureBlobStorageService, AzureBlobStorageService>();
 builder.Services.AddScoped<IPartPricesService, PartPricesService>();
 builder.Services.AddScoped<IAuctionService, AuctionService>();
+builder.Services.AddScoped<ICalculationsService, CalculationsService>();
 
 builder.Services.AddHostedService<AuctionStartBackgroundService>();
 
