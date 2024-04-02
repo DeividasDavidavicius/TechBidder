@@ -32,7 +32,7 @@ namespace Backend_PcAuction.Controllers
 
         // Temporary
         [HttpPost]
-        public async Task<ActionResult> Create(Guid partId)
+        public async Task<ActionResult> Create(Guid partId, CreatePartPriceDto price)
         {
             var part = await _partsRepository.GetForAnyCategoryAsync(partId);
 
@@ -44,8 +44,8 @@ namespace Backend_PcAuction.Controllers
 
             var partPrice = new PartPrice
             {
-                Type = PartPriceTypes.PartAuctionSell,
-                Price = 837.25, 
+                Type = PartPriceTypes.EbayAverage,
+                Price = price.Price, 
                 PriceCheckDate = DateTime.UtcNow,
                 Part = part
             };
