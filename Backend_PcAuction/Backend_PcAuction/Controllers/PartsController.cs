@@ -56,6 +56,7 @@ namespace Backend_PcAuction.Controllers
                 SpecificationValue8 = createPartDto.SpecificationValue8,
                 SpecificationValue9 = createPartDto.SpecificationValue9,
                 SpecificationValue10 = createPartDto.SpecificationValue10,
+                AveragePrice = -1,
                 Category = category,
                 Series = series,
             };

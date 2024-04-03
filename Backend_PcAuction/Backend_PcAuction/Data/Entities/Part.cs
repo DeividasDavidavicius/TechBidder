@@ -15,6 +15,7 @@
         public string? SpecificationValue8 { get; set; }
         public string? SpecificationValue9 { get; set; }
         public string? SpecificationValue10 { get; set; }
+        public double AveragePrice { get; set; }
         public PartCategory Category { get; set; }
         public Series? Series { get; set; }
     }

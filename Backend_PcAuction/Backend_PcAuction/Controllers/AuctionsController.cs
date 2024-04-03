@@ -146,9 +146,9 @@ namespace Backend_PcAuction.Controllers
         {
             var auctions = await _auctionsRepository.GetManyAsync();
             return Ok(auctions.Select(auction => 
-            new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate, auction.EndDate,
-                auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.Status,
-                auction.UserId, auction.Part.Id, auction.Part.Category.Id)));
+                new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate, auction.EndDate,
+                               auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.Status,
+                               auction.UserId, auction.Part.Id, auction.Part.Category.Id)));
 
         }
 

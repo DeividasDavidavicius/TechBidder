@@ -1,10 +1,15 @@
 import { useEffect, useState } from "react";
 import { getParts } from "../../services/PartService";
-import { Autocomplete, Box, Button, Checkbox, Container, CssBaseline, FormControl, FormControlLabel, Grid, TextField, Typography } from "@mui/material";
+import { Autocomplete, Avatar, Box, Button, Card, CardActionArea, CardContent, CardHeader, Checkbox, Container, CssBaseline, FormControl, FormControlLabel, Grid, TextField, Typography } from "@mui/material";
 import { generatePcBuild } from "../../services/CalculationsService";
+import PATHS from "../../utils/Paths";
+import { useNavigate } from "react-router-dom";
+import { timeLeft } from "../../utils/DateUtils";
 
 function PcBuildGenerator()
 {
+    const navigate = useNavigate();
+
     const [motherboards, setMotherboards] = useState([]);
     const [CPU, setCPU] = useState([]);
     const [GPU, setGPU] = useState([]);
@@ -12,6 +17,8 @@ function PcBuildGenerator()
     const [SSD, setSSD] = useState([]);
     const [HDD, setHDD] = useState([]);
     const [PSU, setPSU] = useState([]);
+    const [budget, setBudget] = useState(0);
+    const [auctions, setAuctions] = useState([]);
 
     const [selectedMotherboard, setSelectedMotherboard] = useState(null);
     const [selectedCPU, setSelectedCPU] = useState(null);
@@ -54,6 +61,10 @@ function PcBuildGenerator()
 
     const handlePSUChange = async (newValue) => {
         setSelectedPSU(newValue);
+    }
+
+    const handleBudgetChange = (event) => {
+        setBudget(event.target.value);
     }
 
     useEffect(() => {
@@ -113,14 +124,27 @@ function PcBuildGenerator()
             ramId: selectedRAM ? selectedRAM.id : null,
             hddId: selectedHDD ? selectedHDD.id : null,
             ssdId: selectedSSD ? selectedSSD.id : null,
-            psuId: selectedPSU ? selectedPSU.id : null // MAYBE REMOVE PSU COMPLETELY AND ONLY ADD IT IN CALCULATIONS
+            //psuId: selectedPSU ? selectedPSU.id : null, // MAYBE REMOVE PSU COMPLETELY AND ONLY ADD IT IN CALCULATIONS
+            psuId: 'ANY',
+            budget: budget
         };
-
-        await generatePcBuild(data);
+        const result = await generatePcBuild(data);
+        console.log(result.data);
+        setAuctions(result.data);
     }
 
+    const truncateText = (text, maxLength) => {
+        if (text.length <= maxLength) return text;
+        return text.slice(0, maxLength).trimEnd() + '...';
+    };
+
+    const handleCardClick = (auctionId) => {
+        navigate(PATHS.AUCTIONINFO.replace(":auctionId", auctionId));
+      };
+
     return (
-        <Container component="main" maxWidth="sm">
+        <Box>
+        <Container component="main" maxWidth="md">
             <CssBaseline />
             <Box
                 sx={{
@@ -131,7 +155,7 @@ function PcBuildGenerator()
                 }}
             >
                 <Typography component="h1" variant="h5" sx={{ fontSize: '26px', fontWeight: 'bold', fontFamily: 'Arial, sans-serif', color: '#0d6267' }}>
-                    PSU CALCULATOR
+                    PC BUILD GENERATOR
                 </Typography>
                 <Box component="form" noValidate onSubmit={(event) => generateBuild(event)} sx={{ mt: 3 }}>
                     <Grid container spacing={2}>
@@ -245,21 +269,18 @@ function PcBuildGenerator()
                             </FormControl>
                         </Grid>
                         <Grid item xs={12}>
-                            <FormControl fullWidth>
-                                <Autocomplete
-                                    id="psu-autocomplete"
-                                    options={PSU.map(p => ({ id: p.id, label: p.name }))}
-                                    getOptionLabel={(option) => option?.label || option}
-                                    value={selectedPSU}
-                                    onChange={(event, newValue) => {
-                                        handlePSUChange(newValue);
-                                    }}
-                                    required
-                                    renderInput={(params) => <TextField {...params} label="PSU" />}
-                                    isOptionEqualToValue={(option, value) => { return true; }}
-                                    sx={{ width: '100%', '& input': { fontSize: '1rem' } }}
-                                />
-                            </FormControl>
+                            <TextField
+                                required
+                                fullWidth
+                                id="budget"
+                                label="Budget"
+                                name="budget"
+                                type="number"
+                                inputProps={{ min: 0 }}
+                                value = {budget}
+                                onChange = { handleBudgetChange }
+
+                            />
                         </Grid>
                     </Grid>
                     <Button
@@ -273,6 +294,88 @@ function PcBuildGenerator()
                 </Box>
             </Box>
         </Container>
+        <Container component="main" maxWidth="md">
+        {auctions.length ? (
+        <Box
+            sx={{
+            marginTop: 8,
+            padding: '20px',
+            }}
+        >
+            <Box sx={{ marginTop: 2, marginBottom: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Typography component="h1" variant="h5" sx={{ fontSize: '26px', fontWeight: 'bold', fontFamily: 'Arial, sans-serif', color: '#0d6267' }}>
+                PC BUILD
+            </Typography>
+            </Box>
+            <Box>
+            {auctions.map((auction, index) => (
+                <Card key = {auction.id}  display="flex" sx={{ marginBottom: 2, border: '1px solid #ddd' }}>
+                <CardActionArea onClick={() => handleCardClick(auction.id)} sx={{ width: '100%', display: 'flex', '&:hover': { boxShadow: '0 0 10px rgba(0, 0, 0, 1)' } }}>
+                <Box sx={{ flexGrow: 1 }}>
+                    <CardHeader
+                    title={<Typography variant="h6" sx ={{fontFamily: 'Arial, sans-serif', fontWeight: 'bold', fontSize: '22px', color: '#0d6267'}}>{auction.name}</Typography>}
+                    sx={{
+                        textAlign: 'left',
+                        wordBreak: 'break-all',
+                        overflow: 'hidden',
+                        paddingBottom: 0
+                    }}
+                    />
+                    <CardContent>
+                    <Typography
+                        variant="subtitle1"
+                        sx={{
+                        textAlign: 'left',
+                        fontWeight: 'bold',
+                        color: '#255e62',
+                        fontFamily: 'Arial, sans-serif',
+                        }}
+                    >
+                        {auction.partName}, {auction.categoryId}&nbsp;
+                    </Typography>
+                    <Box sx = {{textAlign: 'left',}}>
+                        <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
+                            Time left:&nbsp;
+                        </Typography>
+                        <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', fontWeight: 'bold', color: '#c21818', display: 'inline-block'}}>
+                        {timeLeft(auction.endDate, new Date().toISOString().slice(0, 19))}
+                        </Typography>
+                    </Box>
+                    <Typography
+                        variant="body2"
+                        color="textSecondary"
+                        component="p"
+                        sx={{
+                        textAlign: 'left',
+                        fontFamily: 'Arial, sans-serif',
+                        wordBreak: 'break-all',
+                        overflow: 'hidden',
+                        color: 'black'
+                        }}
+                    >
+                        {truncateText(auction.description, 180)}
+                    </Typography>
+                    </CardContent>
+                </Box>
+                <Avatar
+                    alt="Auction Image"
+                    src={auction.imageUri}
+                    sx={{
+                    width: '200px',
+                    height: '200px',
+                    borderRadius: '0'
+                    }}
+                />
+                </CardActionArea>
+                </Card>
+            ))}
+            </Box>
+        </Box>
+        ) : (
+            null
+        )}
+        </Container>
+        </Box>
     );
 }
 

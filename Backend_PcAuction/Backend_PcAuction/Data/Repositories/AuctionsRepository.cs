@@ -10,6 +10,7 @@ namespace Backend_PcAuction.Data.Repositories
         Task DeleteAsync(Auction auction);
         Task<Auction?> GetAsync(Guid auctionId);
         Task<Auction?> GetWithPartAsync(Guid partId);
+        Task<Auction?> GetWithPartActiveCheapestAsync(Guid partId);
         Task<IReadOnlyList<Auction>> GetManyAsync();
         Task<List<Auction>> GetManyByPartAsync(Auction auction);
         Task<List<Auction>> GetManyBySeriesDifferentPartAsync(Auction auction);
@@ -43,6 +44,11 @@ namespace Backend_PcAuction.Data.Repositories
         public async Task<Auction?> GetWithPartAsync(Guid partId)
         {
             return await _context.Auctions.Include(a => a.Part).Include(a => a.Part.Category).FirstOrDefaultAsync(a => a.Part.Id == partId);
+        }
+
+        public async Task<Auction?> GetWithPartActiveCheapestAsync(Guid partId)
+        {
+            return await _context.Auctions.Include(a => a.Part).Include(a => a.Part.Category).OrderBy(a => a.Part.AveragePrice).FirstOrDefaultAsync(a => a.Status == AuctionStatuses.Active && a.Part.Id == partId);
         }
 
         public async Task<IReadOnlyList<Auction>> GetManyAsync()

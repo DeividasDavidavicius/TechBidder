@@ -11,6 +11,7 @@
         string? RamId,
         string? HddId,
         string? SsdId,
-        string? PsuId
+        string? PsuId,
+        double Budget
     );
 }

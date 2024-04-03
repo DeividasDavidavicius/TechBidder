@@ -4,6 +4,7 @@ using Backend_PcAuction.Data.Repositories;
 using Backend_PcAuction.Services;
 using Backend_PcAuction.Utils;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace Backend_PcAuction.Controllers
 {
@@ -55,14 +56,16 @@ namespace Backend_PcAuction.Controllers
 
         [HttpPost]
         [Route("pcbuildgenerator")]
-        public async Task<ActionResult<PcBuilderResultDto>> GetPcBuild(PcBuilderDataDto pcBuilderDataDto)
+        public async Task<ActionResult<IEnumerable<AuctionDto>>> GetPcBuild(PcBuilderDataDto pcBuilderDataDto)
         {
-            if(pcBuilderDataDto.MotherboardId == null)
+            if (pcBuilderDataDto.MotherboardId == null)
                 return NotFound();
 
-            var result = await _calculationsService.GeneratePcBuild(pcBuilderDataDto);
+            var pcBuildAuctions = await _calculationsService.GeneratePcBuild(pcBuilderDataDto);
 
-            return null;
+            return Ok(pcBuildAuctions.Select(auction =>
+                new AuctionWithPartNameDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate, auction.EndDate,
+                    auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.Status, auction.UserId, auction.Part.Name, auction.Part.Category.Id)));
         }
     }
 }
