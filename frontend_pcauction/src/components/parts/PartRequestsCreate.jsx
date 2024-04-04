@@ -8,7 +8,7 @@ import SnackbarContext from "../../contexts/SnackbarContext";
 import PATHS from "../../utils/Paths";
 import { deletePart, getPart, getParts, postPart } from "../../services/PartService";
 import { getAllCategorySeries } from "../../services/SeriesService";
-import { getAuctionForPart } from "../../services/AuctionService";
+import { getAuctionForPart, patchAuction } from "../../services/AuctionService";
 
 function PartRequestsCreate() {
     const [categorySeries, setCategorySeries] = useState([]);
@@ -130,15 +130,19 @@ function PartRequestsCreate() {
 
         try {
 
+            // ADD PART REQUEST TABLE AND DELETE IT INSTEAD OF NEWLY CREATED PART.
+            // DELETE NEWLY CREATED (TEMPORARY) PART ONLY WHEN NEW PART IS CHANGED/CREATED FOR
+            // AUCTION SUCCESSFULLY
+
             if(part == null)
             {
-                await postPart(postData, categoryId);
+                //await postPart(postData, categoryId);
                 openSnackbar('Part created successfully!', 'success');
             }
 
             var auction = await getAuctionForPart(partId);
-
             console.log(auction);
+            //await patchAuction()
             await deletePart(categoryId, partId);
 
             navigate(PATHS.PARTS);

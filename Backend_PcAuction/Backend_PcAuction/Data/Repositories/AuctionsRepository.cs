@@ -78,7 +78,7 @@ namespace Backend_PcAuction.Data.Repositories
 
         public async Task<IReadOnlyList<Auction>> GetManyWithPaginationAsync(int page)
         {
-            return await _context.Auctions.Include(a => a.Part).Include(a => a.Part.Category).Where(a => a.Status == AuctionStatuses.Active || a.Status == AuctionStatuses.ActiveNA).Skip((page - 1) * 5).Take(5).ToListAsync();
+            return await _context.Auctions.Include(a => a.Part).Include(a => a.Part.Category).Where(a => a.Status == AuctionStatuses.Active || a.Status == AuctionStatuses.ActiveNA).OrderByDescending(a => a.StartDate).Skip((page - 1) * 5).Take(5).ToListAsync();
         }
 
         public async Task UpdateAsync(Auction auction)

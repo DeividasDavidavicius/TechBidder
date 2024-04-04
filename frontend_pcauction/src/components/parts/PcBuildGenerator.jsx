@@ -124,7 +124,7 @@ function PcBuildGenerator()
             ramId: selectedRAM ? selectedRAM.id : null,
             hddId: selectedHDD ? selectedHDD.id : null,
             ssdId: selectedSSD ? selectedSSD.id : null,
-            //psuId: selectedPSU ? selectedPSU.id : null, // MAYBE REMOVE PSU COMPLETELY AND ONLY ADD IT IN CALCULATIONS
+            // TODO MAYBE ADD CHOOSING IF YOU NEED PSU (LIKE CHECKBOX)
             psuId: 'ANY',
             budget: budget
         };

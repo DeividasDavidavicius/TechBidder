@@ -120,7 +120,7 @@ function PartRequestList() {
                     <Button onClick={handleRemovePart} startIcon={<ModeEditIcon />} sx ={{ fontWeight: 'bold', color: "red" }}>
                         Remove
                     </Button>
-                    <Button onClick={handleCloseRemove} startIcon={<HighlightOffIcon />} sx ={{ fontWeight: 'bold', color: "#369c7d" }}>
+                    <Button onClick={handleCloseRemove} startIcon={<HighlightOffIcon />} sx ={{ fontWeight: 'bold', color: "#268747" }}>
                         Cancel
                     </Button>
                 </DialogActions>

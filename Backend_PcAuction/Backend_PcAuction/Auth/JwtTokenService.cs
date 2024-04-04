@@ -39,7 +39,7 @@ namespace Backend_PcAuction.Auth
             var accessSecurityToken = new JwtSecurityToken(
                 issuer: _issuer,
                 audience: _audience,
-                expires: DateTime.UtcNow.AddMinutes(5), // TODO change to 5mins or 1
+                expires: DateTime.UtcNow.AddMinutes(5),
                 claims: authClaims,
                 signingCredentials: new SigningCredentials(_authSignKey, SecurityAlgorithms.HmacSha256)
             );

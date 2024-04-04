@@ -145,7 +145,7 @@ function EditAuction() {
 
         try {
             await putAuction(formData, auctionId);
-            navigate(PATHS.MAIN); // TODO: Pakeisti i listo view'a  o  ne main page
+            navigate(PATHS.AUCTIONINFO.replace(":auctionId", auctionId));
             openSnackbar('Auction updated successfully!', 'success');
         } catch(error) {
             openSnackbar(error.response.data.errorMessage, "error")

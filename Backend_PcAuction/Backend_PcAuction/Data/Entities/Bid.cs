@@ -9,7 +9,7 @@ namespace Backend_PcAuction.Data.Entities
     {
         public Guid Id { get; set; }
         public double Amount { get; set; }
-        public DateTime CreationDate { get; set; } // TODO Gal saugot UTC laika visur, o fronte paconvertint i local (UtcNow)
+        public DateTime CreationDate { get; set; }
         public Auction Auction { get; set; }
         [Required]
         public string UserId { get; set; }
