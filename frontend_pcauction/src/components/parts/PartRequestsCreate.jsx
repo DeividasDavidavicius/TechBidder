@@ -6,7 +6,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useUser } from "../../contexts/UserContext";
 import SnackbarContext from "../../contexts/SnackbarContext";
 import PATHS from "../../utils/Paths";
-import { deletePart, getPart, getParts } from "../../services/PartService";
+import { deletePart, getPart, getParts, patchPart } from "../../services/PartService";
 import { getAllCategorySeries } from "../../services/SeriesService";
 import { getAuctionForPart, patchAuction } from "../../services/AuctionService";
 import { deletePartRequest, getPartRequest } from "../../services/PartRequestService";
@@ -108,7 +108,7 @@ function PartRequestsCreate() {
 
         const seriesId = partSeries === "none" ? null : partSeries;
 
-        const patch = {name, specificationValue1: specValue1, specificationValue2: specValue2, specificationValue3: specValue3,
+        const patchData = {name, specificationValue1: specValue1, specificationValue2: specValue2, specificationValue3: specValue3,
             specificationValue4: specValue4, specificationValue5: specValue5, specificationValue6: specValue6,
             specificationValue7: specValue7,  specificationValue8: specValue8, specificationValue9: specValue9,
             specificationValue10: specValue10, seriesId, type: 'Permanent'};
@@ -130,29 +130,25 @@ function PartRequestsCreate() {
 
             if(part)
             {
-                console.log("With part");
-                const patchAuctionData = { categoryId: categoryId, partId: part.Id }
-                var result = await patchAuction(patchAuctionData, auctionId);
+                const patchAuctionData = { categoryId: categoryId, partId: part.id }
+
+                await patchAuction(patchAuctionData, auctionId);
                 deletePartRequest(requestId);
-                console.log(result);
-                openSnackbar('Part for auction updated successfully!', 'success');
+                openSnackbar('Auction part updated successfully!', 'success');
                 navigate(PATHS.PARTS);
             }
 
-            // ADD PART REQUEST TABLE AND DELETE IT INSTEAD OF NEWLY CREATED PART.
-            // DELETE NEWLY CREATED (TEMPORARY) PART ONLY WHEN NEW PART IS CHANGED/CREATED FOR
-            // AUCTION SUCCESSFULLY
-
             if(part == null)
             {
-                //await postPart(postData, categoryId);
-                console.log('Without part');
-                //openSnackbar('Part created successfully!', 'success');
+                console.log(patchData);
+                await patchPart(patchData, categoryId, partId);
+
+                await patchAuction(null, auctionId);
+                deletePartRequest(requestId);
+                openSnackbar('New part created successfully!', 'success');
+                navigate(PATHS.PARTS);
             }
 
-            //await deletePart(categoryId, partId);
-
-            //navigate(PATHS.PARTS);
         } catch(error) {
             openSnackbar(error.response.data.errorMessage, "error")
         }

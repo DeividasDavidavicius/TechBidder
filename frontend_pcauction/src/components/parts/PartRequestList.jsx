@@ -9,7 +9,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { checkTokenValidity, refreshAccessToken } from "../../services/AuthenticationService";
 import SnackbarContext from "../../contexts/SnackbarContext";
 import { useUser } from "../../contexts/UserContext";
-import { getAllPartRequests } from "../../services/PartRequestService";
+import { deletePartRequest, getAllPartRequests } from "../../services/PartRequestService";
 
 function PartRequestList() {
     const [requests, setRequests] = useState([]);
@@ -59,7 +59,7 @@ function PartRequestList() {
         setCurrentRequest({});
     };
 
-    const handleRemovePart = async () => {
+    const handleRemovePartRequest = async () => {
         const accessToken = localStorage.getItem('accessToken');
         if (!checkTokenValidity(accessToken)) {
             const result = await refreshAccessToken();
@@ -73,7 +73,7 @@ function PartRequestList() {
             setLogin(result.response.data.accessToken, result.response.data.refreshToken);
         }
 
-        //deletePart(currentPart.categoryId, currentPart.id);
+        deletePartRequest(currentRequest.id);
         openSnackbar('Part request deleted successfully!', 'success');
 
         const updatedRequests = requests.filter(
@@ -129,7 +129,7 @@ function PartRequestList() {
         <Dialog open={openRemoveModal} onClose={handleCloseRemove}>
                 <DialogTitle sx={{ fontSize: '20px', fontWeight: 'bold', fontFamily: 'Arial, sans-serif', color: '#0d6267' }} >Do you want to remove '{currentRequest.name}'?</DialogTitle>
                 <DialogActions style={{ justifyContent: 'center' }}>
-                    <Button onClick={handleRemovePart} startIcon={<ModeEditIcon />} sx ={{ fontWeight: 'bold', color: "red" }}>
+                    <Button onClick={handleRemovePartRequest} startIcon={<ModeEditIcon />} sx ={{ fontWeight: 'bold', color: "red" }}>
                         Remove
                     </Button>
                     <Button onClick={handleCloseRemove} startIcon={<HighlightOffIcon />} sx ={{ fontWeight: 'bold', color: "#268747" }}>

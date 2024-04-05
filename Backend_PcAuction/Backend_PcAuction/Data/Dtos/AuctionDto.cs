@@ -63,8 +63,8 @@ namespace Backend_PcAuction.Data.Dtos
     );
 
     public record UpdateAuctionPartDto(
-        string CategoryId,
-        Guid PartId
+        string? CategoryId,
+        Guid? PartId
     );
     
     public record AuctionsWithPaginationDto(

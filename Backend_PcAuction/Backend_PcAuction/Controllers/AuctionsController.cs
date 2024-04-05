@@ -267,7 +267,7 @@ namespace Backend_PcAuction.Controllers
         [HttpPatch]
         [Route("{auctionId}")]
         [Authorize(Roles = UserRoles.Admin)]
-        public async Task<ActionResult<AuctionDto>> UpdateAuctionsPart(Guid auctionId, UpdateAuctionPartDto updateAuctionPartDto)
+        public async Task<ActionResult<AuctionDto>> UpdateAuctionsPart(Guid auctionId, UpdateAuctionPartDto? updateAuctionPartDto)
         {
             var auction = await _auctionsRepository.GetAsync(auctionId);
 
@@ -276,7 +276,7 @@ namespace Backend_PcAuction.Controllers
                 return NotFound();
             }
 
-            if(updateAuctionPartDto.PartId != null)
+            if(updateAuctionPartDto != null)
             {
                 var part = await _partsRepository.GetAsync(updateAuctionPartDto.CategoryId, updateAuctionPartDto.PartId);
 
