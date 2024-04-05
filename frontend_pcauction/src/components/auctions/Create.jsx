@@ -13,6 +13,7 @@ import PATHS from "../../utils/Paths";
 import { postAuction } from "../../services/AuctionService";
 import { getCategories } from "../../services/PartCategoryService";
 import { getParts } from "../../services/PartService";
+import { postPartRequest } from "../../services/PartRequestService";
 
 function CreateAuction() {
     const navigate = useNavigate();
@@ -142,6 +143,12 @@ function CreateAuction() {
 
         try {
             const result = await postAuction(formData);
+
+            if(partName)
+            {
+                const postData = {name: partName, auctionId: result.data.id, categoryId: category, partId: result.data.partId }
+                await postPartRequest(postData);
+            }
             navigate(PATHS.AUCTIONINFO.replace(":auctionId", result.data.id));
             openSnackbar('Auction created successfully!', 'success');
         } catch(error) {

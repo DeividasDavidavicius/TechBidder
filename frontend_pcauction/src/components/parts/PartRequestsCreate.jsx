@@ -6,9 +6,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useUser } from "../../contexts/UserContext";
 import SnackbarContext from "../../contexts/SnackbarContext";
 import PATHS from "../../utils/Paths";
-import { deletePart, getPart, getParts, postPart } from "../../services/PartService";
+import { deletePart, getPart, getParts } from "../../services/PartService";
 import { getAllCategorySeries } from "../../services/SeriesService";
 import { getAuctionForPart, patchAuction } from "../../services/AuctionService";
+import { deletePartRequest, getPartRequest } from "../../services/PartRequestService";
 
 function PartRequestsCreate() {
     const [categorySeries, setCategorySeries] = useState([]);
@@ -25,8 +26,10 @@ function PartRequestsCreate() {
     const [specValue8, setSpecValue8] = useState("");
     const [specValue9, setSpecValue9] = useState("");
     const [specValue10, setSpecValue10] = useState("");
+    const [partId, setPartId] = useState(null);
+    const [auctionId, setAuctionId] = useState(null);
 
-    const { partId } = useParams();
+    const { requestId } = useParams();
     const { categoryId } = useParams();
     const [requestedPartName, setRequestedPartName] = useState("");
     const [part, setPart] = useState(null);
@@ -96,7 +99,7 @@ function PartRequestsCreate() {
 
         let errors = [];
         setValidationErrors(errors);
-        if(!(name && name.length >= 0)) errors.name = "Part name must be set"
+        if(!(name && name.length >= 0) && part === null) errors.name = "Part name must be set"
 
         if (Object.keys(errors).length > 0) {
             setValidationErrors(errors);
@@ -105,10 +108,10 @@ function PartRequestsCreate() {
 
         const seriesId = partSeries === "none" ? null : partSeries;
 
-        const postData = {name, specificationValue1: specValue1, specificationValue2: specValue2, specificationValue3: specValue3,
+        const patch = {name, specificationValue1: specValue1, specificationValue2: specValue2, specificationValue3: specValue3,
             specificationValue4: specValue4, specificationValue5: specValue5, specificationValue6: specValue6,
             specificationValue7: specValue7,  specificationValue8: specValue8, specificationValue9: specValue9,
-            specificationValue10: specValue10, seriesId};
+            specificationValue10: specValue10, seriesId, type: 'Permanent'};
 
         const accessToken = localStorage.getItem('accessToken');
         if (!checkTokenValidity(accessToken)) {
@@ -123,12 +126,18 @@ function PartRequestsCreate() {
             setLogin(result.response.data.accessToken, result.response.data.refreshToken);
         }
 
-
-        // update auction
-        // delete requested part
-
-
         try {
+
+            if(part)
+            {
+                console.log("With part");
+                const patchAuctionData = { categoryId: categoryId, partId: part.Id }
+                var result = await patchAuction(patchAuctionData, auctionId);
+                deletePartRequest(requestId);
+                console.log(result);
+                openSnackbar('Part for auction updated successfully!', 'success');
+                navigate(PATHS.PARTS);
+            }
 
             // ADD PART REQUEST TABLE AND DELETE IT INSTEAD OF NEWLY CREATED PART.
             // DELETE NEWLY CREATED (TEMPORARY) PART ONLY WHEN NEW PART IS CHANGED/CREATED FOR
@@ -137,15 +146,13 @@ function PartRequestsCreate() {
             if(part == null)
             {
                 //await postPart(postData, categoryId);
-                openSnackbar('Part created successfully!', 'success');
+                console.log('Without part');
+                //openSnackbar('Part created successfully!', 'success');
             }
 
-            var auction = await getAuctionForPart(partId);
-            console.log(auction);
-            //await patchAuction()
-            await deletePart(categoryId, partId);
+            //await deletePart(categoryId, partId);
 
-            navigate(PATHS.PARTS);
+            //navigate(PATHS.PARTS);
         } catch(error) {
             openSnackbar(error.response.data.errorMessage, "error")
         }
@@ -158,13 +165,42 @@ function PartRequestsCreate() {
             navigate(PATHS.MAIN);
         }
 
+        const refreshToken = async () => {
+            const accessToken = localStorage.getItem('accessToken');
+            if (!checkTokenValidity(accessToken)) {
+                const result = await refreshAccessToken();
+                if (!result.success) {
+                    openSnackbar('You need to login!', 'error');
+                    setLogout();
+                    navigate(PATHS.LOGIN);
+                    return;
+                }
+
+                setLogin(result.response.data.accessToken, result.response.data.refreshToken);
+            }
+
+            await fetchRequestData();
+        };
+
+        const fetchRequestData = async () => {
+            const result = await getPartRequest(requestId);
+            const fetchedPartId = result.partId;
+            await setPartId(fetchedPartId);
+            await setAuctionId(result.auctionId);
+
+            await fetchCategoriesData();
+            await fetchRequedtedPartData(fetchedPartId);
+            await fetchCategorySeries();
+            await fetchCategoryParts();
+        };
+
         const fetchCategoriesData = async () => {
             const result = await getCategory(categoryId);
             setCategoryFields(result);
         };
 
-        const fetchRequedtedPartData = async () => {
-            const result = await getPart(categoryId, partId);
+        const fetchRequedtedPartData = async (fetchedPartId) => {
+            const result = await getPart(categoryId, fetchedPartId);
             setRequestedPartName(result.name);
         };
 
@@ -178,12 +214,8 @@ function PartRequestsCreate() {
             setCategoryParts(result);
         }
 
-        fetchCategoriesData();
-        fetchRequedtedPartData();
-        fetchCategorySeries();
-        fetchCategoryParts();
-
-    }, [navigate, openSnackbar, role, categoryId, partId]);
+        refreshToken();
+    }, [navigate, openSnackbar, role, categoryId, partId, requestId, setLogin, setLogout]);
 
     return (
         <Container component="main" maxWidth="sm">

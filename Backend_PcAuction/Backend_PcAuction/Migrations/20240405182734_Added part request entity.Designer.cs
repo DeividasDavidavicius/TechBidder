@@ -4,6 +4,7 @@ using Backend_PcAuction.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Backend_PcAuction.Migrations
 {
     [DbContext(typeof(PcAuctionDbContext))]
-    partial class AuctionDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240405182734_Added part request entity")]
+    partial class Addedpartrequestentity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -323,31 +326,6 @@ namespace Backend_PcAuction.Migrations
                     b.ToTable("PartPrices");
                 });
 
-            modelBuilder.Entity("Backend_PcAuction.Data.Entities.PartRequest", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("AuctionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("PartId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AuctionId");
-
-                    b.HasIndex("PartId");
-
-                    b.ToTable("PartRequests");
-                });
-
             modelBuilder.Entity("Backend_PcAuction.Data.Entities.Series", b =>
                 {
                     b.Property<Guid>("Id")
@@ -564,25 +542,6 @@ namespace Backend_PcAuction.Migrations
                         .HasForeignKey("PartId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Part");
-                });
-
-            modelBuilder.Entity("Backend_PcAuction.Data.Entities.PartRequest", b =>
-                {
-                    b.HasOne("Backend_PcAuction.Data.Entities.Auction", "Auction")
-                        .WithMany()
-                        .HasForeignKey("AuctionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Backend_PcAuction.Data.Entities.Part", "Part")
-                        .WithMany()
-                        .HasForeignKey("PartId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Auction");
 
                     b.Navigation("Part");
                 });

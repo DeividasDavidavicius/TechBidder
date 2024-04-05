@@ -1,19 +1,19 @@
 import { Box, Button, Container, CssBaseline, Dialog, DialogActions, DialogTitle, Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
-import { getCategories } from "../../services/PartCategoryService";
-import { deletePart, getPartRequests } from "../../services/PartService";
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import PATHS from "../../utils/Paths";
 import { Link, useNavigate } from "react-router-dom";
 import { checkTokenValidity, refreshAccessToken } from "../../services/AuthenticationService";
 import SnackbarContext from "../../contexts/SnackbarContext";
 import { useUser } from "../../contexts/UserContext";
+import { getAllPartRequests } from "../../services/PartRequestService";
 
 function PartRequestList() {
-    const [parts, setParts] = useState([]);
-    const [currentPart, setCurrentPart] = useState({});
+    const [requests, setRequests] = useState([]);
+    const [currentRequest, setCurrentRequest] = useState({});
     const [openRemoveModal, setOpenRemoveModal] = useState(false);
 
     const openSnackbar = useContext(SnackbarContext);
@@ -26,31 +26,37 @@ function PartRequestList() {
             navigate(PATHS.MAIN);
         }
 
-        const fetchCategoriesData = async () => {
-            const result = await getCategories();
+        const fetchPartRequests = async () => {
+            const accessToken = localStorage.getItem('accessToken');
+            if (!checkTokenValidity(accessToken)) {
+                const result = await refreshAccessToken();
+                if (!result.success) {
+                    openSnackbar('You need to login!', 'error');
+                    setLogout();
+                    navigate(PATHS.LOGIN);
+                    return;
+                }
 
-            const categoryIds = result.map(category => category.id);
-            fetchPartsData(categoryIds);
+                setLogin(result.response.data.accessToken, result.response.data.refreshToken);
+            }
+
+            const result = await getAllPartRequests();
+            setRequests(result);
         };
 
-        const fetchPartsData = async (categoryIds) => {
-            if (categoryIds.length === 0) return;
 
-            const partsPromises = categoryIds.map(category => getPartRequests(category));
-            const results = await Promise.all(partsPromises);
+        fetchPartRequests();
 
-            const flattenedParts = results.reduce((acc, curr) => acc.concat(curr), []);
+    }, [navigate, openSnackbar, role, setLogin, setLogout]);
 
-            setParts(flattenedParts);
-        };
-
-        fetchCategoriesData();
-
-    }, [navigate, openSnackbar, role]);
+    const handleOpenRemove = (request) => {
+        setCurrentRequest(request);
+        setOpenRemoveModal(true);
+    };
 
     const handleCloseRemove = () => {
         setOpenRemoveModal(false);
-        setCurrentPart({});
+        setCurrentRequest({});
     };
 
     const handleRemovePart = async () => {
@@ -67,13 +73,13 @@ function PartRequestList() {
             setLogin(result.response.data.accessToken, result.response.data.refreshToken);
         }
 
-        deletePart(currentPart.categoryId, currentPart.id);
-        openSnackbar('Part deleted successfully!', 'success');
+        //deletePart(currentPart.categoryId, currentPart.id);
+        openSnackbar('Part request deleted successfully!', 'success');
 
-        const updatedParts = parts.filter(
-            (part) => part.id !== currentPart.id
+        const updatedRequests = requests.filter(
+            (request) => request.id !== currentRequest.id
         );
-        setParts(updatedParts);
+        setRequests(updatedRequests);
         handleCloseRemove();
     }
 
@@ -98,16 +104,22 @@ function PartRequestList() {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                {parts.map((part, index) => (
+                {requests.map((request, index) => (
                     <TableRow key={index}>
-                        <TableCell>{part.categoryId}</TableCell>
-                        <TableCell>{part.name}</TableCell>
+                        <TableCell>{request.categoryId}</TableCell>
+                        <TableCell>{request.name}</TableCell>
                         <TableCell>
-                            <Link to={PATHS.PARTREQUESTCREATE.replace(':partId', part.id).replace(':categoryId', part.categoryId)}>
+                            <Link to={PATHS.PARTREQUESTCREATE.replace(':requestId', request.id).replace(':categoryId', request.categoryId)}>
                                 <Button startIcon={<AddIcon />} sx={{ marginRight: 3, color: '#138c94', fontWeight: 'bold' }}>
                                     CREATE
                                 </Button>
                             </Link>
+                            <Button startIcon={<DeleteIcon />}
+                                sx={{ marginRight: 0, color: '#138c94', fontWeight: 'bold' }}
+                                onClick={ () => handleOpenRemove(request)}
+                            >
+                                Delete
+                            </Button>
                         </TableCell>
                     </TableRow>
                 ))}
@@ -115,7 +127,7 @@ function PartRequestList() {
             </Table>
         </Box>
         <Dialog open={openRemoveModal} onClose={handleCloseRemove}>
-                <DialogTitle sx={{ fontSize: '20px', fontWeight: 'bold', fontFamily: 'Arial, sans-serif', color: '#0d6267' }} >Do you want to remove '{currentPart.name}'?</DialogTitle>
+                <DialogTitle sx={{ fontSize: '20px', fontWeight: 'bold', fontFamily: 'Arial, sans-serif', color: '#0d6267' }} >Do you want to remove '{currentRequest.name}'?</DialogTitle>
                 <DialogActions style={{ justifyContent: 'center' }}>
                     <Button onClick={handleRemovePart} startIcon={<ModeEditIcon />} sx ={{ fontWeight: 'bold', color: "red" }}>
                         Remove

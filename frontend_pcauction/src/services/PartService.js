@@ -21,16 +21,6 @@ export const getParts = async (partCategoryId) => {
     }
   };
 
-  export const getPartRequests = async (partCategoryId) => {
-    try {
-      const response = await axios.get(`${API_URL}/categories/${partCategoryId}/parts/requests`);
-      return response.data;
-    } catch (error) {
-      console.error('Error getting parts:', error);
-      throw error;
-    }
-  };
-
   export const postPart = async (data, partCategoryId) => {
     try {
       const accessToken = localStorage.getItem('accessToken');

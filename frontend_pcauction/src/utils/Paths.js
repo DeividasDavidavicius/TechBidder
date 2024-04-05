@@ -13,7 +13,7 @@ const PATHS = {
     CREATESERIES: '/admin/series/create',
     EDITSERIES: '/admin/categories/:categoryId/series/:seriesId',
     PARTREQUESTS: '/admin/parts/requests',
-    PARTREQUESTCREATE: '/admin/categories/requests/:categoryId/parts/:partId',
+    PARTREQUESTCREATE: '/admin/categories/:categoryId/request/:requestId',
     PSUCALCULATOR: '/psuCalculator',
     PCBUILDGENERATOR: '/pcbuildgenerator',
     ANY: '*'

@@ -4,6 +4,7 @@ using Backend_PcAuction.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Backend_PcAuction.Migrations
 {
     [DbContext(typeof(PcAuctionDbContext))]
-    partial class AuctionDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240405183436_Added part request id")]
+    partial class Addedpartrequestid
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -336,14 +339,14 @@ namespace Backend_PcAuction.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("PartId")
+                    b.Property<Guid>("TemporaryPartId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AuctionId");
 
-                    b.HasIndex("PartId");
+                    b.HasIndex("TemporaryPartId");
 
                     b.ToTable("PartRequests");
                 });
@@ -576,15 +579,15 @@ namespace Backend_PcAuction.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Backend_PcAuction.Data.Entities.Part", "Part")
+                    b.HasOne("Backend_PcAuction.Data.Entities.Part", "TemporaryPart")
                         .WithMany()
-                        .HasForeignKey("PartId")
+                        .HasForeignKey("TemporaryPartId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Auction");
 
-                    b.Navigation("Part");
+                    b.Navigation("TemporaryPart");
                 });
 
             modelBuilder.Entity("Backend_PcAuction.Data.Entities.Series", b =>

@@ -165,6 +165,7 @@ namespace Backend_PcAuction.Controllers
             part.SpecificationValue9 = updatePartDto.SpecificationValue9;
             part.SpecificationValue10 = updatePartDto.SpecificationValue10;
             part.Series = series;
+            part.Type = updatePartDto.Type;
 
             await _partsRepository.UpdateAsync(part);
 

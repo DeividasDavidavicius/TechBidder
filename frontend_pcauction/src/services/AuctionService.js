@@ -25,21 +25,6 @@ export const postAuction = async (data) => {
     }
   };
 
-  export const getAuctionForPart = async (id) => {
-    try {
-      const accessToken = localStorage.getItem('accessToken');
-      const response = await axios.get(`${API_URL}/auctions/part/${id}`, {
-        headers: {
-          "Authorization": `Bearer ${accessToken}`
-        }}
-      );
-      return response.data;
-    } catch (error) {
-      console.error('Error getting auction:', error);
-      throw error;
-    }
-  };
-
   export const getAuctionsWithPagination = async (page) => {
     try {
       const response = await axios.get(`${API_URL}/auctions/pagination?page=${page}`

@@ -264,23 +264,6 @@ namespace Backend_PcAuction.Controllers
             return NoContent();
         }
 
-        [HttpGet]
-        [Route("part/{partId}")]
-        [Authorize(Roles = UserRoles.Admin)]
-        public async Task<ActionResult<AuctionDto>> GetWithPart(Guid partId)
-        {
-            var auction = await _auctionsRepository.GetWithPartAsync(partId);
-
-            if(auction == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate,
-                auction.EndDate, auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.Status,
-                auction.UserId, auction.Part.Id, auction.Part.Category.Id));
-        }
-
         [HttpPatch]
         [Route("{auctionId}")]
         [Authorize(Roles = UserRoles.Admin)]
@@ -293,14 +276,17 @@ namespace Backend_PcAuction.Controllers
                 return NotFound();
             }
 
-            var part = await _partsRepository.GetAsync(updateAuctionPartDto.CategoryId, updateAuctionPartDto.PartId);
-
-            if (part == null)
+            if(updateAuctionPartDto.PartId != null)
             {
-                return NotFound();
-            }
+                var part = await _partsRepository.GetAsync(updateAuctionPartDto.CategoryId, updateAuctionPartDto.PartId);
 
-            auction.Part = part;
+                if (part == null)
+                {
+                    return NotFound();
+                }
+
+                auction.Part = part;
+            }
 
             if (auction.Status == AuctionStatuses.NewNA)
                 auction.Status = AuctionStatuses.New;
