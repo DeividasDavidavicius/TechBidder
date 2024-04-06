@@ -133,6 +133,7 @@ function EditPart() {
         }
 
         const fetchPartData = async () => {
+            try {
             const partData = await getPart(categoryId, partId);
 
             setName(partData.name);
@@ -153,6 +154,12 @@ function EditPart() {
             setCategoryFields(categoryFields);
 
             fetchAllCategorySeries(categoryId);
+            }
+            catch(error)
+            {
+                openSnackbar('This part does not exist!!', 'error');
+                navigate(PATHS.PARTS);
+            }
         };
 
         const fetchCategorySeries = async(categoryId, seriesId) => {

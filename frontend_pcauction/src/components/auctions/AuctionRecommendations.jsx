@@ -1,22 +1,41 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PATHS from "../../utils/Paths";
 import { Avatar, Box, Card, CardActionArea, CardContent, CardHeader, Container, CssBaseline, Typography } from "@mui/material";
 import { getAuctionRecommendations } from "../../services/AuctionService";
 import { timeLeft } from "../../utils/DateUtils";
+import SnackbarContext from "../../contexts/SnackbarContext";
+import { getHighestBid } from "../../services/BIdService";
 
 const AuctionRecommendations = ({auctionId}) => {
     const navigate = useNavigate();
     const [auctions, setAuctions] = useState([]);
+    const openSnackbar = useContext(SnackbarContext);
 
     useEffect(() => {
         const fetchAuctionsData = async () => {
+          try {
             const result = await getAuctionRecommendations(auctionId);
-            setAuctions(result);
+
+            const auctionsWithHighestBid = await Promise.all(
+              result.map(async (auction) => {
+                const highestBid = await getHighestBid(auction.id);
+                const highestBidAmount = highestBid.amount;
+                return { ...auction, highestBidAmount };
+              })
+            );
+
+            setAuctions(auctionsWithHighestBid);
+          }
+          catch(error)
+          {
+            openSnackbar('This auction does not exist!', 'error');
+            navigate(PATHS.MAIN);
+          }
         };
 
         fetchAuctionsData();
-    }, [auctionId]);
+    }, [auctionId, navigate, openSnackbar]);
 
     const truncateText = (text, maxLength) => {
         if (text.length <= maxLength) return text;
@@ -57,6 +76,17 @@ const AuctionRecommendations = ({auctionId}) => {
                 }}
                 />
                 <CardContent>
+                {auction.highestBidAmount > 0  && (
+                    <>
+                    <Box sx = {{textAlign: 'left',}}>
+                      <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '20px', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
+                        Highest bid:&nbsp;
+                      </Typography>
+                      <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', fontWeight: 'bold', fontSize: '20px', color: '#c21818', display: 'inline-block'}}>
+                        {auction.highestBidAmount}
+                      </Typography>
+                  </Box>
+                    </> )}
                 <Typography
                     variant="subtitle1"
                     sx={{
@@ -76,7 +106,6 @@ const AuctionRecommendations = ({auctionId}) => {
                       {timeLeft(auction.endDate, new Date().toISOString().slice(0, 19))}
                       </Typography>
                   </Box>
-
                   <Typography
                     variant="body2"
                     color="textSecondary"

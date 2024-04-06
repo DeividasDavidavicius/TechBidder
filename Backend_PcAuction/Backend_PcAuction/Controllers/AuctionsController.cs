@@ -302,7 +302,7 @@ namespace Backend_PcAuction.Controllers
 
         [HttpGet]
         [Route("{auctionId}/recommendations")]
-        public async Task<ActionResult<IEnumerable<AuctionDto>>>GetRecommendations(Guid auctionId)
+        public async Task<ActionResult<IEnumerable<AuctionWithPartNameDto>>>GetRecommendations(Guid auctionId)
         {
             var auction = await _auctionsRepository.GetAsync(auctionId);
 

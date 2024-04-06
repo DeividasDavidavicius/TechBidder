@@ -16,6 +16,7 @@ namespace Backend_PcAuction.Data.Dtos
         string? SpecificationValue9,
         string? SpecificationValue10,
         string CategoryId,
+        string Type,
         Guid? SeriesId
     );
 

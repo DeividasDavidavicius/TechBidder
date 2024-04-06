@@ -66,7 +66,7 @@ namespace Backend_PcAuction.Controllers
             return Created($"/api/v1/categories/{categoryId}/parts/{part.Id}",
                 new PartDto(part.Id, part.Name, part.SpecificationValue1, part.SpecificationValue2, part.SpecificationValue3,
                  part.SpecificationValue4, part.SpecificationValue5, part.SpecificationValue6, part.SpecificationValue7,
-                 part.SpecificationValue8, part.SpecificationValue9, part.SpecificationValue10, part.Category.Id, part.Series?.Id));
+                 part.SpecificationValue8, part.SpecificationValue9, part.SpecificationValue10, part.Category.Id, part.Type, part.Series?.Id));
         }
 
         [HttpGet]
@@ -89,7 +89,7 @@ namespace Backend_PcAuction.Controllers
 
             return Ok(new PartDto(part.Id, part.Name, part.SpecificationValue1, part.SpecificationValue2, part.SpecificationValue3,
                  part.SpecificationValue4, part.SpecificationValue5, part.SpecificationValue6, part.SpecificationValue7,
-                 part.SpecificationValue8, part.SpecificationValue9, part.SpecificationValue10, part.Category.Id, part.Series?.Id));
+                 part.SpecificationValue8, part.SpecificationValue9, part.SpecificationValue10, part.Category.Id, part.Type, part.Series?.Id));
         }
 
         [HttpGet]
@@ -106,7 +106,7 @@ namespace Backend_PcAuction.Controllers
 
             return Ok(parts.Select(part => new PartDto(part.Id, part.Name, part.SpecificationValue1, part.SpecificationValue2, part.SpecificationValue3,
                  part.SpecificationValue4, part.SpecificationValue5, part.SpecificationValue6, part.SpecificationValue7,
-                 part.SpecificationValue8, part.SpecificationValue9, part.SpecificationValue10, part.Category.Id, part.Series?.Id)));
+                 part.SpecificationValue8, part.SpecificationValue9, part.SpecificationValue10, part.Category.Id, part.Type, part.Series?.Id)));
         }
 
         [HttpGet]
@@ -124,7 +124,7 @@ namespace Backend_PcAuction.Controllers
 
             return Ok(parts.Select(part => new PartDto(part.Id, part.Name, part.SpecificationValue1, part.SpecificationValue2, part.SpecificationValue3,
                  part.SpecificationValue4, part.SpecificationValue5, part.SpecificationValue6, part.SpecificationValue7,
-                 part.SpecificationValue8, part.SpecificationValue9, part.SpecificationValue10, part.Category.Id, part.Series?.Id)));
+                 part.SpecificationValue8, part.SpecificationValue9, part.SpecificationValue10, part.Category.Id, part.Type, part.Series?.Id)));
         }
 
         [HttpPatch]
@@ -171,7 +171,7 @@ namespace Backend_PcAuction.Controllers
 
             return Ok(new PartDto(part.Id, part.Name, part.SpecificationValue1, part.SpecificationValue2, part.SpecificationValue3,
                  part.SpecificationValue4, part.SpecificationValue5, part.SpecificationValue6, part.SpecificationValue7,
-                 part.SpecificationValue8, part.SpecificationValue9, part.SpecificationValue10, part.Category.Id, part.Series?.Id));
+                 part.SpecificationValue8, part.SpecificationValue9, part.SpecificationValue10, part.Category.Id, part.Type, part.Series?.Id));
         }
 
         [HttpDelete]

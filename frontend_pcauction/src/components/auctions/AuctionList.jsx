@@ -4,6 +4,7 @@ import PATHS from "../../utils/Paths";
 import { Avatar, Box, Card, CardActionArea, CardContent, CardHeader, Container, CssBaseline, Pagination, Typography } from "@mui/material";
 import { getAuctionsWithPagination } from "../../services/AuctionService";
 import { timeLeft } from "../../utils/DateUtils";
+import { getHighestBid } from "../../services/BIdService";
 
 function AuctionList() {
     const navigate = useNavigate();
@@ -20,7 +21,16 @@ function AuctionList() {
         const fetchAuctionsData = async () => {
             const result = await getAuctionsWithPagination(currentPage);
             setTotalAuctions(result.auctionCount);
-            setAuctions(result.auctions);
+
+            const auctionsWithHighestBid = await Promise.all(
+              (result.auctions).map(async (auction) => {
+                const highestBid = await getHighestBid(auction.id);
+                const highestBidAmount = highestBid.amount;
+                return { ...auction, highestBidAmount };
+              })
+            );
+
+            setAuctions(auctionsWithHighestBid);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
@@ -67,6 +77,17 @@ function AuctionList() {
                 }}
                 />
                 <CardContent>
+                {auction.highestBidAmount > 0  && (
+                    <>
+                    <Box sx = {{textAlign: 'left',}}>
+                      <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '20px', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
+                        Highest bid:&nbsp;
+                      </Typography>
+                      <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', fontWeight: 'bold', fontSize: '20px', color: '#c21818', display: 'inline-block'}}>
+                        {auction.highestBidAmount}
+                      </Typography>
+                  </Box>
+                    </> )}
                 <Typography
                     variant="subtitle1"
                     sx={{
@@ -86,7 +107,6 @@ function AuctionList() {
                       {timeLeft(auction.endDate, new Date().toISOString().slice(0, 19))}
                       </Typography>
                   </Box>
-
                   <Typography
                     variant="body2"
                     color="textSecondary"

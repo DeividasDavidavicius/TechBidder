@@ -6,9 +6,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useUser } from "../../contexts/UserContext";
 import SnackbarContext from "../../contexts/SnackbarContext";
 import PATHS from "../../utils/Paths";
-import { deletePart, getPart, getParts, patchPart } from "../../services/PartService";
+import { getPart, getParts, patchPart } from "../../services/PartService";
 import { getAllCategorySeries } from "../../services/SeriesService";
-import { getAuctionForPart, patchAuction } from "../../services/AuctionService";
+import { patchAuction } from "../../services/AuctionService";
 import { deletePartRequest, getPartRequest } from "../../services/PartRequestService";
 
 function PartRequestsCreate() {
@@ -179,15 +179,22 @@ function PartRequestsCreate() {
         };
 
         const fetchRequestData = async () => {
-            const result = await getPartRequest(requestId);
-            const fetchedPartId = result.partId;
-            await setPartId(fetchedPartId);
-            await setAuctionId(result.auctionId);
+            try {
+                const result = await getPartRequest(requestId);
+                const fetchedPartId = result.partId;
+                await setPartId(fetchedPartId);
+                await setAuctionId(result.auctionId);
 
-            await fetchCategoriesData();
-            await fetchRequedtedPartData(fetchedPartId);
-            await fetchCategorySeries();
-            await fetchCategoryParts();
+                await fetchCategoriesData();
+                await fetchRequedtedPartData(fetchedPartId);
+                await fetchCategorySeries();
+                await fetchCategoryParts();
+            }
+            catch(error)
+            {
+                openSnackbar('This part request does not exist!!', 'error');
+                navigate(PATHS.PARTREQUESTS);
+            }
         };
 
         const fetchCategoriesData = async () => {

@@ -66,12 +66,17 @@ function EditSeries() {
         }
 
         const fetchSeriesData = async () => {
-            const seriesData = await getSeries(categoryId, seriesId);
-            setName(seriesData.name);
+            try {
+                const seriesData = await getSeries(categoryId, seriesId);
+                setName(seriesData.name);            }
+            catch(error)
+            {
+                openSnackbar('This series does not exist!!', 'error');
+                navigate(PATHS.SERIES);
+            }
         };
 
         fetchSeriesData();
-
     }, [categoryId, seriesId, navigate, openSnackbar, role]);
 
     return (
