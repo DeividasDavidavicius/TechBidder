@@ -144,7 +144,7 @@ function PcBuildGenerator()
 
     return (
         <Box>
-        <Container component="main" maxWidth="md">
+        <Container component="main" maxWidth="sm">
             <CssBaseline />
             <Box
                 sx={{

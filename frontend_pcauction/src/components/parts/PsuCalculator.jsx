@@ -19,6 +19,13 @@ function PsuCalculator() {
     const [selectedSSD, setSelectedSSD] = useState(null);
     const [selectedHDD, setSelectedHDD] = useState(null);
 
+    const [validationErrors, setValidationErrors] = useState({
+        motherboard: null,
+        cpu: null,
+        gpu: null,
+        ram: null
+    });
+
     const [result, setResult] = useState(null);
 
     const handleMotherboardChange = async (newValue) => {
@@ -47,6 +54,20 @@ function PsuCalculator() {
 
     const getPsuSuggestions = async (e) => {
         e.preventDefault();
+
+        console.log(selectedCPU);
+
+        let errors = [];
+        setValidationErrors(errors);
+        if(selectedCPU == null) errors.cpu = "Select CPU";
+        if(selectedGPU == null) errors.gpu = "Select GPU";
+        if(selectedRAM == null) errors.ram = "Select RAM";
+        if(selectedMotherboard == null) errors.motherboard = "Select motherboard";
+
+        if (Object.keys(errors).length > 0) {
+            setValidationErrors(errors);
+            return;
+        }
 
         const data= {
             motherboardId: selectedMotherboard ? selectedMotherboard.id : null,
@@ -129,7 +150,7 @@ function PsuCalculator() {
                                         handleMotherboardChange(newValue);
                                     }}
                                     required
-                                    renderInput={(params) => <TextField {...params} label="Motherboard" />}
+                                    renderInput={(params) => <TextField {...params} label="Motherboard *" error={Boolean(validationErrors.motherboard)} helperText={validationErrors.motherboard} />}
                                     isOptionEqualToValue={(option, value) => { return true; }}
                                     sx={{ width: '100%', '& input': { fontSize: '1rem' } }}
                                 />
@@ -146,7 +167,7 @@ function PsuCalculator() {
                                         handleCPUChange(newValue);
                                     }}
                                     required
-                                    renderInput={(params) => <TextField {...params} label="CPU" />}
+                                    renderInput={(params) => <TextField {...params} label="CPU *" error={Boolean(validationErrors.cpu)} helperText={validationErrors.cpu}/>}
                                     isOptionEqualToValue={(option, value) => { return true; }}
                                     sx={{ width: '100%', '& input': { fontSize: '1rem' } }}
                                 />
@@ -163,7 +184,7 @@ function PsuCalculator() {
                                         handleGPUChange(newValue);
                                     }}
                                     required
-                                    renderInput={(params) => <TextField {...params} label="GPU" />}
+                                    renderInput={(params) => <TextField {...params} label="GPU *" error={Boolean(validationErrors.gpu)} helperText={validationErrors.gpu} />}
                                     isOptionEqualToValue={(option, value) => { return true; }}
                                     sx={{ width: '100%', '& input': { fontSize: '1rem' } }}
                                 />
@@ -180,7 +201,7 @@ function PsuCalculator() {
                                         handleRAMChange(newValue);
                                     }}
                                     required
-                                    renderInput={(params) => <TextField {...params} label="RAM" />}
+                                    renderInput={(params) => <TextField {...params} label="RAM" error={Boolean(validationErrors.ram)} helperText={validationErrors.ram} />}
                                     isOptionEqualToValue={(option, value) => { return true; }}
                                     sx={{ width: '100%', '& input': { fontSize: '1rem' } }}
                                 />

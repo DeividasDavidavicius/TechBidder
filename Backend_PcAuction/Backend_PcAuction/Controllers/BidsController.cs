@@ -75,6 +75,11 @@ namespace Backend_PcAuction.Controllers
                 return UnprocessableEntity("You can not bid because auction ended");
             }
 
+            if(auction.UserId == User.FindFirstValue(JwtRegisteredClaimNames.Sub))
+            {
+                return UnprocessableEntity("You can not bid on your own auction");
+            }
+
             var bid = new Bid
             {
                 Amount = createBidDto.Amount,
@@ -85,7 +90,6 @@ namespace Backend_PcAuction.Controllers
 
             await _bidsRepository.CreateAsync(bid);
 
-            auction.HighestBid = bid.Amount;
             _auctionsRepository.UpdateAsync(auction);
 
             return Created($"/api/v1/auctions/{auctionId}/bids/{bid.Id}", 

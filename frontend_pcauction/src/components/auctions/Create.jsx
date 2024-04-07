@@ -100,8 +100,8 @@ function CreateAuction() {
         if(endDate == null || endDate === "") errors.endDate = "Auction end date must be set";
         if(condition === null || condition === "") errors.condition = "Condition must be set"
         if(selectedImage === null || selectedImage === "") errors.image = "Image must be selected";
-        if(!imageType || !imageType.startsWith('image/')) errors.image = "Please select a valid image file";
-        if((part === "" || part === undefined || part == null) && checkBox === false) errors.part = "Please select a part for this auction";
+        if(!imageType || !imageType.startsWith('image/')) errors.image = "Select a valid image file";
+        if((part === "" || part === undefined || part == null) && checkBox === false) errors.part = "Select a part for this auction";
         if(partName === "" && checkBox === true) errors.partName = "Part name must be set";
 
         if (Object.keys(errors).length > 0) {

@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import PATHS from "../../utils/Paths";
-import { Avatar, Box, Card, CardActionArea, CardContent, CardHeader, Container, CssBaseline, Pagination, Typography } from "@mui/material";
+import { Autocomplete, Avatar, Box, Card, CardActionArea, CardContent, CardHeader, Container, CssBaseline, FormControl, Grid, Pagination, TextField, Typography } from "@mui/material";
 import { getAuctionsWithPagination } from "../../services/AuctionService";
 import { timeLeft } from "../../utils/DateUtils";
 import { getHighestBid } from "../../services/BIdService";
+import { getCategories } from "../../services/PartCategoryService";
+import { getPart, getParts } from "../../services/PartService";
+import { getAllCategorySeries } from "../../services/SeriesService";
 
 function AuctionList() {
     const navigate = useNavigate();
@@ -12,14 +15,28 @@ function AuctionList() {
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
 
-    const [currentPage, setCurrentPage] = useState(parseInt(queryParams.get('page', 10) || 1));
+    const [currentPage, setCurrentPage] = useState(parseInt(queryParams.get('page', 1) || 1));
+    const [categoryId, setCategoryId] = useState(queryParams.get('categoryId'));
+    const [seriesId, setSeriesId] = useState(queryParams.get('seriesId'));
+    const [partId, setPartId] = useState(queryParams.get('partId'));
     const [totalAuctions, setTotalAuctions] = useState(0);
     const [auctions, setAuctions] = useState([]);
     const auctionsPerPage = 5;
 
+    const [categories, setCategories] = useState([]);
+    const [series, setSeries] = useState([]);
+    const [parts, setParts] = useState([]);
+
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [selectedSeries, setSelectedSeries] = useState(null);
+    const [selectedPart, setSelectedPart] = useState(null);
+
     useEffect(() => {
+      console.log("T");
         const fetchAuctionsData = async () => {
-            const result = await getAuctionsWithPagination(currentPage);
+          console.log(selectedCategory)
+            const result = await getAuctionsWithPagination(currentPage, selectedCategory ? selectedCategory.id : (categoryId ? categoryId : ""),
+                                                           selectedSeries ? selectedSeries.id: (seriesId ? seriesId : ""), selectedPart ? selectedPart.id : (partId ? partId : ""));
             setTotalAuctions(result.auctionCount);
 
             const auctionsWithHighestBid = await Promise.all(
@@ -34,12 +51,55 @@ function AuctionList() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
+
+        const fetchFiltersData = async () => {
+          const categoriesResult = await getCategories();
+          if(categoryId !== null) setSelectedCategory(categoriesResult.find(category => category.id === categoryId))
+          setCategoryId(null);
+          setCategories(categoriesResult);
+
+          const seriesPromises = categoriesResult.map(category =>
+            getAllCategorySeries(category.id)
+          );
+
+          const seriesData = await Promise.all(seriesPromises);
+          const flattenedSeriesData = seriesData.flat();
+          if(seriesId !== null) setSelectedSeries(flattenedSeriesData.find(series => series.id === seriesId))
+          setSeriesId(null);
+          setSeries(flattenedSeriesData);
+
+          const partsPromises = categoriesResult.map(category =>
+            getParts(category.id)
+          );
+
+          const partsData = await Promise.all(partsPromises);
+          const flattenedPartData = partsData.flat();
+          if(partId !== null) setSelectedPart(flattenedPartData.find(part => part.id === partId))
+          setPartId(null);
+          setParts(flattenedPartData);
+      };
+
         fetchAuctionsData();
-    }, [currentPage]);
+        fetchFiltersData();
+
+    }, [currentPage, selectedCategory, selectedSeries, selectedPart]);
 
     const handlePageChange = (event, newPage) => {
-        navigate(PATHS.AUCTIONS + "?page=" + newPage);
-        setCurrentPage(newPage);
+      const queryParams = [];
+      if (newPage) {
+          queryParams.push(`page=${newPage}`);
+      }
+      if (selectedCategory?.id) {
+          queryParams.push(`categoryId=${selectedCategory.id}`);
+      }
+      if (selectedSeries?.id) {
+          queryParams.push(`seriesId=${selectedSeries.id}`);
+      }
+      if (selectedPart?.id) {
+          queryParams.push(`partId=${selectedPart.id}`);
+      }
+      navigate(PATHS.AUCTIONS + "?" + queryParams.join("&"));
+      setCurrentPage(newPage);
     };
 
     const truncateText = (text, maxLength) => {
@@ -49,7 +109,60 @@ function AuctionList() {
 
     const handleCardClick = (auctionId) => {
         navigate(PATHS.AUCTIONINFO.replace(":auctionId", auctionId));
-      };
+    };
+
+    const handleCategoryChange = async (category) => {
+
+      console.log(category);
+        await setSelectedCategory(category);
+        await setSelectedSeries(null);
+        await setSelectedPart(null);
+
+        const queryParams = [];
+        if (currentPage) {
+            queryParams.push(`page=${currentPage}`);
+        }
+        if (category?.id) {
+            queryParams.push(`categoryId=${category.id}`);
+        }
+        navigate(PATHS.AUCTIONS + "?" + queryParams.join("&"));
+    }
+
+    const handleSeriesChange = async (series) => {
+      await setSelectedSeries(series);
+      await setSelectedPart(null);
+
+      const queryParams = [];
+      if (currentPage) {
+          queryParams.push(`page=${currentPage}`);
+      }
+      if (selectedCategory?.id) {
+          queryParams.push(`categoryId=${selectedCategory.id}`);
+      }
+      if (series?.id) {
+          queryParams.push(`seriesId=${series.id}`);
+      }
+      navigate(PATHS.AUCTIONS + "?" + queryParams.join("&"));
+    }
+
+  const handlePartChange = async (part) => {
+    await setSelectedPart(part);
+
+    const queryParams = [];
+    if (currentPage) {
+        queryParams.push(`page=${currentPage}`);
+    }
+    if (selectedCategory?.id) {
+        queryParams.push(`categoryId=${selectedCategory.id}`);
+    }
+    if (selectedSeries?.id) {
+        queryParams.push(`seriesId=${selectedSeries.id}`);
+    }
+    if (part?.id) {
+        queryParams.push(`partId=${part.id}`);
+    }
+    navigate(PATHS.AUCTIONS + "?" + queryParams.join("&"));
+  }
 
     return (
     <Container component="main" maxWidth="lg">
@@ -62,6 +175,69 @@ function AuctionList() {
           padding: '20px',
         }}
       >
+
+
+        <Grid container spacing={2} sx={{marginBottom: 2}}>
+            <Grid item xs={12} sm={4}>
+                <FormControl fullWidth>
+                    <Autocomplete
+                        id="categories-autocomplete"
+                        options={categories.map(p => ({ id: p.id, label: p.id }))}
+                        getOptionLabel={(option) => option?.label || option}
+                        value={selectedCategory}
+                        onChange={(event, newValue) => handleCategoryChange(newValue)}
+                        required
+                        renderInput={(params) => <TextField {...params} label="Categories"/>}
+                        isOptionEqualToValue={(option, value) => true}
+                    />
+                </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+                <FormControl fullWidth>
+                    <Autocomplete
+                        id="series-autocomplete"
+                        options={selectedCategory ? series.filter(s => s.categoryId === selectedCategory?.id)
+                          .map(s => ({ id: s.id, label: s.name }))
+                          : series.map(s => ({ id: s.id, label: s.name }))}
+                        getOptionLabel={(option) => option?.label || option}
+                        value={selectedSeries}
+                        onChange={(event, newValue) => handleSeriesChange(newValue)}
+                        required
+                        renderInput={(params) => <TextField {...params} label="Series"/>}
+                        isOptionEqualToValue={(option, value) => true}
+                    />
+                </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+                <FormControl fullWidth>
+                    <Autocomplete
+                        id="parts-autocomplete"
+                        options={(selectedCategory && selectedSeries) ?
+                          parts.filter(p => p.categoryId === selectedCategory.id && p.seriesId === selectedSeries.id)
+                               .map(p => ({ id: p.id, label: p.name })) :
+                          (selectedCategory ?
+                           parts.filter(p => p.categoryId === selectedCategory.id)
+                                .map(p => ({ id: p.id, label: p.name })) :
+                           (selectedSeries ?
+                            parts.filter(p => p.seriesId === selectedSeries.id)
+                                 .map(p => ({ id: p.id, label: p.name })) :
+                            parts.map(p => ({ id: p.id, label: p.name }))))
+                        }
+                        getOptionLabel={(option) => option?.label || option}
+                        value={selectedPart}
+                        onChange={(event, newValue) => handlePartChange(newValue)}
+                        required
+                        renderInput={(params) => <TextField {...params} label="Parts"/>}
+                        isOptionEqualToValue={(option, value) => true}
+                    />
+                </FormControl>
+            </Grid>
+        </Grid>
+
+
+
+
+
         <Box>
           {auctions.map((auction, index) => (
             <Card key = {auction.id}  display="flex" sx={{ marginBottom: 2, border: '1px solid #ddd' }}>

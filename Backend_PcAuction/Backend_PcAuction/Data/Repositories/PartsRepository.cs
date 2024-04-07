@@ -54,13 +54,13 @@ namespace Backend_PcAuction.Data.Repositories
         }
         public async Task<Part?> GetFromActiveAuctions(string categoryId, Guid partId)
         {
-            return await _context.Auctions.Where(a => a.Status == AuctionStatuses.Active && a.Part.Id == partId && a.Part.Category.Id == categoryId).
+            return await _context.Auctions.Where(a => a.Status == AuctionStatuses.Active && a.Part.Id == partId && a.Part.Category.Id == categoryId && a.Part.AveragePrice > 0).
                 Include(a => a.Part.Category).Select(a => a.Part).FirstOrDefaultAsync();
         }
 
         public async Task<List<Part>> GetManyFromActiveAuctions(string categoryId)
         {
-            return await _context.Auctions.Where(a => a.Status == AuctionStatuses.Active && a.Part.Category.Id == categoryId).
+            return await _context.Auctions.Where(a => a.Status == AuctionStatuses.Active && a.Part.Category.Id == categoryId && a.Part.AveragePrice > 0).
                 Include(a => a.Part.Category).Select(a => a.Part).Distinct().ToListAsync();
         }
 

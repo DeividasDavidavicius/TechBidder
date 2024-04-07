@@ -112,7 +112,6 @@ namespace Backend_PcAuction.Controllers
                 Condition = createAuctionDto.Condition,
                 Manufacturer = createAuctionDto.Manufacturer,
                 ImageUri = imageUri,
-                HighestBid = -1,
                 UserId = User.FindFirstValue(JwtRegisteredClaimNames.Sub),
                 Part = part
             };
@@ -154,10 +153,10 @@ namespace Backend_PcAuction.Controllers
 
         [HttpGet]
         [Route("pagination")]
-        public async Task<ActionResult<AuctionsWithPaginationDto>> GetManyWithPagination(int page = 1)
+        public async Task<ActionResult<AuctionsWithPaginationDto>> GetManyWithPagination(int page = 1, string categoryId = null, Guid? seriesId = null, Guid? partId = null)
         {
-            var auctions = await _auctionsRepository.GetManyWithPaginationAsync(page);
-            var auctionCount = await _auctionsRepository.GetCountAsync();
+            var auctions = await _auctionsRepository.GetManyWithPaginationAsync(page, categoryId, seriesId, partId);
+            var auctionCount = await _auctionsRepository.GetCountAsync(categoryId, seriesId, partId);
 
             var resultAuctions = auctions.Select(auction =>
             new AuctionWithPartNameDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate, auction.EndDate,

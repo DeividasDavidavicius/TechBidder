@@ -15,9 +15,9 @@ namespace Backend_PcAuction.Services
 
     public class CalculationsService : ICalculationsService
     {
-        public readonly IPartsRepository _partsRepository;
-        public readonly IAuctionsRepository _auctionsRepository;
-        public readonly IPartPricesService _partPriceService;
+        private readonly IPartsRepository _partsRepository;
+        private readonly IAuctionsRepository _auctionsRepository;
+        private readonly IPartPricesService _partPriceService;
         public CalculationsService(IPartsRepository partsRepository, IAuctionsRepository auctionsRepository, IPartPricesService partPriceService)
         {
             _partsRepository = partsRepository;

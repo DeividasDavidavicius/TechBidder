@@ -3,6 +3,7 @@ import { useContext, useEffect, useState } from "react";
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import DeleteIcon from '@mui/icons-material/Delete';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import AddIcon from '@mui/icons-material/Add';
 import PATHS from "../../utils/Paths";
 import { Link, useNavigate } from "react-router-dom";
@@ -105,10 +106,10 @@ function PartRequestList() {
                 </TableHead>
                 <TableBody>
                 {requests.map((request, index) => (
-                    <TableRow key={index}>
-                        <TableCell>{request.categoryId}</TableCell>
-                        <TableCell>{request.name}</TableCell>
-                        <TableCell>
+                    <TableRow key={index} >
+                        <TableCell style={{ width: '20%' }}>{request.categoryId}</TableCell>
+                        <TableCell style={{ width: '35%' }}>{request.name}</TableCell>
+                        <TableCell style={{ width: '45%' }}>
                             <Link to={PATHS.PARTREQUESTCREATE.replace(':requestId', request.id).replace(':categoryId', request.categoryId)}>
                                 <Button startIcon={<AddIcon />} sx={{ marginRight: 3, color: '#138c94', fontWeight: 'bold' }}>
                                     CREATE
@@ -120,6 +121,11 @@ function PartRequestList() {
                             >
                                 Delete
                             </Button>
+                            <Link to={PATHS.AUCTIONINFO.replace(':auctionId', request.auctionId).replace(':categoryId', request.categoryId)}>
+                                <Button startIcon={<InfoOutlinedIcon />} sx={{ marginRight: 3, color: '#138c94', fontWeight: 'bold' }}>
+                                    AUCTION
+                                </Button>
+                            </Link>
                         </TableCell>
                     </TableRow>
                 ))}

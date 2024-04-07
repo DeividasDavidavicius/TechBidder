@@ -101,7 +101,7 @@ function EditPart() {
         const patchData = {name, specificationValue1: specValue1, specificationValue2: specValue2, specificationValue3: specValue3,
             specificationValue4: specValue4, specificationValue5: specValue5, specificationValue6: specValue6,
             specificationValue7: specValue7,  specificationValue8: specValue8, specificationValue9: specValue9,
-            specificationValue10: specValue10, seriesId};
+            specificationValue10: specValue10, seriesId, type: 'Permanent'};
 
         const accessToken = localStorage.getItem('accessToken');
         if (!checkTokenValidity(accessToken)) {

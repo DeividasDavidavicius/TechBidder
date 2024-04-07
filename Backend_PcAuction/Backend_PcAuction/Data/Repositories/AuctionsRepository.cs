@@ -15,9 +15,9 @@ namespace Backend_PcAuction.Data.Repositories
         Task<List<Auction>> GetManyBySeriesDifferentPartAsync(Auction auction);
         Task<List<Auction>> GetManyByCategoryDifferentSeriesAsync(Auction auction);
         Task<List<Auction>> GetManyByCategoryDifferentPartAsync(Auction auction);
-        Task<IReadOnlyList<Auction>> GetManyWithPaginationAsync(int page);
+        Task<IReadOnlyList<Auction>> GetManyWithPaginationAsync(int page, string categoryId, Guid? seriesId, Guid? partId);
         Task UpdateAsync(Auction auction);
-        Task<int> GetCountAsync();
+        Task<int> GetCountAsync(string categoryId, Guid? seriesId, Guid? partId);
     }
 
     public class AuctionsRepository : IAuctionsRepository
@@ -70,9 +70,12 @@ namespace Backend_PcAuction.Data.Repositories
             return await _context.Auctions.Include(a => a.Part).Include(a => a.Part.Category).Where(a => a.Status == AuctionStatuses.Active && a.Part.Category.Id == auction.Part.Category.Id && a.Part.Id != auction.Part.Id).ToListAsync();
         }
 
-        public async Task<IReadOnlyList<Auction>> GetManyWithPaginationAsync(int page)
+        public async Task<IReadOnlyList<Auction>> GetManyWithPaginationAsync(int page, string categoryId, Guid? seriesId, Guid? partId)
         {
-            return await _context.Auctions.Include(a => a.Part).Include(a => a.Part.Category).Where(a => a.Status == AuctionStatuses.Active || a.Status == AuctionStatuses.ActiveNA).OrderByDescending(a => a.StartDate).Skip((page - 1) * 5).Take(5).ToListAsync();
+            return await _context.Auctions.Include(a => a.Part).Include(a => a.Part.Category).
+                Where(a => (a.Status == AuctionStatuses.Active || a.Status == AuctionStatuses.ActiveNA) && (categoryId == null || a.Part.Category.Id == categoryId)
+                && (seriesId == null || a.Part.Series.Id == seriesId) && (partId == null || a.Part.Id == partId)).
+                OrderByDescending(a => a.StartDate).Skip((page - 1) * 5).Take(5).ToListAsync();
         }
 
         public async Task UpdateAsync(Auction auction)
@@ -87,9 +90,10 @@ namespace Backend_PcAuction.Data.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<int> GetCountAsync()
+        public async Task<int> GetCountAsync(string categoryId, Guid? seriesId, Guid? partId)
         {
-            return await _context.Auctions.Where(a => a.Status == AuctionStatuses.Active).CountAsync();
+            return await _context.Auctions.Where(a => a.Status == AuctionStatuses.Active && (categoryId == null || a.Part.Category.Id == categoryId)
+                && (seriesId == null || a.Part.Series.Id == seriesId) && (partId == null || a.Part.Id == partId)).CountAsync();
         }
     }
 }

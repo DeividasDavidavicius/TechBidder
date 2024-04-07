@@ -31,7 +31,18 @@ namespace Backend_PcAuction.Services
 
 
             var samePartAuctions = await _auctionsRepository.GetManyByPartAsync(auction);
-            var samePartAuctionsFiltered = samePartAuctions.Where(a => a.HighestBid < 1000).ToList(); // TODO replace 1000 with average price
+
+            var samePartAuctionsFiltered = samePartAuctions.ToList();
+
+            foreach(var recAuction in samePartAuctions)
+            {
+                var highestBid = await _bidsRepository.GetLastAsync(recAuction.Id);
+
+                if(highestBid != null && highestBid.Amount > recAuction.Part.AveragePrice && recAuction.Part.AveragePrice > 0)
+                {
+                    samePartAuctionsFiltered.Remove(recAuction);
+                }
+            }
 
             for (int i = 0; i < 2 && samePartAuctionsFiltered.Count > 0; i++)
             {
@@ -41,9 +52,19 @@ namespace Backend_PcAuction.Services
             }
 
             var sameSeriesAuctions = (auction.Part.Series != null ? await _auctionsRepository.GetManyBySeriesDifferentPartAsync(auction) : new List<Auction>());
-            var sameSeriesAuctionsFiltered = sameSeriesAuctions.Where(a => a.HighestBid < 1000).ToList(); // TODO replace 1000 with average price
+            var sameSeriesAuctionsFiltered = sameSeriesAuctions.ToList();
 
-            
+            foreach (var recAuction in sameSeriesAuctions)
+            {
+                var highestBid = await _bidsRepository.GetLastAsync(recAuction.Id);
+
+                if (highestBid != null && highestBid.Amount > recAuction.Part.AveragePrice && recAuction.Part.AveragePrice > 0)
+                {
+                    sameSeriesAuctionsFiltered.Remove(recAuction);
+                }
+            }
+
+
             for (int i = 0; i < 2 && sameSeriesAuctionsFiltered.Count > 0; i++)
             {
                 int randomIndex = random.Next(0, sameSeriesAuctionsFiltered.Count);
@@ -52,7 +73,17 @@ namespace Backend_PcAuction.Services
             }
 
             var sameCategoryAuctions = auction.Part.Series != null ?  await _auctionsRepository.GetManyByCategoryDifferentSeriesAsync(auction) : await _auctionsRepository.GetManyByCategoryDifferentPartAsync(auction);
-            var sameCategoryAuctionsFiltered = sameCategoryAuctions.Where(a => a.HighestBid < 1000).ToList(); // TODO replace 1000 with average price
+            var sameCategoryAuctionsFiltered = sameCategoryAuctions.ToList();
+
+            foreach (var recAuction in sameCategoryAuctions)
+            {
+                var highestBid = await _bidsRepository.GetLastAsync(recAuction.Id);
+
+                if (highestBid != null && highestBid.Amount > recAuction.Part.AveragePrice && recAuction.Part.AveragePrice > 0)
+                {
+                    sameCategoryAuctionsFiltered.Remove(recAuction);
+                }
+            }
 
             var allRemainingAuctions = new List<Auction>();
 

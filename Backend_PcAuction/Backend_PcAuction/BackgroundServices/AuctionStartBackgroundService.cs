@@ -1,6 +1,5 @@
 ﻿using Backend_PcAuction.Data;
 using Backend_PcAuction.Data.Entities;
-using Backend_PcAuction.Data.Repositories;
 using Backend_PcAuction.Utils;
 using Microsoft.EntityFrameworkCore;
 
@@ -45,18 +44,11 @@ namespace Backend_PcAuction.BackgroundServices
 
                         var log = new Log
                         {
-                            Message = String.Format("Updated: Time: {0}, auction: {1}", DateTime.UtcNow, auction.Name)
+                            Message = String.Format("Updated auction status: Time: {0}, auction: {1}", DateTime.UtcNow, auction.Name)
                         };
                         dbContext.Logs.Add(log);
                     }
-                    else
-                    {
-                        var log = new Log
-                        {
-                            Message = String.Format("Not updated: Time: {0}, auction: {1}", DateTime.UtcNow, auction.Name)
-                        };
-                        dbContext.Logs.Add(log);
-                    }
+
                     await dbContext.SaveChangesAsync();
                 }
             }

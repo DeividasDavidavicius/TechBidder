@@ -40,6 +40,7 @@ builder.Services.AddScoped<IAuctionService, AuctionService>();
 builder.Services.AddScoped<ICalculationsService, CalculationsService>();
 
 builder.Services.AddHostedService<AuctionStartBackgroundService>();
+builder.Services.AddHostedService<PartAveragePriceBackgroundService>();
 
 builder.Services.AddAuthorization(options =>
 {

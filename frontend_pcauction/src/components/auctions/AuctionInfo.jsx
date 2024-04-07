@@ -23,8 +23,9 @@ function AuctionInfo() {
     const [imageUri, setImageUri] = useState(null);
     const openSnackbar = useContext(SnackbarContext);
     const navigate = useNavigate();
-    const { setLogin, setLogout } = useUser();
+    const { role, setLogin, setLogout, getUserId } = useUser();
     const [bidAmountField, setBidAmountField] = useState(0);
+    const [canBid, setCanBid] = useState(true);
 
     const [partData, setPartData] = useState([]);
     const [categoryData, setCategoryData] = useState([]);
@@ -137,7 +138,10 @@ function AuctionInfo() {
                 setMinIncrement(result.minIncrement);
 
                 await fetchCategoryData(result.categoryId);
-                await fetchPartData(result.categoryId, result.partId)
+                await fetchPartData(result.categoryId, result.partId);
+                if (!(role.includes("RegisteredUser")) || result.userId === getUserId()) {
+                    setCanBid(false);
+                }
             }
             catch(error) {
                 openSnackbar('This auction does not exist!', 'error');
@@ -158,7 +162,26 @@ function AuctionInfo() {
 
         fetchAuctionData();
         fetchHighestBidData();
-      }, [auctionId, navigate, openSnackbar]);
+      }, [auctionId, navigate, openSnackbar, getUserId, role]);
+
+
+      useEffect(() => {
+        const fetchHighestBidData = async () => {
+            try {
+                const result = await getHighestBid(auctionId);
+                setHighestBid(result.amount);
+            }
+            catch(error) {
+                openSnackbar('This auction does not exist!', 'error');
+                navigate(PATHS.MAIN);
+            }
+        };
+
+        fetchHighestBidData();
+        const interval = setInterval(fetchHighestBidData, 3000);
+
+        return () => clearInterval(interval);
+    }, []);
 
       return (
         <Container component="main" maxWidth="lg">
@@ -279,6 +302,9 @@ function AuctionInfo() {
                                 </Typography >
                             </Box>
                         </Grid>
+
+                        {canBid === true && (
+                        <>
                         <Grid item xs={12} sx={{ marginTop: 1 }}>
                             <Box sx={{ display: 'flex', alignItems: 'stretch' }}>
                                 <TextField
@@ -315,6 +341,7 @@ function AuctionInfo() {
                                 </Button>
                             </Box>
                         </Grid>
+                        </> )}
                         <Grid item xs={12}>
                             <Box sx={{ display: 'flex', alignItems: 'stretch', marginTop: 2 }}>
                                 <Typography

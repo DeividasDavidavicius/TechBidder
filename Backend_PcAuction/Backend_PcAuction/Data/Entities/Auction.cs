@@ -18,7 +18,6 @@ namespace Backend_PcAuction.Data.Entities
         public string Condition { get; set; }
         public string? Manufacturer { get; set; }
         public string ImageUri { get; set; } // del rodymo paziuret kaip skelbiu ratio padaro
-        public double HighestBid { get; set; }
         public Part Part { get; set; }
         [Required]
         public string UserId { get; set; }

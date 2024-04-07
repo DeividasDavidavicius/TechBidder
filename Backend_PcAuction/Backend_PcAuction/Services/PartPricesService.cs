@@ -26,6 +26,7 @@ namespace Backend_PcAuction.Services
 
             var sumOfSales = 0.0;
             double factors = 0;
+            double returnValue = -1;
 
             foreach (var sale in salesOnPartAuction)
             {
@@ -34,7 +35,15 @@ namespace Backend_PcAuction.Services
 
             if(ebayPriceAvg != null)
             {
-                factors++;
+                if(ebayPriceAvg.Price == -10)
+                {
+                    ebayPriceAvg = null;
+                    returnValue = 0;
+                }
+                else
+                {
+                    factors++;
+                }
             }
 
             if(salesOnPartAuction.Count > 0)
@@ -44,7 +53,7 @@ namespace Backend_PcAuction.Services
 
             if(factors == 0)
             {
-                return -1;
+                return returnValue;
             }
 
             var ebayAvgAmount = ebayPriceAvg != null ? ebayPriceAvg.Price : 0;
