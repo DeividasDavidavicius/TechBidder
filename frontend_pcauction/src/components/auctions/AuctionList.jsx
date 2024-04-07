@@ -6,7 +6,7 @@ import { getAuctionsWithPagination } from "../../services/AuctionService";
 import { timeLeft } from "../../utils/DateUtils";
 import { getHighestBid } from "../../services/BIdService";
 import { getCategories } from "../../services/PartCategoryService";
-import { getPart, getParts } from "../../services/PartService";
+import { getParts } from "../../services/PartService";
 import { getAllCategorySeries } from "../../services/SeriesService";
 
 function AuctionList() {
@@ -32,9 +32,7 @@ function AuctionList() {
     const [selectedPart, setSelectedPart] = useState(null);
 
     useEffect(() => {
-      console.log("T");
         const fetchAuctionsData = async () => {
-          console.log(selectedCategory)
             const result = await getAuctionsWithPagination(currentPage, selectedCategory ? selectedCategory.id : (categoryId ? categoryId : ""),
                                                            selectedSeries ? selectedSeries.id: (seriesId ? seriesId : ""), selectedPart ? selectedPart.id : (partId ? partId : ""));
             setTotalAuctions(result.auctionCount);
@@ -54,7 +52,12 @@ function AuctionList() {
 
         const fetchFiltersData = async () => {
           const categoriesResult = await getCategories();
-          if(categoryId !== null) setSelectedCategory(categoriesResult.find(category => category.id === categoryId))
+          if (categoryId !== null) {
+            const category = categoriesResult.find(category => category.id === categoryId);
+            if (category) {
+              setSelectedCategory({ id: category.id, label: category.id });
+            }
+          }
           setCategoryId(null);
           setCategories(categoriesResult);
 
@@ -64,7 +67,12 @@ function AuctionList() {
 
           const seriesData = await Promise.all(seriesPromises);
           const flattenedSeriesData = seriesData.flat();
-          if(seriesId !== null) setSelectedSeries(flattenedSeriesData.find(series => series.id === seriesId))
+          if (seriesId !== null) {
+            const series = flattenedSeriesData.find(series => series.id === seriesId);
+            if (series) {
+              setSelectedSeries({ id: series.id, label: series.name });
+            }
+          }
           setSeriesId(null);
           setSeries(flattenedSeriesData);
 
@@ -74,7 +82,12 @@ function AuctionList() {
 
           const partsData = await Promise.all(partsPromises);
           const flattenedPartData = partsData.flat();
-          if(partId !== null) setSelectedPart(flattenedPartData.find(part => part.id === partId))
+          if (partId !== null) {
+            const part = flattenedPartData.find(part => part.id === partId);
+            if (part) {
+              setSelectedPart({ id: part.id, label: part.name });
+            }
+          }
           setPartId(null);
           setParts(flattenedPartData);
       };
@@ -112,8 +125,6 @@ function AuctionList() {
     };
 
     const handleCategoryChange = async (category) => {
-
-      console.log(category);
         await setSelectedCategory(category);
         await setSelectedSeries(null);
         await setSelectedPart(null);
