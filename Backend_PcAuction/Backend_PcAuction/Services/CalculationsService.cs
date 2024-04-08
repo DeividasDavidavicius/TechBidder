@@ -90,7 +90,6 @@ namespace Backend_PcAuction.Services
             }
 
             // TODO: Galbut dar atkreipti demesi skaiciuojant weight score i kainu skirtuma (100/kainu skirtumas) * weight * score
-            // TODO: Ieskot tik is aukcionu, kuriu current bid price <= avgPrice?
 
             var finalBuild = builds.OrderByDescending(b => b.TotalPrice).FirstOrDefault();
             List<Auction> auctions = new List<Auction>();
@@ -147,22 +146,29 @@ namespace Backend_PcAuction.Services
 
             if (pcBuilderDataDto.CpuAlreadyHave) cpuList = await GetPartAlreadyHave(pcBuilderDataDto.CpuId, PartCategories.CPU);
             else cpuList = pcBuilderDataDto.CpuId == null ? null : await GetParts(pcBuilderDataDto.CpuId, PartCategories.CPU);
+            if (pcBuilderDataDto.CpuId != null && cpuList == null) return null;
 
             if (pcBuilderDataDto.GpuAlreadyHave) gpuList = await GetPartAlreadyHave(pcBuilderDataDto.GpuId, PartCategories.GPU);
             else gpuList = pcBuilderDataDto.GpuId == null ? null : await GetParts(pcBuilderDataDto.GpuId, PartCategories.GPU);
+            if (pcBuilderDataDto.GpuId != null && gpuList == null) return null;
 
             if (pcBuilderDataDto.RamAlreadyHave) ramList = await GetPartAlreadyHave(pcBuilderDataDto.RamId, PartCategories.RAM);
             else ramList = pcBuilderDataDto.RamId == null ? null : await GetParts(pcBuilderDataDto.RamId, PartCategories.RAM);
+            if (pcBuilderDataDto.RamId != null && ramList == null) return null;
 
             if (pcBuilderDataDto.SsdAlreadyHave) ssdList = await GetPartAlreadyHave(pcBuilderDataDto.SsdId, PartCategories.SSD);
             else ssdList = pcBuilderDataDto.SsdId == null ? null : await GetParts(pcBuilderDataDto.SsdId, PartCategories.SSD);
+            if (pcBuilderDataDto.SsdId != null && ssdList == null) return null;
 
             if (pcBuilderDataDto.HddAlreadyHave) hddList = await GetPartAlreadyHave(pcBuilderDataDto.HddId, PartCategories.HDD);
             else hddList = pcBuilderDataDto.HddId == null ? null : await GetParts(pcBuilderDataDto.HddId, PartCategories.HDD);
+            if (pcBuilderDataDto.HddId != null && hddList == null) return null;
 
             var psuList = pcBuilderDataDto.IncludePsu == true ? await GetParts("ANY", PartCategories.PSU) : null;
+            if (pcBuilderDataDto.IncludePsu == true && psuList == null) return null;
 
-            if(cpuList != null)
+
+            if (cpuList != null)
             {
                 cpuList = CheckCpuCompatibility(motherboard, cpuList);
                 if (cpuList == null) return null;
