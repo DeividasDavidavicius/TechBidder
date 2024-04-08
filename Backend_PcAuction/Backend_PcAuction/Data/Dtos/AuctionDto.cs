@@ -36,6 +36,24 @@ namespace Backend_PcAuction.Data.Dtos
         string CategoryId
     );
 
+    public record AuctionWithAvgPriceDto(
+    Guid Id,
+    string Name,
+    string Description,
+    DateTime CreationDate,
+    DateTime StartDate,
+    DateTime EndDate,
+    double MinIncrement,
+    string Condition,
+    string Manufacturer,
+    string ImageUri,
+    string Status,
+    double AveragePrice,
+    string UserId,
+    string PartName,
+    string CategoryId
+);
+
     public record CreateAuctionDto(
         [Required]string Name,
         [Required] string Description,

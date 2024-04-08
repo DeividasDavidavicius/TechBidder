@@ -61,11 +61,42 @@ namespace Backend_PcAuction.Controllers
             if (pcBuilderDataDto.MotherboardId == null)
                 return NotFound();
 
-            var pcBuildAuctions = await _calculationsService.GeneratePcBuild(pcBuilderDataDto);
+            if (pcBuilderDataDto.MotherboardAlreadyHave && pcBuilderDataDto.MotherboardId == "ANY")
+                return UnprocessableEntity("Select specific motherboard");
+
+            if (pcBuilderDataDto.CpuAlreadyHave && pcBuilderDataDto.CpuId == "ANY")
+                return UnprocessableEntity("Select specific CPU");
+
+            if (pcBuilderDataDto.GpuAlreadyHave && pcBuilderDataDto.GpuId == "ANY")
+                return UnprocessableEntity("Select specific GPU");
+
+            if (pcBuilderDataDto.RamAlreadyHave && pcBuilderDataDto.RamId == "ANY")
+                return UnprocessableEntity("Select specific RAM");
+
+            if (pcBuilderDataDto.SsdAlreadyHave && pcBuilderDataDto.SsdId == "ANY")
+                return UnprocessableEntity("Select specific SSD");
+
+            if (pcBuilderDataDto.HddAlreadyHave && pcBuilderDataDto.HddId == "ANY")
+                return UnprocessableEntity("Select specific HDD");
+
+            var pcBuildAuctions = new List<Auction>();
+            try
+            {
+                pcBuildAuctions = await _calculationsService.GeneratePcBuild(pcBuilderDataDto);
+            }
+            catch (Exception ex)
+            {
+                return UnprocessableEntity("Could not generate PC build");
+            }
+
+            if (pcBuildAuctions.Count == 0)
+            {
+                return UnprocessableEntity("Could not generate PC build");
+            }
 
             return Ok(pcBuildAuctions.Select(auction =>
-                new AuctionWithPartNameDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate, auction.EndDate,
-                    auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.Status, auction.UserId, auction.Part.Name, auction.Part.Category.Id)));
+                new AuctionWithAvgPriceDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate, auction.EndDate,
+                    auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.Status, auction.Part.AveragePrice, auction.UserId, auction.Part.Name, auction.Part.Category.Id)));
         }
     }
 }

@@ -55,8 +55,6 @@ function PsuCalculator() {
     const getPsuSuggestions = async (e) => {
         e.preventDefault();
 
-        console.log(selectedCPU);
-
         let errors = [];
         setValidationErrors(errors);
         if(selectedCPU == null) errors.cpu = "Select CPU";

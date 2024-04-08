@@ -65,9 +65,13 @@ namespace Backend_PcAuction.Services
 
         public async Task<List<Auction>> GeneratePcBuild(PcBuilderDataDto pcBuilderDataDto)
         {
-            var motherboards = await GetParts(pcBuilderDataDto.MotherboardId, PartCategories.Motherboard);
+            var motherboards = new List<Part>();
+
+            if (pcBuilderDataDto.MotherboardAlreadyHave) motherboards = await GetPartAlreadyHave(pcBuilderDataDto.MotherboardId, PartCategories.Motherboard);
+            else  motherboards = await GetParts(pcBuilderDataDto.MotherboardId, PartCategories.Motherboard);
+
             if (motherboards == null)
-                return null;
+                return new List<Auction>();
 
             List<PcBuild> builds = new List<PcBuild>();
 
@@ -86,15 +90,12 @@ namespace Backend_PcAuction.Services
             }
 
             // TODO: Galbut dar atkreipti demesi skaiciuojant weight score i kainu skirtuma (100/kainu skirtumas) * weight * score
-            // TODO: Galbut random pasirinkti cia
-            // TODO: Galbut random'e pora daliu palikti ir pora tik random parinkti 50/50 koki 
-            // TODO: Pasirinkti dalis kurias jau turi? (Ten iki compatibility tik tures itaka atrodo)
             // TODO: Ieskot tik is aukcionu, kuriu current bid price <= avgPrice?
 
             var finalBuild = builds.OrderByDescending(b => b.TotalPrice).FirstOrDefault();
             List<Auction> auctions = new List<Auction>();
 
-            auctions.Add(await _auctionsRepository.GetWithPartActiveCheapestAsync(finalBuild.Motherboard.Id));
+            if(!pcBuilderDataDto.MotherboardAlreadyHave) auctions.Add(await _auctionsRepository.GetWithPartActiveCheapestAsync(finalBuild.Motherboard.Id));
             if(finalBuild.CPU != null) auctions.Add(await _auctionsRepository.GetWithPartActiveCheapestAsync(finalBuild.CPU.Id));
             if (finalBuild.GPU != null) auctions.Add(await _auctionsRepository.GetWithPartActiveCheapestAsync(finalBuild.GPU.Id));
             if (finalBuild.RAM != null) auctions.Add(await _auctionsRepository.GetWithPartActiveCheapestAsync(finalBuild.RAM.Id));
@@ -120,18 +121,46 @@ namespace Backend_PcAuction.Services
                 }
 
                 var part = await _partsRepository.GetFromActiveAuctions(category, guid);
+                if (part == null) return null;
                 return new List<Part> { part };
             }
         }
 
+        public async Task<List<Part>> GetPartAlreadyHave(string id, string category)
+        {
+            Guid guid;
+            if (!Guid.TryParse(id, out guid))
+            {
+                return null;
+            }
+            var part = await _partsRepository.GetAsync(category, guid);
+            return new List<Part> { part };
+        }
+
         public async Task<PcBuild> GenerateBuildForMotherboard(Part motherboard, PcBuilderDataDto pcBuilderDataDto)
         {
-            var cpuList = pcBuilderDataDto.CpuId == null ? null : await GetParts(pcBuilderDataDto.CpuId, PartCategories.CPU);
-            var gpuList = pcBuilderDataDto.GpuId == null ? null : await GetParts(pcBuilderDataDto.GpuId, PartCategories.GPU);
-            var ramList = pcBuilderDataDto.RamId == null ? null : await GetParts(pcBuilderDataDto.RamId, PartCategories.RAM);
-            var ssdList = pcBuilderDataDto.SsdId == null ? null : await GetParts(pcBuilderDataDto.SsdId, PartCategories.SSD);
-            var hddList = pcBuilderDataDto.HddId == null ? null : await GetParts(pcBuilderDataDto.HddId, PartCategories.HDD);
-            var psuList = await GetParts("ANY", PartCategories.PSU);
+            var cpuList = new List<Part>();
+            var gpuList = new List<Part>();
+            var ramList = new List<Part>();
+            var ssdList = new List<Part>();
+            var hddList = new List<Part>();
+
+            if (pcBuilderDataDto.CpuAlreadyHave) cpuList = await GetPartAlreadyHave(pcBuilderDataDto.CpuId, PartCategories.CPU);
+            else cpuList = pcBuilderDataDto.CpuId == null ? null : await GetParts(pcBuilderDataDto.CpuId, PartCategories.CPU);
+
+            if (pcBuilderDataDto.GpuAlreadyHave) gpuList = await GetPartAlreadyHave(pcBuilderDataDto.GpuId, PartCategories.GPU);
+            else gpuList = pcBuilderDataDto.GpuId == null ? null : await GetParts(pcBuilderDataDto.GpuId, PartCategories.GPU);
+
+            if (pcBuilderDataDto.RamAlreadyHave) ramList = await GetPartAlreadyHave(pcBuilderDataDto.RamId, PartCategories.RAM);
+            else ramList = pcBuilderDataDto.RamId == null ? null : await GetParts(pcBuilderDataDto.RamId, PartCategories.RAM);
+
+            if (pcBuilderDataDto.SsdAlreadyHave) ssdList = await GetPartAlreadyHave(pcBuilderDataDto.SsdId, PartCategories.SSD);
+            else ssdList = pcBuilderDataDto.SsdId == null ? null : await GetParts(pcBuilderDataDto.SsdId, PartCategories.SSD);
+
+            if (pcBuilderDataDto.HddAlreadyHave) hddList = await GetPartAlreadyHave(pcBuilderDataDto.HddId, PartCategories.HDD);
+            else hddList = pcBuilderDataDto.HddId == null ? null : await GetParts(pcBuilderDataDto.HddId, PartCategories.HDD);
+
+            var psuList = pcBuilderDataDto.IncludePsu == true ? await GetParts("ANY", PartCategories.PSU) : null;
 
             if(cpuList != null)
             {
@@ -157,9 +186,14 @@ namespace Backend_PcAuction.Services
                 if (hddList == null) return null;
             }
 
+            if (pcBuilderDataDto.MotherboardAlreadyHave) motherboard = null;
+            else motherboard.AveragePrice = await _partPriceService.GetPriceAverageAsync(motherboard.Id);
 
-            motherboard.AveragePrice = await _partPriceService.GetPriceAverageAsync(motherboard.Id);
-
+            if (pcBuilderDataDto.CpuAlreadyHave) cpuList = null;
+            if (pcBuilderDataDto.GpuAlreadyHave) gpuList = null;
+            if (pcBuilderDataDto.RamAlreadyHave) ramList = null;
+            if (pcBuilderDataDto.SsdAlreadyHave) ssdList = null;
+            if (pcBuilderDataDto.HddAlreadyHave) hddList = null;
 
             if (cpuList != null) cpuList = await GetPrices(cpuList);
             if (gpuList != null) gpuList = await GetPrices(gpuList);
@@ -170,18 +204,21 @@ namespace Backend_PcAuction.Services
 
             PcBuild build = new PcBuild();
 
-            build.Motherboard = motherboard;
+            build.Motherboard =  motherboard;
             build.CPU = FindCheapestPart(cpuList);
             build.GPU = FindCheapestPart(gpuList);
             build.RAM = FindCheapestPart(ramList);
             build.SSD = FindCheapestPart(ssdList);
             build.HDD = FindCheapestPart(hddList);
 
-            var psuCalcResult = CalculatePSU(build.Motherboard, build.CPU, build.GPU, build.RAM, build.SSD, build.HDD);
-            var psuSize = psuCalcResult.CalculatedWattage > psuCalcResult.RecommendedWattage ? psuCalcResult.CalculatedWattage : psuCalcResult.RecommendedWattage;
+            if (pcBuilderDataDto.IncludePsu)
+            {
+                var psuCalcResult = CalculatePSU(build.Motherboard, build.CPU, build.GPU, build.RAM, build.SSD, build.HDD);
+                var psuSize = psuCalcResult.CalculatedWattage > psuCalcResult.RecommendedWattage ? psuCalcResult.CalculatedWattage : psuCalcResult.RecommendedWattage;
 
-            var suitablePSUs = psuList.Where(p => Double.Parse(p.SpecificationValue1) >= psuSize);
-            build.PSU = suitablePSUs.OrderBy(p => p.AveragePrice).FirstOrDefault();
+                var suitablePSUs = psuList.Where(p => Double.Parse(p.SpecificationValue1) >= psuSize);
+                build.PSU = suitablePSUs.OrderBy(p => p.AveragePrice).FirstOrDefault();
+            }
 
             build.TotalPrice = (build.Motherboard?.AveragePrice ?? 0) +
               (build.CPU?.AveragePrice ?? 0) +
@@ -209,7 +246,7 @@ namespace Backend_PcAuction.Services
             int iterationsCount = 100;
             for(int i = 0; i < iterationsCount; i++)
             {
-                PcBuild randomBuild = GenerateRandomBuild(cpuList, gpuList, ramList, ssdList, hddList, psuList, motherboard, pcBuilderDataDto.Budget);
+                PcBuild randomBuild = GenerateRandomBuild(build, cpuList, gpuList, ramList, ssdList, hddList, psuList, motherboard, pcBuilderDataDto.Budget, pcBuilderDataDto.IncludePsu);
                 var score = CalculateScore(randomBuild, build);
                 if(randomBuild.TotalPrice <= pcBuilderDataDto.Budget && score > 0)
                 {
@@ -312,23 +349,26 @@ namespace Backend_PcAuction.Services
             return 0;
         }
 
-        public PcBuild GenerateRandomBuild(List<Part> cpuList, List<Part> gpuList, List<Part> ramList,
-                                           List<Part> ssdList, List<Part> hddList, List<Part> psuList, Part motherboard, double budget)
+        public PcBuild GenerateRandomBuild(PcBuild build, List<Part> cpuList, List<Part> gpuList, List<Part> ramList, List<Part> ssdList, List<Part> hddList,
+                                           List<Part> psuList, Part motherboard, double budget, bool includePsu)
         {
             PcBuild randomBuild = new PcBuild();
 
             Random random = new Random();
-            randomBuild.CPU = SelectRandomPart(cpuList, random);
-            randomBuild.GPU = SelectRandomPart(gpuList, random);
-            randomBuild.RAM = SelectRandomPart(ramList, random);
-            randomBuild.SSD = SelectRandomPart(ssdList, random);
-            randomBuild.HDD = SelectRandomPart(hddList, random);
+            randomBuild.CPU = random.NextDouble() < 0.7 ? SelectRandomPart(cpuList, random) : build.CPU;
+            randomBuild.GPU = random.NextDouble() < 0.7 ? SelectRandomPart(gpuList, random) : build.GPU;
+            randomBuild.RAM = random.NextDouble() < 0.7 ? SelectRandomPart(ramList, random) : build.RAM;
+            randomBuild.SSD = random.NextDouble() < 0.7 ? SelectRandomPart(ssdList, random) : build.SSD;
+            randomBuild.HDD = random.NextDouble() < 0.7 ? SelectRandomPart(hddList, random) : build.HDD;
             randomBuild.Motherboard = motherboard;
 
-            var psuCalcResult = CalculatePSU(randomBuild.Motherboard, randomBuild.CPU, randomBuild.GPU, randomBuild.RAM, randomBuild.SSD, randomBuild.HDD);
-            var psuSize = psuCalcResult.CalculatedWattage > psuCalcResult.RecommendedWattage ? psuCalcResult.CalculatedWattage : psuCalcResult.RecommendedWattage;
-            var suitablePSUs = psuList.Where(p => Double.Parse(p.SpecificationValue1) >= psuSize);
-            randomBuild.PSU = suitablePSUs.OrderBy(p => p.AveragePrice).FirstOrDefault();
+            if (includePsu)
+            {
+                var psuCalcResult = CalculatePSU(randomBuild.Motherboard, randomBuild.CPU, randomBuild.GPU, randomBuild.RAM, randomBuild.SSD, randomBuild.HDD);
+                var psuSize = psuCalcResult.CalculatedWattage > psuCalcResult.RecommendedWattage ? psuCalcResult.CalculatedWattage : psuCalcResult.RecommendedWattage;
+                var suitablePSUs = psuList.Where(p => Double.Parse(p.SpecificationValue1) >= psuSize);
+                randomBuild.PSU = suitablePSUs.OrderBy(p => p.AveragePrice).FirstOrDefault();
+            }
 
             randomBuild.TotalPrice = (randomBuild.CPU?.AveragePrice ?? 0) +
                                      (randomBuild.GPU?.AveragePrice ?? 0) +

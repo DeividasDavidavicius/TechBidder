@@ -140,7 +140,6 @@ function PartRequestsCreate() {
 
             if(part == null)
             {
-                console.log(patchData);
                 await patchPart(patchData, categoryId, partId);
 
                 await patchAuction(null, auctionId);

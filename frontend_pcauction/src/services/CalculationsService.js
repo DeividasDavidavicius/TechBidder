@@ -23,7 +23,7 @@ export const calculatePsu = async(data) => {
           "Content-Type": "application/json"
         }
       })
-      return response;
+      return response.data;
     } catch (error) {
       console.error("Failed to generate PC build", error);
       throw error;

@@ -54,14 +54,36 @@ namespace Backend_PcAuction.Data.Repositories
         }
         public async Task<Part?> GetFromActiveAuctions(string categoryId, Guid partId)
         {
-            return await _context.Auctions.Where(a => a.Status == AuctionStatuses.Active && a.Part.Id == partId && a.Part.Category.Id == categoryId && a.Part.AveragePrice > 0).
-                Include(a => a.Part.Category).Select(a => a.Part).FirstOrDefaultAsync();
+            var auctionQuery = _context.Auctions
+                .Where(a => a.Status == AuctionStatuses.Active && a.Part.Id == partId && a.Part.Category.Id == categoryId && a.Part.AveragePrice > 0) .Include(a => a.Part.Category)
+                .Select(a => new
+                {
+                    Auction = a,
+                    HighestBidAmount = _context.Bids.Where(b => b.Auction.Id == a.Id).OrderByDescending(b => b.Amount).Select(b => b.Amount).FirstOrDefault()
+                });
+
+            var filteredParts = await auctionQuery
+                .Where(a => a.HighestBidAmount < a.Auction.Part.AveragePrice)
+                .Select(a => a.Auction.Part)
+                .FirstOrDefaultAsync();
+            return filteredParts;
         }
 
         public async Task<List<Part>> GetManyFromActiveAuctions(string categoryId)
         {
-            return await _context.Auctions.Where(a => a.Status == AuctionStatuses.Active && a.Part.Category.Id == categoryId && a.Part.AveragePrice > 0).
-                Include(a => a.Part.Category).Select(a => a.Part).Distinct().ToListAsync();
+            var auctionQuery = _context.Auctions
+            .Where(a => a.Status == AuctionStatuses.Active && a.Part.Category.Id == categoryId && a.Part.AveragePrice > 0).Include(a => a.Part.Category)
+                .Select(a => new
+                {
+                    Auction = a,
+                    HighestBidAmount = _context.Bids.Where(b => b.Auction.Id == a.Id).OrderByDescending(b => b.Amount).Select(b => b.Amount).FirstOrDefault()
+                });
+
+            var filteredParts = await auctionQuery
+                .Where(a => a.HighestBidAmount < a.Auction.Part.AveragePrice)
+                .Select(a => a.Auction.Part)
+                .Distinct().ToListAsync();
+            return filteredParts;
         }
 
         public async Task UpdateAsync(Part part)

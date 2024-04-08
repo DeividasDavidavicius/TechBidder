@@ -12,6 +12,13 @@
         string? HddId,
         string? SsdId,
         string? PsuId,
+        bool MotherboardAlreadyHave,
+        bool CpuAlreadyHave,
+        bool GpuAlreadyHave,
+        bool RamAlreadyHave,
+        bool SsdAlreadyHave,
+        bool HddAlreadyHave,
+        bool IncludePsu,
         double Budget
     );
 }
