@@ -23,7 +23,8 @@ function Header() {
         { name: "PARTS", route: PATHS.PARTS },
         { name: "SERIES", route: PATHS.SERIES },
         { name: "PSU CALCULATOR", route: PATHS.PSUCALCULATOR },
-        { name: "PC BUILD GENERATOR", route: PATHS.PCBUILDGENERATOR }
+        { name: "PC BUILD GENERATOR", route: PATHS.PCBUILDGENERATOR },
+        { name: "COMPATIBILITY", route: PATHS.COMPATIBILITYCHECK }
     ];
 
     let navOptions = [];

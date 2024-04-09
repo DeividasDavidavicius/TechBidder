@@ -16,6 +16,7 @@ const PATHS = {
     PARTREQUESTCREATE: '/admin/categories/:categoryId/request/:requestId',
     PSUCALCULATOR: '/psuCalculator',
     PCBUILDGENERATOR: '/pcbuildgenerator',
+    COMPATIBILITYCHECK: '/compatibility',
     ANY: '*'
 }
 

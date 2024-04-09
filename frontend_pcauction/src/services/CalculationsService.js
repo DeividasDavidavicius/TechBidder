@@ -29,3 +29,17 @@ export const calculatePsu = async(data) => {
       throw error;
     }
   };
+
+  export const findCompatibleParts = async(data) => {
+    try {
+      const response = await axios.post(`${API_URL}/compatibility`, data, {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+      return response.data;
+    } catch (error) {
+      console.error("Failed to get compatible parts", error);
+      throw error;
+    }
+  };

@@ -217,7 +217,6 @@ function PcBuildGenerator()
         }
         catch(error)
         {
-            console.log(error);
             setAuctions([]);
             setMessage(error.response.data);
         }

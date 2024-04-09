@@ -4,6 +4,7 @@ using Backend_PcAuction.Data.Repositories;
 using Backend_PcAuction.Utils;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using static Backend_PcAuction.Data.Dtos.CompatiblePartsDto;
 
 namespace Backend_PcAuction.Services
 {
@@ -11,6 +12,7 @@ namespace Backend_PcAuction.Services
     {
         PsuCalcResultDto CalculatePSU(Part motherboard, Part cpu, Part gpu, Part ram, Part ssd, Part hdd);
         Task<List<Auction>> GeneratePcBuild(PcBuilderDataDto pcBuilderDataDto);
+        Task<List<CompatiblePartsResultDto>> GetCompatibleParts(CompatiblePartsDataDto compatiblePartsDataDto);
     }
 
     public class CalculationsService : ICalculationsService
@@ -61,6 +63,107 @@ namespace Backend_PcAuction.Services
             }
 
             return new PsuCalcResultDto(calculatedWattage, recommendedWattage);
+        }
+
+        public async Task<List<CompatiblePartsResultDto>> GetCompatibleParts(CompatiblePartsDataDto compatiblePartsDataDto)
+        {
+            var allPartsForCategory = await _partsRepository.GetManyAsync(compatiblePartsDataDto.CompatibleCategoryId);
+
+            if(allPartsForCategory.Count == 0)
+            {
+                return null;
+            }
+
+            var compatibleParts = new List<Part>();
+            var motherboard = new Part();
+
+            if (compatiblePartsDataDto.CategoryId == PartCategories.Motherboard)
+            {
+                motherboard = await _partsRepository.GetAsync(PartCategories.Motherboard, compatiblePartsDataDto.PartId);
+            }
+
+
+            switch (compatiblePartsDataDto.CompatibleCategoryId)
+            {
+                case PartCategories.CPU:
+                    compatibleParts = CheckCpuCompatibility(motherboard, (List<Part>)allPartsForCategory);
+                    break;
+                case PartCategories.GPU:
+                    compatibleParts = (List<Part>)allPartsForCategory;
+                    break;
+                case PartCategories.RAM:
+                    compatibleParts = CheckRamCompatibility(motherboard, (List<Part>)allPartsForCategory);
+                    break;
+                case PartCategories.SSD:
+                    compatibleParts = CheckSsdCompatibility(motherboard, (List<Part>)allPartsForCategory);
+                    break;
+                case PartCategories.HDD:
+                    compatibleParts = CheckHddCompatibility(motherboard, (List<Part>)allPartsForCategory);
+                    break;
+                case PartCategories.Motherboard:
+                    break;
+            }
+
+            if(compatiblePartsDataDto.CompatibleCategoryId == PartCategories.Motherboard)
+            {
+                switch (compatiblePartsDataDto.CategoryId)
+                {
+                    case PartCategories.CPU:
+                        var cpu = await _partsRepository.GetAsync(PartCategories.CPU, compatiblePartsDataDto.PartId);
+                        foreach(var part in allPartsForCategory)
+                        {
+                            if(CheckCpuCompatibility(part, new List<Part>() { cpu }) != null)
+                            {
+                                compatibleParts.Add(part);
+                            }
+                        }
+                        break;
+                    case PartCategories.GPU:
+                        compatibleParts = (List<Part>)allPartsForCategory;
+                        break;
+                    case PartCategories.RAM:
+                        var ram = await _partsRepository.GetAsync(PartCategories.RAM, compatiblePartsDataDto.PartId);
+                        foreach (var part in allPartsForCategory)
+                        {
+                            if (CheckRamCompatibility(part, new List<Part>() { ram }) != null)
+                            {
+                                compatibleParts.Add(part);
+                            }
+                        }
+                        break;
+                    case PartCategories.SSD:
+                        var ssd = await _partsRepository.GetAsync(PartCategories.SSD, compatiblePartsDataDto.PartId);
+                        foreach (var part in allPartsForCategory)
+                        {
+                            if (CheckSsdCompatibility(part, new List<Part>() { ssd }) != null)
+                            {
+                                compatibleParts.Add(part);
+                            }
+                        }
+                        break;
+                    case PartCategories.HDD:
+                        var hdd = await _partsRepository.GetAsync(PartCategories.HDD, compatiblePartsDataDto.PartId);
+                        foreach (var part in allPartsForCategory)
+                        {
+                            if (CheckHddCompatibility(part, new List<Part>() { hdd }) != null)
+                            {
+                                compatibleParts.Add(part);
+                            }
+                        }
+                        break;
+                    case PartCategories.Motherboard:
+                        break;
+                }
+            }
+
+            List<CompatiblePartsResultDto> compatiblePartResult = new List<CompatiblePartsResultDto>();
+            foreach(var part in compatibleParts)
+            {
+                var activeAuctionForPartCnt = await _auctionsRepository.GetCountAsync(part.Category.Id, part.Series?.Id, part.Id);
+                compatiblePartResult.Add(new CompatiblePartsResultDto(part.Id, part.Name, activeAuctionForPartCnt));
+            }
+
+            return compatiblePartResult;
         }
 
         public async Task<List<Auction>> GeneratePcBuild(PcBuilderDataDto pcBuilderDataDto)

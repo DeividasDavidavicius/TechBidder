@@ -16,6 +16,7 @@ import PartRequestList from "../components/parts/PartRequestList";
 import PartRequestsCreate from "../components/parts/PartRequestsCreate";
 import PsuCalculator from "../components/parts/PsuCalculator";
 import PcBuildGenerator from "../components/parts/PcBuildGenerator";
+import CompatibilityCheck from "../components/parts/CompatibilityCheck";
 
 const AppRoutes = [
     { index: true, path: PATHS.MAIN, element: <MainPage/> },
@@ -35,7 +36,8 @@ const AppRoutes = [
     { path: PATHS.PARTREQUESTS, element: <PartRequestList/> },
     { path: PATHS.PARTREQUESTCREATE, element: <PartRequestsCreate/> },
     { path: PATHS.PSUCALCULATOR, element: <PsuCalculator/> },
-    { path: PATHS.PCBUILDGENERATOR, element: <PcBuildGenerator/> }
+    { path: PATHS.PCBUILDGENERATOR, element: <PcBuildGenerator/> },
+    { path: PATHS.COMPATIBILITYCHECK, element: <CompatibilityCheck/> }
 ];
 
 export default AppRoutes;

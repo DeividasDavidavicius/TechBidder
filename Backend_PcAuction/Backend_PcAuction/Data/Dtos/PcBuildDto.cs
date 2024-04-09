@@ -1,9 +1,5 @@
 ﻿namespace Backend_PcAuction.Data.Dtos
 {
-    public record PcBuilderResultDto(
-
-    );
-
     public record PcBuilderDataDto(
         string? MotherboardId,
         string? CpuId,

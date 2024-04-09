@@ -186,8 +186,6 @@ function AuctionList() {
           padding: '20px',
         }}
       >
-
-
         <Grid container spacing={2} sx={{marginBottom: 2}}>
             <Grid item xs={12} sm={4}>
                 <FormControl fullWidth>
@@ -198,7 +196,7 @@ function AuctionList() {
                         value={selectedCategory}
                         onChange={(event, newValue) => handleCategoryChange(newValue)}
                         required
-                        renderInput={(params) => <TextField {...params} label="Categories"/>}
+                        renderInput={(params) => <TextField {...params} label="Part category"/>}
                         isOptionEqualToValue={(option, value) => true}
                     />
                 </FormControl>
@@ -238,16 +236,12 @@ function AuctionList() {
                         value={selectedPart}
                         onChange={(event, newValue) => handlePartChange(newValue)}
                         required
-                        renderInput={(params) => <TextField {...params} label="Parts"/>}
+                        renderInput={(params) => <TextField {...params} label="Part"/>}
                         isOptionEqualToValue={(option, value) => true}
                     />
                 </FormControl>
             </Grid>
         </Grid>
-
-
-
-
 
         <Box>
           {auctions.map((auction, index) => (

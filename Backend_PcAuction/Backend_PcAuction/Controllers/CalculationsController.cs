@@ -5,6 +5,7 @@ using Backend_PcAuction.Services;
 using Backend_PcAuction.Utils;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using static Backend_PcAuction.Data.Dtos.CompatiblePartsDto;
 
 namespace Backend_PcAuction.Controllers
 {
@@ -97,6 +98,15 @@ namespace Backend_PcAuction.Controllers
             return Ok(pcBuildAuctions.Select(auction =>
                 new AuctionWithAvgPriceDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate, auction.EndDate,
                     auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.Status, auction.Part.AveragePrice, auction.UserId, auction.Part.Name, auction.Part.Category.Id)));
+        }
+
+        [HttpPost]
+        [Route("compatibility")]
+        public async Task<ActionResult<IEnumerable<CompatiblePartsResultDto>>> GetPartCompatibility(CompatiblePartsDataDto pcBuilderDataDto)
+        {
+            var result = await _calculationsService.GetCompatibleParts(pcBuilderDataDto);
+
+            return Ok(result);
         }
     }
 }
