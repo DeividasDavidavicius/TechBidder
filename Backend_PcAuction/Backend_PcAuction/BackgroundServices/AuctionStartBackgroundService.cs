@@ -44,7 +44,7 @@ namespace Backend_PcAuction.BackgroundServices
 
                         var log = new Log
                         {
-                            Message = String.Format("Updated auction status: Time: {0}, auction: {1}", DateTime.UtcNow, auction.Name)
+                            Message = String.Format("Updated auction status to {2}: Time: {0}, auction: {1}", DateTime.UtcNow, auction.Name, auction.Status)
                         };
                         dbContext.Logs.Add(log);
                     }

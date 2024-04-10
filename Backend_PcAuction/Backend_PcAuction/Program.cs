@@ -29,6 +29,7 @@ builder.Services.AddTransient<IPartsRepository, PartsRepository>();
 builder.Services.AddTransient<IPartsPricesRepository, PartsPricesRepository>();
 builder.Services.AddTransient<ISeriesRepository, SeriesRepository>();
 builder.Services.AddTransient<IPartRequestsRepository, PartRequestsRepository>();
+builder.Services.AddTransient<IPurchaseRepository, PurchaseRepository>();
 
 builder.Services.AddTransient<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<AuthDbSeeder>();
@@ -40,6 +41,7 @@ builder.Services.AddScoped<IAuctionService, AuctionService>();
 builder.Services.AddScoped<ICalculationsService, CalculationsService>();
 
 builder.Services.AddHostedService<AuctionStartBackgroundService>();
+builder.Services.AddHostedService<AuctionEndBackgroundService>();
 builder.Services.AddHostedService<PartAveragePriceBackgroundService>();
 
 builder.Services.AddAuthorization(options =>

@@ -87,7 +87,7 @@ namespace Backend_PcAuction.Controllers
             }
             catch (Exception ex)
             {
-                return UnprocessableEntity("Could not generate PC build");
+                return UnprocessableEntity("Error generating PC build");
             }
 
             if (pcBuildAuctions.Count == 0)
