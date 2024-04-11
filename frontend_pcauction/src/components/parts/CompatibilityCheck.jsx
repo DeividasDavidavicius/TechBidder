@@ -71,7 +71,6 @@ function CompatibilityCheck() {
 
         const result = await findCompatibleParts(data);
         setCompatibleParts(result);
-        console.log(result);
     };
 
 
@@ -172,7 +171,7 @@ function CompatibilityCheck() {
                         COMPATIBLE PARTS
                     </Typography>
                     {compatibleParts.map((part) => (
-                        <Link to={PATHS.AUCTIONS + "?" + `partId=${part.partId}`} key={part.partId} style={{ textDecoration: 'none' }}>
+                        <Link to={`${PATHS.AUCTIONS}?partId=${part.partId}`} key={part.partId} style={{ textDecoration: 'none' }}>
                             <Card style={{ margin: '10px', cursor: 'pointer', maxWidth: '100%', border: '1px solid #ddd'}} sx={{'&:hover': { boxShadow: '0 0 10px rgba(0, 0, 0, 1)' }}}>
                                 <CardContent>
                                     <Typography variant="h5" component="h2" sx={{ fontSize: '20px', fontFamily: 'Arial, sans-serif', color: 'black' }}>

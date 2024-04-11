@@ -18,6 +18,7 @@ function AuctionInfo() {
     const { auctionId } = useParams();
     const [startDateLocal, setStartDateLocal] = useState(null);
     const [endDateLocal, setEndDateLocal] = useState(null);
+    const [currentDateLocal, setCurrentDateLocal] = useState(new Date().toLocaleString())
     const [minIncrement, setMinIncrement] = useState(0);
     const [highestBid, setHighestBid] = useState(0);
     const [imageUri, setImageUri] = useState(null);
@@ -135,6 +136,7 @@ function AuctionInfo() {
                 setImageUri(result.imageUri);
                 setStartDateLocal(localDateStart);
                 setEndDateLocal(localDateEnd);
+
                 setMinIncrement(result.minIncrement);
 
                 await fetchCategoryData(result.categoryId);
@@ -175,13 +177,14 @@ function AuctionInfo() {
                 openSnackbar('This auction does not exist!', 'error');
                 navigate(PATHS.MAIN);
             }
+            setCurrentDateLocal(new Date().toLocaleString());
         };
 
         fetchHighestBidData();
         const interval = setInterval(fetchHighestBidData, 3000);
 
         return () => clearInterval(interval);
-    }, []);
+    }, [auctionId, navigate, openSnackbar]);
 
       return (
         <Container component="main" maxWidth="lg">
@@ -303,7 +306,7 @@ function AuctionInfo() {
                             </Box>
                         </Grid>
 
-                        {canBid === true && (
+                        {canBid === true && endDateLocal > currentDateLocal && startDateLocal < currentDateLocal && (
                         <>
                         <Grid item xs={12} sx={{ marginTop: 1 }}>
                             <Box sx={{ display: 'flex', alignItems: 'stretch' }}>
@@ -343,6 +346,7 @@ function AuctionInfo() {
                         </Grid>
                         </> )}
                         <Grid item xs={12}>
+                            {startDateLocal < currentDateLocal && endDateLocal > currentDateLocal && (
                             <Box sx={{ display: 'flex', alignItems: 'stretch', marginTop: 2 }}>
                                 <Typography
                                     component="span"
@@ -370,6 +374,53 @@ function AuctionInfo() {
                                  <CountdownTimer targetDate={endDateLocal} />
                                 </Typography >
                             </Box>
+                            )}
+                            {startDateLocal > currentDateLocal && (
+                            <Box sx={{ display: 'flex', alignItems: 'stretch', marginTop: 2 }}>
+                            <Typography
+                                component="span"
+                                variant="subtitle1"
+                                sx={{
+                                    fontWeight: 'bold',
+                                    fontSize: '20px',
+                                    fontFamily: 'Arial, sans-serif',
+                                    letterSpacing: '1px',
+                                    textTransform: 'uppercase',
+                                    color: '#3b9298' }}
+                            >
+                                Auction starts in: {" "}
+                            </Typography >
+                            <Typography
+                                component="span"
+                                variant="subtitle1"
+                                sx={{
+                                    fontWeight: 'bold',
+                                    fontSize: '16px',
+                                    fontFamily: 'Arial, sans-serif',
+                                    color: '#333',
+                                    letterSpacing: '1px' }}
+                            >
+                                <CountdownTimer targetDate={startDateLocal} />
+                            </Typography >
+                            </Box>
+                            )}
+                            {endDateLocal < currentDateLocal && (
+                            <Box sx={{ display: 'flex', alignItems: 'stretch', marginTop: 2 }}>
+                            <Typography
+                                component="span"
+                                variant="subtitle1"
+                                sx={{
+                                    fontWeight: 'bold',
+                                    fontSize: '20px',
+                                    fontFamily: 'Arial, sans-serif',
+                                    letterSpacing: '1px',
+                                    textTransform: 'uppercase',
+                                    color: '#3b9298' }}
+                            >
+                                Auction has ended
+                            </Typography >
+                            </Box>
+                            )}
                         </Grid>
                     </Box>
                 </Box>
