@@ -306,6 +306,38 @@ function AuctionInfo() {
                             </Box>
                         </Grid>
 
+                        {partData.averagePrice > 0 &&
+                        <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'stretch' }}>
+                                <Typography
+                                    component="span"
+                                    variant="subtitle1"
+                                    sx={{
+                                        fontWeight: 'bold',
+                                        fontSize: '16px',
+                                        fontFamily: 'Arial, sans-serif',
+                                        letterSpacing: '1px',
+                                        textTransform: 'uppercase',
+                                        color: '#3b9298' }}
+                                >
+                                    Average price:
+                                </Typography >
+                                <Typography
+                                    component="span"
+                                    variant="subtitle1"
+                                    sx={{
+                                        fontWeight: 'bold',
+                                        fontSize: '16px',
+                                        fontFamily: 'Arial, sans-serif',
+                                        color: '#333',
+                                        letterSpacing: '1px' }}
+                                >
+                                &nbsp;{partData.averagePrice}
+                                </Typography >
+                            </Box>
+                        </Grid>
+                        }
+
                         {canBid === true && endDateLocal > currentDateLocal && startDateLocal < currentDateLocal && (
                         <>
                         <Grid item xs={12} sx={{ marginTop: 1 }}>
@@ -426,142 +458,155 @@ function AuctionInfo() {
                 </Box>
 
                 <Box sx={{ padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left'}}>
-                    <Box>
-                        <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
-                            Condition:&nbsp;
-                        </Typography>
-                        <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{auctionData.condition}</Typography>
-                    </Box>
-                    <Box sx={{ marginTop: '5px' }}>
-                        <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
-                            Part category:&nbsp;
-                        </Typography>
-                        <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{categoryData.id}</Typography>
-                    </Box>
-                    {seriesData.name? (
-                    <>
-                    <Box>
-                        <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
-                            Part series:&nbsp;
-                        </Typography>
-                        <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{seriesData.name}</Typography>
-                    </Box>
-                    </> ) : null}
-                    <Box>
-                        <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
-                            Part name:&nbsp;
-                        </Typography>
-                        <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{partData.name}</Typography>
-                    </Box>
+                    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
+                        <Box sx={{ width: '50%' }}>
+                            <Box>
+                                <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#1c9fa9', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
+                                    Part information&nbsp;
+                                </Typography>
+                            </Box>
+                            <Box sx={{ marginTop: '5px' }}>
+                                <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
+                                    Part category:&nbsp;
+                                </Typography>
+                                <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{categoryData.id}</Typography>
+                            </Box>
+                            {seriesData.name? (
+                            <>
+                            <Box>
+                                <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
+                                    Part series:&nbsp;
+                                </Typography>
+                                <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{seriesData.name}</Typography>
+                            </Box>
+                            </> ) : null}
+                            <Box>
+                                <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
+                                    Part name:&nbsp;
+                                </Typography>
+                                <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{partData.name}</Typography>
+                            </Box>
+                            {auctionData.manufacturer ? (
+                            <>
+                            <Box sx={{ marginTop: '5px' }}>
+                                <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
+                                    Manufacturer:&nbsp;
+                                </Typography>
+                                <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{auctionData.manufacturer}</Typography>
+                            </Box>
+                            </> ) : null}
+                            <Box sx>
+                                <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
+                                    Condition:&nbsp;
+                                </Typography>
+                                <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{auctionData.condition}</Typography>
+                            </Box>
+                        </Box>
 
-                    <Box sx = {{marginTop: 1}}>
-                        <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#1c9fa9', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
-                            Specifications&nbsp;
-                        </Typography>
+                        {partData.type !== "Temporary" &&
+                            <Box sx={{ width: '50%' }}>
+                                <Box>
+                                    <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#1c9fa9', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
+                                        Specifications&nbsp;
+                                    </Typography>
+                                </Box>
+                                {partData.specificationValue1 !== '' && (
+                                <>
+                                <Box>
+                                    <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
+                                        {categoryData.specificationName1}:&nbsp;
+                                    </Typography>
+                                    <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{partData.specificationValue1}</Typography>
+                                </Box>
+                                </> )}
+                                {partData.specificationValue2 !== '' && (
+                                <>
+                                <Box>
+                                    <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
+                                        {categoryData.specificationName2}:&nbsp;
+                                    </Typography>
+                                    <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{partData.specificationValue2}</Typography>
+                                </Box>
+                                </> )}
+                                {partData.specificationValue3 !== '' && (
+                                <>
+                                <Box>
+                                    <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
+                                        {categoryData.specificationName3}:&nbsp;
+                                    </Typography>
+                                    <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{partData.specificationValue3}</Typography>
+                                </Box>
+                                </> )}
+                                {partData.specificationValue4 !== '' && (
+                                <>
+                                <Box>
+                                    <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
+                                        {categoryData.specificationName4}:&nbsp;
+                                    </Typography>
+                                    <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{partData.specificationValue4}</Typography>
+                                </Box>
+                                </> )}
+                                {partData.specificationValue5 !== '' && (
+                                <>
+                                <Box>
+                                    <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
+                                        {categoryData.specificationName5}:&nbsp;
+                                    </Typography>
+                                    <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{partData.specificationValue5}</Typography>
+                                </Box>
+                                </> )}
+                                {partData.specificationValue6 !== '' && (
+                                <>
+                                <Box>
+                                    <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
+                                        {categoryData.specificationName6}:&nbsp;
+                                    </Typography>
+                                    <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{partData.specificationValue6}</Typography>
+                                </Box>
+                                </> )}
+                                {partData.specificationValue7 !== '' && (
+                                <>
+                                <Box>
+                                    <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
+                                        {categoryData.specificationName7}:&nbsp;
+                                    </Typography>
+                                    <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{partData.specificationValue7}</Typography>
+                                </Box>
+                                </> )}
+                                {partData.specificationValue8 !== '' && (
+                                <>
+                                <Box>
+                                    <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
+                                        {categoryData.specificationName8}:&nbsp;
+                                    </Typography>
+                                    <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{partData.specificationValue8}</Typography>
+                                </Box>
+                                </> )}
+                                {partData.specificationValue9 !== '' && (
+                                <>
+                                <Box>
+                                    <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
+                                        {categoryData.specificationName9}:&nbsp;
+                                    </Typography>
+                                    <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{partData.specificationValue9}</Typography>
+                                </Box>
+                                </> )}
+                                {partData.specificationValue10 !== '' && (
+                                <>
+                                <Box>
+                                    <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
+                                        {categoryData.specificationName10}:&nbsp;
+                                    </Typography>
+                                    <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{partData.specificationValue10}</Typography>
+                                </Box>
+                                </> )}
+                            </Box>
+                        }
                     </Box>
-                    {partData.specificationValue1 !== '' && (
-                    <>
-                    <Box>
-                        <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
-                            {categoryData.specificationName1}:&nbsp;
+                    <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', marginTop: 3}}>
+                            Description:&nbsp;
                         </Typography>
-                        <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{partData.specificationValue1}</Typography>
-                    </Box>
-                    </> )}
-                    {partData.specificationValue2 !== '' && (
-                    <>
-                    <Box>
-                        <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
-                            {categoryData.specificationName2}:&nbsp;
-                        </Typography>
-                        <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{partData.specificationValue2}</Typography>
-                    </Box>
-                    </> )}
-                    {partData.specificationValue3 !== '' && (
-                    <>
-                    <Box>
-                        <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
-                            {categoryData.specificationName3}:&nbsp;
-                        </Typography>
-                        <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{partData.specificationValue3}</Typography>
-                    </Box>
-                    </> )}
-                    {partData.specificationValue4 !== '' && (
-                    <>
-                    <Box>
-                        <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
-                            {categoryData.specificationName4}:&nbsp;
-                        </Typography>
-                        <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{partData.specificationValue4}</Typography>
-                    </Box>
-                    </> )}
-                    {partData.specificationValue5 !== '' && (
-                    <>
-                    <Box>
-                        <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
-                            {categoryData.specificationName5}:&nbsp;
-                        </Typography>
-                        <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{partData.specificationValue5}</Typography>
-                    </Box>
-                    </> )}
-                    {partData.specificationValue6 !== '' && (
-                    <>
-                    <Box>
-                        <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
-                            {categoryData.specificationName6}:&nbsp;
-                        </Typography>
-                        <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{partData.specificationValue6}</Typography>
-                    </Box>
-                    </> )}
-                    {partData.specificationValue7 !== '' && (
-                    <>
-                    <Box>
-                        <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
-                            {categoryData.specificationName7}:&nbsp;
-                        </Typography>
-                        <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{partData.specificationValue7}</Typography>
-                    </Box>
-                    </> )}
-                    {partData.specificationValue8 !== '' && (
-                    <>
-                    <Box>
-                        <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
-                            {categoryData.specificationName8}:&nbsp;
-                        </Typography>
-                        <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{partData.specificationValue8}</Typography>
-                    </Box>
-                    </> )}
-                    {partData.specificationValue9 !== '' && (
-                    <>
-                    <Box>
-                        <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
-                            {categoryData.specificationName9}:&nbsp;
-                        </Typography>
-                        <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{partData.specificationValue9}</Typography>
-                    </Box>
-                    </> )}
-                    {partData.specificationValue10 !== '' && (
-                    <>
-                    <Box>
-                        <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
-                            {categoryData.specificationName10}:&nbsp;
-                        </Typography>
-                        <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{partData.specificationValue10}</Typography>
-                    </Box>
-                    </> )}
-                    {auctionData.manufacturer ? (
-                    <>
-                    <Box sx={{ marginTop: '5px' }}>
-                        <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
-                            Manufacturer:&nbsp;
-                        </Typography>
-                        <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{auctionData.manufacturer}</Typography>
-                    </Box>
-                    </> ) : null}
-                    <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', marginTop: '5px'}}>
-                        Description:&nbsp;
-                    </Typography>
-                    <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', wordBreak: 'break-all' }}>{auctionData.description}</Typography>
+                        <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', wordBreak: 'break-all' }}>{auctionData.description}</Typography>
                     <Typography component="span"     ariant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', marginTop: '30px', fontFamily: 'Arial, sans-serif' }}>
                         Auction start date:&nbsp;
                     </Typography>

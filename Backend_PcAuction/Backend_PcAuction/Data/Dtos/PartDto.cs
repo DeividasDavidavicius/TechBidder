@@ -17,6 +17,7 @@ namespace Backend_PcAuction.Data.Dtos
         string? SpecificationValue10,
         string CategoryId,
         string Type,
+        double AveragePrice,
         Guid? SeriesId
     );
 
