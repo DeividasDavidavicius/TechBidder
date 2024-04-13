@@ -57,6 +57,7 @@ namespace Backend_PcAuction.BackgroundServices
 
                         var purchase = new Purchase
                         {
+                            Amount = highestBid.Amount,
                             Status = PurchaseStatuses.PendingPayment,
                             AuctionWinDate = DateTime.UtcNow,
                             Auction = auction,

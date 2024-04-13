@@ -9,9 +9,11 @@ using Backend_PcAuction.Data.Entities;
 using Backend_PcAuction.Data.Repositories;
 using Backend_PcAuction.Data.Seeders;
 using Backend_PcAuction.Services;
+using Backend_PcAuction.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
@@ -83,6 +85,8 @@ builder.Services.AddCors(options =>
 var blobServiceClient = new BlobServiceClient(builder.Configuration["AzureBlob:ConnectionString"]);
 var blobContainerClient = blobServiceClient.GetBlobContainerClient(builder.Configuration["AzureBlob:ContainerName"]);
 builder.Services.AddScoped(provider => blobContainerClient);
+
+builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
 
 var app = builder.Build();
 

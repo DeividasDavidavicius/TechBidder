@@ -7,6 +7,7 @@ namespace Backend_PcAuction.Data.Entities
     public class Purchase
     {
         public Guid Id { get; set; }
+        public double Amount { get; set; }
         public string Status { get; set; }
         public DateTime AuctionWinDate { get; set; }
         public DateTime? PaymentDate { get; set; }

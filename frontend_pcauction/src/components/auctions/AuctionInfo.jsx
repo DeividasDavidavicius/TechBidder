@@ -12,6 +12,8 @@ import { getPart } from "../../services/PartService";
 import { getSeries } from "../../services/SeriesService";
 import CountdownTimer from "./CountdownTimer";
 import AuctionRecommendations from "./AuctionRecommendations";
+import { loadStripe } from "@stripe/stripe-js";
+import { postStripePurchase } from "../../services/PurchaseService";
 
 function AuctionInfo() {
     const [auctionData, setAuctionData] = useState({});
@@ -35,6 +37,30 @@ function AuctionInfo() {
     const handleBidChange = (event) => {
         setBidAmountField(event.target.value);
       };
+
+    const handlePayClick =  async () => {
+        const accessToken = localStorage.getItem('accessToken');
+        if (!checkTokenValidity(accessToken)) {
+            const result = await refreshAccessToken();
+            if (!result.success) {
+                openSnackbar('You must login to pay for auction!', 'error');
+                setLogout();
+                navigate(PATHS.LOGIN);
+                return;
+            }
+
+            setLogin(result.response.data.accessToken, result.response.data.refreshToken);
+        }
+
+        const stripe = await loadStripe("pk_test_51P4prORxCq26AiIxyvGnTqs397m678mlyguCvx5YNRQ309rpj0T41Jgqn4lnsWTqZtSCRoMKLhHK0OpvpxnwSytQ00IYTdA36o");
+
+        const response = await postStripePurchase(auctionId);
+
+        const result = stripe.redirectToCheckout({sessionId: response.id});
+
+        console.log(result);
+
+    }
 
     const handleSubmitBid = async (e) => {
         e.preventDefault();
@@ -214,12 +240,12 @@ function AuctionInfo() {
                 >
                     <Box
                         sx={{
-                        width: { sm: '90', md:'50%' },
-                        display: 'flex',
-                        justifyContent: 'center',
-                        marginLeft: { xs: 3, sm: 3, md: 3, lg: 3 },
-                        marginRight: { xs: 3, sm: 3, md: 3, lg: 3 },
-                        marginBottom: 1
+                            width: { sm: '90', md:'50%' },
+                            display: 'flex',
+                            justifyContent: 'center',
+                            marginLeft: { xs: 3, sm: 3, md: 3, lg: 3 },
+                            marginRight: { xs: 3, sm: 3, md: 3, lg: 3 },
+                            marginBottom: 1
                         }}
                     >
                         <Avatar
@@ -454,6 +480,29 @@ function AuctionInfo() {
                             </Box>
                             )}
                         </Grid>
+                        <Grid item xs={12}>
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                sx={{
+                                    width: '50%',
+                                    borderTopLeftRadius: '10px',
+                                    borderBottomLeftRadius: '10px',
+                                    borderTopRightRadius: '10px',
+                                    borderBottomRightRadius: '10px',
+                                    marginLeft: 3,
+                                    bgcolor: '#0d6267',
+                                    fontSize: '14px',
+                                    fontWeight: 'bold',
+                                    '&:hover': {
+                                        backgroundColor: '#3d8185',
+                                    },
+                                }}
+                                onClick={handlePayClick}
+                            >
+                                PAY
+                            </Button>
+                        </Grid>
                     </Box>
                 </Box>
 
@@ -488,14 +537,14 @@ function AuctionInfo() {
                             </Box>
                             {auctionData.manufacturer ? (
                             <>
-                            <Box sx={{ marginTop: '5px' }}>
+                            <Box sx={{marginTop: '5px'}}>
                                 <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
                                     Manufacturer:&nbsp;
                                 </Typography>
                                 <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>{auctionData.manufacturer}</Typography>
                             </Box>
                             </> ) : null}
-                            <Box sx>
+                            <Box>
                                 <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
                                     Condition:&nbsp;
                                 </Typography>
