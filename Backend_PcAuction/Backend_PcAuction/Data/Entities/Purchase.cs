@@ -10,7 +10,6 @@ namespace Backend_PcAuction.Data.Entities
         public double Amount { get; set; }
         public string Status { get; set; }
         public DateTime AuctionWinDate { get; set; }
-        public DateTime? PaymentDate { get; set; }
         public Auction Auction { get; set; }
         [Required]
         public string BuyerId { get; set; }

@@ -7,11 +7,11 @@ import UserProvider from './contexts/UserProvider';
 import { SnackbarProvider } from './contexts/SnackbarProvider';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-    <React.StrictMode>
+    //<React.StrictMode>
         <UserProvider>
             <SnackbarProvider>
                 <App/>
             </SnackbarProvider>
         </UserProvider>
-    </React.StrictMode>
+    //</React.StrictMode>
 );

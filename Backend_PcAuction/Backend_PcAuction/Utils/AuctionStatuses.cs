@@ -11,5 +11,7 @@
 
         public const string EndedWithBids = nameof(EndedWithBids);
         public const string EndedWithoutBids = nameof(EndedWithoutBids);
+
+        public const string Paid = nameof(Paid);
     }
 }

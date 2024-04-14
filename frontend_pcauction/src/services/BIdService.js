@@ -25,3 +25,13 @@ export const postBid = async (data, auctionId) => {
       throw error;
     }
   };
+
+  export const getAuctionBids = async (auctionId) => {
+    try {
+      const response = await axios.get(`${API_URL}/auctions/${auctionId}/bids`);
+      return response.data;
+    } catch (error) {
+      console.error('Error getting auction bids', error);
+      throw error;
+    }
+  };

@@ -1,19 +1,19 @@
 import { useContext, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { getAuction } from "../../services/AuctionService";
 import SnackbarContext from "../../contexts/SnackbarContext";
-import { Avatar, Box, Button, Container, CssBaseline, Grid, TextField, Typography } from "@mui/material";
+import { Avatar, Box, Button, Container, CssBaseline, Grid, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography } from "@mui/material";
 import PATHS from "../../utils/Paths";
 import { checkTokenValidity, refreshAccessToken } from "../../services/AuthenticationService";
 import { useUser } from "../../contexts/UserContext";
-import { getHighestBid, postBid } from "../../services/BIdService";
+import { getAuctionBids, getHighestBid, postBid } from "../../services/BIdService";
 import { getCategory } from "../../services/PartCategoryService";
 import { getPart } from "../../services/PartService";
 import { getSeries } from "../../services/SeriesService";
 import CountdownTimer from "./CountdownTimer";
 import AuctionRecommendations from "./AuctionRecommendations";
 import { loadStripe } from "@stripe/stripe-js";
-import { postStripePurchase } from "../../services/PurchaseService";
+import { getPurchase, getStripePurchaseSession, patchPurchase } from "../../services/PurchaseService";
 
 function AuctionInfo() {
     const [auctionData, setAuctionData] = useState({});
@@ -33,6 +33,13 @@ function AuctionInfo() {
     const [partData, setPartData] = useState([]);
     const [categoryData, setCategoryData] = useState([]);
     const [seriesData, setSeriesData] = useState([]);
+
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const [purchase, setPurchase] = useState(null);
+    const [purchaseStatus] = useState(queryParams.get('status'));
+
+    const [bids, setBids] = useState([]);
 
     const handleBidChange = (event) => {
         setBidAmountField(event.target.value);
@@ -54,12 +61,13 @@ function AuctionInfo() {
 
         const stripe = await loadStripe("pk_test_51P4prORxCq26AiIxyvGnTqs397m678mlyguCvx5YNRQ309rpj0T41Jgqn4lnsWTqZtSCRoMKLhHK0OpvpxnwSytQ00IYTdA36o");
 
-        const response = await postStripePurchase(auctionId);
+        const response = await getStripePurchaseSession(auctionId);
 
-        const result = stripe.redirectToCheckout({sessionId: response.id});
-
-        console.log(result);
-
+        try
+        {
+            await stripe.redirectToCheckout({sessionId: response.id});
+        }
+        catch(error) {}
     }
 
     const handleSubmitBid = async (e) => {
@@ -115,13 +123,16 @@ function AuctionInfo() {
             return;
         }
 
-        const data = {amount: bidAmount};
-        await postBid(data, auctionId);
+        try {
+            const data = {amount: bidAmount};
+            await postBid(data, auctionId);
+        }
+        catch(error) {}
 
         openSnackbar('Bid placed successfully!', 'success');
         setBidAmountField(0);
         setHighestBid(bidAmount);
-        //window.location.reload();
+        //window.location.reload(PATHS.AUCTIONINFO.replace(":auctionId", auctionId);
         // navigate(PATHS.AUCTIONINFO.replace(":auctionId", auctionId));
     };
 
@@ -188,9 +199,22 @@ function AuctionInfo() {
             }
         };
 
+        const updatePurchaseStatus = async() => {
+            if(purchaseStatus)
+            {
+                try {
+                    await patchPurchase(auctionId);
+                    window.location.replace(PATHS.AUCTIONINFO.replace(":auctionId", auctionId));
+                }
+                catch(error) {}
+            }
+        };
+
         fetchAuctionData();
         fetchHighestBidData();
-      }, [auctionId, navigate, openSnackbar, getUserId, role]);
+        updatePurchaseStatus();
+
+      }, [auctionId]);
 
 
       useEffect(() => {
@@ -207,10 +231,56 @@ function AuctionInfo() {
         };
 
         fetchHighestBidData();
+
         const interval = setInterval(fetchHighestBidData, 3000);
 
         return () => clearInterval(interval);
-    }, [auctionId, navigate, openSnackbar]);
+    }, [auctionId]);
+
+    useEffect(() => {
+        const fetchPurchase = async () => {
+            try {
+                const result = await getPurchase(auctionId);
+                setPurchase(result);
+            } catch (error) {}
+        }
+
+        fetchPurchase();
+
+        const interval = setInterval(fetchPurchase, 100000); // TODO uzdet 3000
+
+        return () => clearInterval(interval);
+    }, [auctionId]);
+
+    function modifyDate(dateString) {
+        const offsetInMilliseconds = new Date().getTimezoneOffset() * 60000;
+        const utcDate = new Date(dateString);
+        const localDate = new Date(utcDate.getTime() - offsetInMilliseconds).toLocaleString();
+        return localDate;
+      }
+
+    useEffect(() => {
+        const fetchBids = async() => {
+            const result = await getAuctionBids(auctionId);
+
+            const modifiedBids = result.map(bid => {
+                return {
+                  ...bid,
+                  creationDate: modifyDate(bid.creationDate)
+                };
+              });
+
+            setBids(modifiedBids);
+            console.log(result);
+            console.log(result.length)
+        }
+
+        fetchBids();
+
+        const interval = setInterval(fetchBids, 3000);
+
+        return () => clearInterval(interval);
+    }, [auctionId]);
 
       return (
         <Container component="main" maxWidth="lg">
@@ -327,7 +397,7 @@ function AuctionInfo() {
                                         color: '#333',
                                         letterSpacing: '1px' }}
                                 >
-                                &nbsp;{minIncrement}
+                                &nbsp;{minIncrement}€
                                 </Typography >
                             </Box>
                         </Grid>
@@ -358,7 +428,7 @@ function AuctionInfo() {
                                         color: '#333',
                                         letterSpacing: '1px' }}
                                 >
-                                &nbsp;{partData.averagePrice}
+                                &nbsp;{partData.averagePrice}€
                                 </Typography >
                             </Box>
                         </Grid>
@@ -464,45 +534,91 @@ function AuctionInfo() {
                             )}
                             {endDateLocal < currentDateLocal && (
                             <Box sx={{ display: 'flex', alignItems: 'stretch', marginTop: 2 }}>
-                            <Typography
-                                component="span"
-                                variant="subtitle1"
-                                sx={{
-                                    fontWeight: 'bold',
-                                    fontSize: '20px',
-                                    fontFamily: 'Arial, sans-serif',
-                                    letterSpacing: '1px',
-                                    textTransform: 'uppercase',
-                                    color: '#3b9298' }}
-                            >
-                                Auction has ended
-                            </Typography >
+                                <Typography
+                                    component="span"
+                                    variant="subtitle1"
+                                    sx={{
+                                        fontWeight: 'bold',
+                                        fontSize: '20px',
+                                        fontFamily: 'Arial, sans-serif',
+                                        letterSpacing: '1px',
+                                        textTransform: 'uppercase',
+                                        color: '#3b9298' }}
+                                >
+                                    Auction has ended
+                                </Typography >
                             </Box>
                             )}
                         </Grid>
+
+                        {endDateLocal < currentDateLocal && purchase && role.includes("RegisteredUser") && purchase.buyerId === getUserId() && purchase.status === 'PendingPayment' &&
                         <Grid item xs={12}>
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                sx={{
-                                    width: '50%',
-                                    borderTopLeftRadius: '10px',
-                                    borderBottomLeftRadius: '10px',
-                                    borderTopRightRadius: '10px',
-                                    borderBottomRightRadius: '10px',
-                                    marginLeft: 3,
-                                    bgcolor: '#0d6267',
-                                    fontSize: '14px',
-                                    fontWeight: 'bold',
-                                    '&:hover': {
-                                        backgroundColor: '#3d8185',
-                                    },
-                                }}
-                                onClick={handlePayClick}
-                            >
-                                PAY
-                            </Button>
+                            <Box sx={{ display: 'flex', alignItems: 'stretch' }}>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    sx={{
+                                        width: '25%',
+                                        borderTopLeftRadius: '10px',
+                                        borderBottomLeftRadius: '10px',
+                                        borderTopRightRadius: '10px',
+                                        borderBottomRightRadius: '10px',
+                                        bgcolor: '#0d6267',
+                                        fontSize: '14px',
+                                        fontWeight: 'bold',
+                                        '&:hover': {
+                                            backgroundColor: '#3d8185',
+                                        },
+                                        marginTop: 2
+                                    }}
+                                    onClick={handlePayClick}
+                                >
+                                    PAY
+                                </Button>
+                            </Box>
                         </Grid>
+                        }
+
+                        {purchase && purchase.status !== 'PendingPayment' &&
+                        <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'stretch' }}>
+                                <Typography
+                                        component="span"
+                                        variant="subtitle1"
+                                        sx={{
+                                            fontWeight: 'bold',
+                                            fontSize: '20px',
+                                            fontFamily: 'Arial, sans-serif',
+                                            letterSpacing: '1px',
+                                            textTransform: 'uppercase',
+                                            color: '#3b9298' }}
+                                    >
+                                    {purchase.status === 'Paid' ? 'Buyer paid for the part' : 'Buyer did not pay for the part in time'}
+                                    </Typography >
+                            </Box>
+                        </Grid>
+                        }
+
+                        {endDateLocal < currentDateLocal && purchase && purchase.status === 'PendingPayment' && role.includes("RegisteredUser") && purchase.buyerId !== getUserId() &&
+                        <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'stretch' }}>
+                                <Typography
+                                        component="span"
+                                        variant="subtitle1"
+                                        sx={{
+                                            fontWeight: 'bold',
+                                            fontSize: '20px',
+                                            fontFamily: 'Arial, sans-serif',
+                                            letterSpacing: '1px',
+                                            textTransform: 'uppercase',
+                                            color: '#3b9298' }}
+                                    >
+                                    Waiting for buyer to pay for the part
+                                    </Typography >
+                            </Box>
+                        </Grid>
+                        }
+
                     </Box>
                 </Box>
 
@@ -654,17 +770,38 @@ function AuctionInfo() {
                     </Box>
                     <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', marginTop: 3}}>
                             Description:&nbsp;
-                        </Typography>
-                        <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', wordBreak: 'break-all' }}>{auctionData.description}</Typography>
-                    <Typography component="span"     ariant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', marginTop: '30px', fontFamily: 'Arial, sans-serif' }}>
-                        Auction start date:&nbsp;
                     </Typography>
-                    <Typography component="span" sx={{fontFamily: 'Arial, sans-serif' }}>{startDateLocal}</Typography>
-                    <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', color: '#255e62', fontFamily: 'Arial, sans-serif', marginTop: '5px' }}>
-                        Auction end date:&nbsp;
-                    </Typography>
-                    <Typography component="span" sx={{fontFamily: 'Arial, sans-serif' }}>{endDateLocal}</Typography>
+                    <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', wordBreak: 'break-all' }}>{auctionData.description}</Typography>
                 </Box>
+                {bids && bids.length > 0 &&
+                <Box sx={{ marginTop: 3, marginBottom: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <Typography component="h1" variant="h5" sx={{ fontSize: '26px', fontWeight: 'bold', fontFamily: 'Arial, sans-serif', color: '#0d6267' }}>
+                        BIDS
+                    </Typography>
+                </Box>
+                }
+                {bids && bids.length > 0 &&
+                <Box sx={{marginRight: 5, marginLeft: 5}}>
+                    <Table size="small">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell style={{ backgroundColor: '#0d6267', color: 'white', fontWeight: 'bold' }}>USERNAME</TableCell>
+                                <TableCell style={{ backgroundColor: '#0d6267', color: 'white', fontWeight: 'bold' }}>AMOUNT</TableCell>
+                                <TableCell style={{ backgroundColor: '#0d6267',  color: 'white', fontWeight: 'bold' }}>DATE</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                        {bids.map((b, index) => (
+                            <TableRow key={index}>
+                                <TableCell>{b.username}</TableCell>
+                                <TableCell>{b.amount}€</TableCell>
+                                <TableCell>{b.creationDate}</TableCell>
+                            </TableRow>
+                        ))}
+                        </TableBody>
+                    </Table>
+                </Box>
+                }
                 <AuctionRecommendations auctionId = {auctionId}/>
             </Box>
         </Container>

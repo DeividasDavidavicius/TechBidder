@@ -50,7 +50,7 @@ const AuctionRecommendations = ({auctionId}) => {
       {auctions.length ? (
       <Box
         sx={{
-          marginTop: 8,
+          marginTop: 7,
           padding: '20px',
         }}
       >

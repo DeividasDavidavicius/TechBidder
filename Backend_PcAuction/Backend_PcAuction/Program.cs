@@ -32,6 +32,7 @@ builder.Services.AddTransient<IPartsPricesRepository, PartsPricesRepository>();
 builder.Services.AddTransient<ISeriesRepository, SeriesRepository>();
 builder.Services.AddTransient<IPartRequestsRepository, PartRequestsRepository>();
 builder.Services.AddTransient<IPurchaseRepository, PurchaseRepository>();
+builder.Services.AddTransient<IStripePaymentRepository, StripePaymentRepository>();
 
 builder.Services.AddTransient<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<AuthDbSeeder>();

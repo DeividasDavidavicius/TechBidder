@@ -118,7 +118,7 @@ namespace Backend_PcAuction.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Bid>>> GetMany(Guid auctionId)
+        public async Task<ActionResult<IEnumerable<BidWithUsernameDto>>> GetMany(Guid auctionId)
         {
             var auction = await _auctionsRepository.GetAsync(auctionId);
 
@@ -129,7 +129,7 @@ namespace Backend_PcAuction.Controllers
 
             var bids = await _bidsRepository.GetManyAsync(auctionId);
 
-            return Ok(bids.Select(bid => new BidDto(bid.Id, bid.Amount, bid.CreationDate)));
+            return Ok(bids.Select(bid => new BidWithUsernameDto(bid.Id, bid.Amount, bid.CreationDate, bid.User.UserName)));
         }
 
         [HttpDelete]

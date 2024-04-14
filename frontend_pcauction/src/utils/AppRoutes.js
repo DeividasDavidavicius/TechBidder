@@ -19,10 +19,8 @@ import PcBuildGenerator from "../components/parts/PcBuildGenerator";
 import CompatibilityCheck from "../components/parts/CompatibilityCheck";
 
 const AppRoutes = [
-    { index: true, path: PATHS.MAIN, element: <MainPage/> },
     { path: PATHS.LOGIN, element: <Login/> },
     { path: PATHS.REGISTER, element: <Register/> },
-    { path: PATHS.ANY, element: <MainPage/> },
     { path: PATHS.AUCTIONS, element: <AuctionList/> },
     { path: PATHS.AUCTIONINFO, element: <AuctionInfo/> },
     { path: PATHS.CREATEAUCTION, element: <CreateAuction/> },
@@ -37,7 +35,9 @@ const AppRoutes = [
     { path: PATHS.PARTREQUESTCREATE, element: <PartRequestsCreate/> },
     { path: PATHS.PSUCALCULATOR, element: <PsuCalculator/> },
     { path: PATHS.PCBUILDGENERATOR, element: <PcBuildGenerator/> },
-    { path: PATHS.COMPATIBILITYCHECK, element: <CompatibilityCheck/> }
+    { path: PATHS.COMPATIBILITYCHECK, element: <CompatibilityCheck/> },
+    { path: PATHS.ANY, element: <MainPage/> },
+    { index: true, path: PATHS.MAIN, element: <MainPage/> }
 ];
 
 export default AppRoutes;

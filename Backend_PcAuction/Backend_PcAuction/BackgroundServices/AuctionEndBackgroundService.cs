@@ -13,7 +13,7 @@ namespace Backend_PcAuction.BackgroundServices
         public AuctionEndBackgroundService(IServiceScopeFactory scopeFactory)
         {
             _scopeFactory = scopeFactory;
-            _interval = TimeSpan.FromSeconds(30);
+            _interval = TimeSpan.FromSeconds(10);
         }
 
         protected override async Task ExecuteAsync(CancellationToken token)
