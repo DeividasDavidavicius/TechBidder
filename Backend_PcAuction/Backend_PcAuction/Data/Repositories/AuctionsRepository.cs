@@ -15,7 +15,7 @@ namespace Backend_PcAuction.Data.Repositories
         Task<List<Auction>> GetManyBySeriesDifferentPartAsync(Auction auction);
         Task<List<Auction>> GetManyByCategoryDifferentSeriesAsync(Auction auction);
         Task<List<Auction>> GetManyByCategoryDifferentPartAsync(Auction auction);
-        Task<IReadOnlyList<Auction>> GetManyWithPaginationAsync(int page, string categoryId, Guid? seriesId, Guid? partId);
+        Task<IReadOnlyList<Auction>> GetManyWithPaginationAsync(int page, string categoryId, Guid? seriesId, Guid? partId, string sortType);
         Task UpdateAsync(Auction auction);
         Task<int> GetCountAsync(string categoryId, Guid? seriesId, Guid? partId);
     }
@@ -70,12 +70,24 @@ namespace Backend_PcAuction.Data.Repositories
             return await _context.Auctions.Include(a => a.Part).Include(a => a.Part.Category).Where(a => a.Status == AuctionStatuses.Active && a.Part.Category.Id == auction.Part.Category.Id && a.Part.Id != auction.Part.Id).ToListAsync();
         }
 
-        public async Task<IReadOnlyList<Auction>> GetManyWithPaginationAsync(int page, string categoryId, Guid? seriesId, Guid? partId)
+        public async Task<IReadOnlyList<Auction>> GetManyWithPaginationAsync(int page, string categoryId, Guid? seriesId, Guid? partId, string sortType)
         {
-            return await _context.Auctions.Include(a => a.Part).Include(a => a.Part.Category).
+            if(sortType == AuctionSortingTypes.TimeLeft)
+            {
+                return await _context.Auctions.Include(a => a.Part).Include(a => a.Part.Category).
+                Where(a => (a.Status == AuctionStatuses.Active || a.Status == AuctionStatuses.ActiveNA) && (categoryId == null || a.Part.Category.Id == categoryId)
+                && (seriesId == null || a.Part.Series.Id == seriesId) && (partId == null || a.Part.Id == partId)).
+                OrderBy(a => a.EndDate).Skip((page - 1) * 5).Take(5).ToListAsync();
+            }   
+            else if(sortType == AuctionSortingTypes.CreationDate)
+            {
+                return await _context.Auctions.Include(a => a.Part).Include(a => a.Part.Category).
                 Where(a => (a.Status == AuctionStatuses.Active || a.Status == AuctionStatuses.ActiveNA) && (categoryId == null || a.Part.Category.Id == categoryId)
                 && (seriesId == null || a.Part.Series.Id == seriesId) && (partId == null || a.Part.Id == partId)).
                 OrderByDescending(a => a.StartDate).Skip((page - 1) * 5).Take(5).ToListAsync();
+            }
+
+            return null;
         }
 
         public async Task UpdateAsync(Auction auction)

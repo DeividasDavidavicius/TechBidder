@@ -17,6 +17,7 @@ import PartRequestsCreate from "../components/parts/PartRequestsCreate";
 import PsuCalculator from "../components/parts/PsuCalculator";
 import PcBuildGenerator from "../components/parts/PcBuildGenerator";
 import CompatibilityCheck from "../components/parts/CompatibilityCheck";
+import UserProfile from "../components/user/UserProfile";
 
 const AppRoutes = [
     { path: PATHS.LOGIN, element: <Login/> },
@@ -36,6 +37,7 @@ const AppRoutes = [
     { path: PATHS.PSUCALCULATOR, element: <PsuCalculator/> },
     { path: PATHS.PCBUILDGENERATOR, element: <PcBuildGenerator/> },
     { path: PATHS.COMPATIBILITYCHECK, element: <CompatibilityCheck/> },
+    { path: PATHS.USERPROFILE, element: <UserProfile/> },
     { path: PATHS.ANY, element: <MainPage/> },
     { index: true, path: PATHS.MAIN, element: <MainPage/> }
 ];

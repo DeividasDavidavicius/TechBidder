@@ -185,7 +185,7 @@ function PartRequestsCreate() {
                 await setAuctionId(result.auctionId);
 
                 await fetchCategoriesData();
-                await fetchRequedtedPartData(fetchedPartId);
+                await fetchRequestedPartData(fetchedPartId);
                 await fetchCategorySeries();
                 await fetchCategoryParts();
             }
@@ -201,7 +201,7 @@ function PartRequestsCreate() {
             setCategoryFields(result);
         };
 
-        const fetchRequedtedPartData = async (fetchedPartId) => {
+        const fetchRequestedPartData = async (fetchedPartId) => {
             const result = await getPart(categoryId, fetchedPartId);
             setRequestedPartName(result.name);
         };

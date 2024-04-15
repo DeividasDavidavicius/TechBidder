@@ -30,6 +30,7 @@ function Header() {
     let navOptions = [];
 
     if (isLoggedIn === true) {
+        navOptions.push({ name: 'Profile', route: PATHS.USERPROFILE });
         navOptions.push({ name: 'Logout', route: PATHS.MAIN, method: 'handleLogout' });
     }
 

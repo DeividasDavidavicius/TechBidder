@@ -129,7 +129,7 @@ namespace Backend_PcAuction.Controllers
 
             var bids = await _bidsRepository.GetManyAsync(auctionId);
 
-            return Ok(bids.Select(bid => new BidWithUsernameDto(bid.Id, bid.Amount, bid.CreationDate, bid.User.UserName)));
+            return Ok(bids.Select(bid => new BidWithUsernameDto(bid.Id, bid.Amount, bid.CreationDate, bid.User.UserName, bid.User.Id)));
         }
 
         [HttpDelete]
@@ -153,6 +153,9 @@ namespace Backend_PcAuction.Controllers
 
             var authorizationResult = await _authorizationService.AuthorizeAsync(User, bid, PolicyNames.ResourceOwner);
             if (!authorizationResult.Succeeded)
+                return Forbid();
+
+            if (DateTime.UtcNow.AddMinutes(60) > auction.EndDate)
                 return Forbid();
 
             await _bidsRepository.DeleteAsync(bid);

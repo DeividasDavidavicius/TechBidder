@@ -25,9 +25,9 @@ export const postAuction = async (data) => {
     }
   };
 
-  export const getAuctionsWithPagination = async (page, categoryId, seriesId, partId) => {
+  export const getAuctionsWithPagination = async (page, categoryId, seriesId, partId, sortType) => {
     try {
-      const response = await axios.get(`${API_URL}/auctions/pagination?page=${page}&categoryId=${categoryId}&seriesId=${seriesId}&partId=${partId}`
+      const response = await axios.get(`${API_URL}/auctions/pagination?page=${page}&categoryId=${categoryId}&seriesId=${seriesId}&partId=${partId}&sortType=${sortType}`
       );
       return response.data;
     } catch (error) {

@@ -35,3 +35,18 @@ export const postBid = async (data, auctionId) => {
       throw error;
     }
   };
+
+  export const deleteBid = async (auctionId, bidId) => {
+    try {
+      const accessToken = localStorage.getItem('accessToken');
+      await axios.delete(`${API_URL}/auctions/${auctionId}/bids/${bidId}`, {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`
+        }
+      })
+    } catch (error) {
+      console.error("Error deleting bid", error);
+      throw error;
+    }
+  };

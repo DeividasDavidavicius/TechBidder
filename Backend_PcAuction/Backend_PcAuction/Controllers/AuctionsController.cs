@@ -153,9 +153,14 @@ namespace Backend_PcAuction.Controllers
 
         [HttpGet]
         [Route("pagination")]
-        public async Task<ActionResult<AuctionsWithPaginationDto>> GetManyWithPagination(int page = 1, string categoryId = null, Guid? seriesId = null, Guid? partId = null)
+        public async Task<ActionResult<AuctionsWithPaginationDto>> GetManyWithPagination(int page = 1, string categoryId = null, Guid? seriesId = null, Guid? partId = null, string sortType = AuctionSortingTypes.CreationDate)
         {
-            var auctions = await _auctionsRepository.GetManyWithPaginationAsync(page, categoryId, seriesId, partId);
+            if(sortType != AuctionSortingTypes.CreationDate && sortType != AuctionSortingTypes.TimeLeft)
+            {
+                return UnprocessableEntity();
+            }
+
+            var auctions = await _auctionsRepository.GetManyWithPaginationAsync(page, categoryId, seriesId, partId, sortType);
             var auctionCount = await _auctionsRepository.GetCountAsync(categoryId, seriesId, partId);
 
             var resultAuctions = auctions.Select(auction =>

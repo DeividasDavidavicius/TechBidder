@@ -34,7 +34,7 @@ namespace Backend_PcAuction.Data.Repositories
 
         public async Task<IReadOnlyList<Bid>> GetManyAsync(Guid auctionId)
         {
-            return await _context.Bids.Include(bid => bid.User).Where(bid => bid.Auction.Id == auctionId).ToListAsync();
+            return await _context.Bids.Include(bid => bid.User).Where(bid => bid.Auction.Id == auctionId).OrderByDescending(bid => bid.Amount).ToListAsync();
         }
 
         public async Task<Bid?> GetLastAsync(Guid auctionId)

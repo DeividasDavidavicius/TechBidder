@@ -17,6 +17,7 @@ const PATHS = {
     PSUCALCULATOR: '/psuCalculator',
     PCBUILDGENERATOR: '/pcbuildgenerator',
     COMPATIBILITYCHECK: '/compatibility',
+    USERPROFILE: '/profile',
     ANY: '*'
 }
 

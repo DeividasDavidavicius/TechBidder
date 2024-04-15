@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import PATHS from "../../utils/Paths";
-import { Autocomplete, Avatar, Box, Card, CardActionArea, CardContent, CardHeader, Container, CssBaseline, FormControl, Grid, Pagination, TextField, Typography } from "@mui/material";
+import { Autocomplete, Avatar, Box, Card, CardActionArea, CardContent, CardHeader, Container, CssBaseline, FormControl, FormControlLabel, FormLabel, Grid, Pagination, Radio, RadioGroup, TextField, Typography } from "@mui/material";
 import { getAuctionsWithPagination } from "../../services/AuctionService";
 import { timeLeft } from "../../utils/DateUtils";
 import { getHighestBid } from "../../services/BIdService";
@@ -20,6 +20,7 @@ function AuctionList() {
     const [categoryId, setCategoryId] = useState(queryParams.get('categoryId'));
     const [seriesId, setSeriesId] = useState(queryParams.get('seriesId'));
     const [partId, setPartId] = useState(queryParams.get('partId'));
+    const [sortType, setSortType] = useState(queryParams.get('sort') || 'creationdate')
     const [totalAuctions, setTotalAuctions] = useState(0);
     const [auctions, setAuctions] = useState([]);
     const auctionsPerPage = 5;
@@ -35,7 +36,7 @@ function AuctionList() {
     useEffect(() => {
         const fetchAuctionsData = async () => {
             const result = await getAuctionsWithPagination(currentPage, selectedCategory ? selectedCategory.id : (categoryId ? categoryId : ""),
-                                                           selectedSeries ? selectedSeries.id: (seriesId ? seriesId : ""), selectedPart ? selectedPart.id : (partId ? partId : ""));
+                                                           selectedSeries ? selectedSeries.id: (seriesId ? seriesId : ""), selectedPart ? selectedPart.id : (partId ? partId : ""), sortType);
             setTotalAuctions(result.auctionCount);
 
             const auctionsWithHighestBid = await Promise.all(
@@ -95,7 +96,7 @@ function AuctionList() {
 
         fetchAuctionsData();
         fetchFiltersData();
-    }, [currentPage, selectedCategory, selectedSeries, selectedPart, categoryId, partId, seriesId]);
+    }, [currentPage, selectedCategory, selectedSeries, selectedPart, sortType, categoryId, partId, seriesId]);
 
     const handlePageChange = (event, newPage) => {
       const queryParams = [];
@@ -110,6 +111,9 @@ function AuctionList() {
       }
       if (selectedPart?.id) {
           queryParams.push(`partId=${selectedPart.id}`);
+      }
+      if(sortType) {
+        queryParams.push(`sort=${sortType}`);
       }
       navigate(PATHS.AUCTIONS + "?" + queryParams.join("&"));
       setCurrentPage(newPage);
@@ -132,6 +136,9 @@ function AuctionList() {
         if (category?.id) {
             queryParams.push(`categoryId=${category.id}`);
         }
+        if(sortType) {
+          queryParams.push(`sort=${sortType}`);
+        }
         navigate(PATHS.AUCTIONS + "?" + queryParams.join("&"));
     }
 
@@ -148,6 +155,9 @@ function AuctionList() {
       }
       if (series?.id) {
           queryParams.push(`seriesId=${series.id}`);
+      }
+      if(sortType) {
+        queryParams.push(`sort=${sortType}`);
       }
       navigate(PATHS.AUCTIONS + "?" + queryParams.join("&"));
     }
@@ -171,6 +181,28 @@ function AuctionList() {
     navigate(PATHS.AUCTIONS + "?" + queryParams.join("&"));
   }
 
+  const handleSortingChange = (event) => {
+    setSortType(event.target.value);
+
+    const queryParams = [];
+    if (currentPage) {
+        queryParams.push(`page=${currentPage}`);
+    }
+    if (selectedCategory?.id) {
+        queryParams.push(`categoryId=${selectedCategory.id}`);
+    }
+    if (selectedSeries?.id) {
+        queryParams.push(`seriesId=${selectedSeries.id}`);
+    }
+    if (selectedPart?.id) {
+        queryParams.push(`partId=${selectedPart.id}`);
+    }
+    if(sortType) {
+      queryParams.push(`sort=${event.target.value}`);
+    }
+    navigate(PATHS.AUCTIONS + "?" + queryParams.join("&"));
+  };
+
     return (
     <Container component="main" maxWidth="lg">
       <CssBaseline />
@@ -182,6 +214,22 @@ function AuctionList() {
           padding: '20px',
         }}
       >
+       <Box display="flex" justifyContent="flex-end" alignItems="center">
+            <FormLabel component="legend" id="demo-row-radio-buttons-group-label">
+                Sorting:
+            </FormLabel>
+            <RadioGroup
+                row
+                aria-labelledby="demo-row-radio-buttons-group-label"
+                name="row-radio-buttons-group"
+                value={sortType}
+                onChange={handleSortingChange}
+                sx={{marginLeft: 1}}
+            >
+                <FormControlLabel value="creationdate" control={<Radio />} label="Creation date" />
+                <FormControlLabel value="timeleft" control={<Radio />} label="Time left" />
+            </RadioGroup>
+        </Box>
         <Grid container spacing={2} sx={{marginBottom: 2}}>
             <Grid item xs={12} sm={4}>
                 <FormControl fullWidth>
@@ -238,7 +286,6 @@ function AuctionList() {
                 </FormControl>
             </Grid>
         </Grid>
-
         <Box>
           {auctions.map((auction, index) => (
             <Card key = {auction.id}  display="flex" sx={{ marginBottom: 2, border: '1px solid #ddd' }}>

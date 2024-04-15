@@ -2,17 +2,20 @@ import { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { getAuction } from "../../services/AuctionService";
 import SnackbarContext from "../../contexts/SnackbarContext";
-import { Avatar, Box, Button, Container, CssBaseline, Grid, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography } from "@mui/material";
+import { Avatar, Box, Button, Container, CssBaseline, Dialog, DialogActions, DialogTitle, Grid, Paper, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography } from "@mui/material";
 import PATHS from "../../utils/Paths";
 import { checkTokenValidity, refreshAccessToken } from "../../services/AuthenticationService";
 import { useUser } from "../../contexts/UserContext";
-import { getAuctionBids, getHighestBid, postBid } from "../../services/BIdService";
+import { deleteBid, getAuctionBids, getHighestBid, postBid } from "../../services/BIdService";
 import { getCategory } from "../../services/PartCategoryService";
 import { getPart } from "../../services/PartService";
 import { getSeries } from "../../services/SeriesService";
 import CountdownTimer from "./CountdownTimer";
 import AuctionRecommendations from "./AuctionRecommendations";
 import { loadStripe } from "@stripe/stripe-js";
+import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+import UndoRoundedIcon from '@mui/icons-material/UndoRounded';
 import { getPurchase, getStripePurchaseSession, patchPurchase } from "../../services/PurchaseService";
 
 function AuctionInfo() {
@@ -40,10 +43,57 @@ function AuctionInfo() {
     const [purchaseStatus] = useState(queryParams.get('status'));
 
     const [bids, setBids] = useState([]);
+    const [openRemoveModal, setOpenRemoveModal] = useState(false);
+    const [removeBid, setRemoveBid] = useState({});
 
     const handleBidChange = (event) => {
         setBidAmountField(event.target.value);
-      };
+    };
+
+    const handleOpenRemove = (bid) => {
+        setRemoveBid(bid);
+        setOpenRemoveModal(true);
+    };
+
+    const handleCloseRemove = () => {
+        setOpenRemoveModal(false);
+        setRemoveBid({});
+    };
+
+    const handleRemoveBid = async () => {
+        const accessToken = localStorage.getItem('accessToken');
+        if (!checkTokenValidity(accessToken)) {
+            const result = await refreshAccessToken();
+            if (!result.success) {
+                openSnackbar('You must login to pay for auction!', 'error');
+                setLogout();
+                navigate(PATHS.LOGIN);
+                return;
+            }
+
+            setLogin(result.response.data.accessToken, result.response.data.refreshToken);
+        }
+
+        await deleteBid(auctionId, removeBid.id)
+        openSnackbar('Bid cancelled successfully!', 'success');
+
+        const updatedBids = bids.filter(
+            (bid) => bid.id !== removeBid.id
+        );
+        setBids(updatedBids);
+        handleCloseRemove();
+    }
+
+    function isOlderBy30Minutes(date1, date2) {
+        const d1 = new Date(date1);
+        const d2 = new Date(date2);
+
+        const timeDiff = d2 - d1;
+
+        const minutesDiff = timeDiff / (1000 * 60);
+
+        return minutesDiff >= 60;
+    }
 
     const handlePayClick =  async () => {
         const accessToken = localStorage.getItem('accessToken');
@@ -781,29 +831,55 @@ function AuctionInfo() {
                 </Box>
                 }
                 {bids && bids.length > 0 &&
-                <Box sx={{marginRight: 5, marginLeft: 5}}>
-                    <Table size="small">
-                        <TableHead>
-                            <TableRow>
-                                <TableCell style={{ backgroundColor: '#0d6267', color: 'white', fontWeight: 'bold' }}>USERNAME</TableCell>
-                                <TableCell style={{ backgroundColor: '#0d6267', color: 'white', fontWeight: 'bold' }}>AMOUNT</TableCell>
-                                <TableCell style={{ backgroundColor: '#0d6267',  color: 'white', fontWeight: 'bold' }}>DATE</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                        {bids.map((b, index) => (
-                            <TableRow key={index}>
-                                <TableCell>{b.username}</TableCell>
-                                <TableCell>{b.amount}€</TableCell>
-                                <TableCell>{b.creationDate}</TableCell>
-                            </TableRow>
-                        ))}
-                        </TableBody>
-                    </Table>
-                </Box>
+                    <Box sx={{marginRight: 5, marginLeft: 5}}>
+                        <Paper style={{ maxHeight: '300px', overflow: 'auto' }}>
+                            <Table size="small">
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell style={{ backgroundColor: '#0d6267', color: 'white', fontWeight: 'bold' }}>USERNAME</TableCell>
+                                        <TableCell style={{ backgroundColor: '#0d6267',  color: 'white', fontWeight: 'bold' }}>DATE</TableCell>
+                                        <TableCell style={{ backgroundColor: '#0d6267', color: 'white', fontWeight: 'bold' }}>AMOUNT</TableCell>
+                                        <TableCell style={{ backgroundColor: '#0d6267', color: 'white', fontWeight: 'bold' }}></TableCell>
+
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                {bids.map((b, index) => (
+                                    <TableRow key={index}>
+                                        <TableCell>{b.username}</TableCell>
+                                        <TableCell>{b.creationDate}</TableCell>
+                                        <TableCell>{b.amount}€</TableCell>
+                                        <TableCell>
+                                            {b.creationDate.getTime}
+                                            {index === 0 && role.includes("RegisteredUser") && b.userId === getUserId() && isOlderBy30Minutes(currentDateLocal, endDateLocal) === true &&
+                                            <Button startIcon={<CancelOutlinedIcon />}
+                                                sx={{ marginRight: 0, color: '#138c94', fontWeight: 'bold' }}
+                                                onClick={ () => handleOpenRemove(b)}
+                                            >
+                                                Cancel
+                                            </Button>
+                                            }
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                                </TableBody>
+                            </Table>
+                        </Paper>
+                    </Box>
                 }
                 <AuctionRecommendations auctionId = {auctionId}/>
             </Box>
+            <Dialog open={openRemoveModal} onClose={handleCloseRemove}>
+                <DialogTitle sx={{ fontSize: '20px', fontWeight: 'bold', fontFamily: 'Arial, sans-serif', color: '#0d6267' }} >Do you want to cancel this bid ({removeBid.amount}€)?</DialogTitle>
+                <DialogActions style={{ justifyContent: 'center' }}>
+                    <Button onClick={handleRemoveBid} startIcon={<HighlightOffIcon />} sx ={{ fontWeight: 'bold', color: "red" }}>
+                        Confirm
+                    </Button>
+                    <Button onClick={handleCloseRemove} startIcon={<UndoRoundedIcon />} sx ={{ fontWeight: 'bold', color: "#268747" }}>
+                        Back
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Container>
     );
 };
