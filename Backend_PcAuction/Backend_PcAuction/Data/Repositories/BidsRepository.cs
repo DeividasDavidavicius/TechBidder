@@ -1,4 +1,5 @@
 ﻿using Backend_PcAuction.Data.Entities;
+using Backend_PcAuction.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend_PcAuction.Data.Repositories
@@ -10,6 +11,7 @@ namespace Backend_PcAuction.Data.Repositories
         Task<Bid?> GetAsync(Guid auctionId, Guid bidId);
         Task<Bid?> GetLastAsync(Guid auctionId);
         Task<IReadOnlyList<Bid>> GetManyAsync(Guid auctionId);
+        Task<IReadOnlyList<Bid>> GetAllByUserAsync(string userId);
     }
 
     public class BidsRepository : IBidsRepository
@@ -35,6 +37,13 @@ namespace Backend_PcAuction.Data.Repositories
         public async Task<IReadOnlyList<Bid>> GetManyAsync(Guid auctionId)
         {
             return await _context.Bids.Include(bid => bid.User).Where(bid => bid.Auction.Id == auctionId).OrderByDescending(bid => bid.Amount).ToListAsync();
+        }
+
+        public async Task<IReadOnlyList<Bid>> GetAllByUserAsync(string userId)
+        {
+            return await _context.Bids.Include(bid => bid.User).Include(bid => bid.Auction).
+                Where(bid => bid.User.Id == userId && (bid.Auction.Status == AuctionStatuses.Active || bid.Auction.Status == AuctionStatuses.ActiveNA)).
+                OrderByDescending(bid => bid.Amount).ToListAsync();
         }
 
         public async Task<Bid?> GetLastAsync(Guid auctionId)

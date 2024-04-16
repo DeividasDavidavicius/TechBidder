@@ -4,7 +4,7 @@ import PATHS from "../../utils/Paths";
 import { Autocomplete, Avatar, Box, Card, CardActionArea, CardContent, CardHeader, Container, CssBaseline, FormControl, FormControlLabel, FormLabel, Grid, Pagination, Radio, RadioGroup, TextField, Typography } from "@mui/material";
 import { getAuctionsWithPagination } from "../../services/AuctionService";
 import { timeLeft } from "../../utils/DateUtils";
-import { getHighestBid } from "../../services/BIdService";
+import { getHighestBid } from "../../services/BidService";
 import { getCategories } from "../../services/PartCategoryService";
 import { getParts } from "../../services/PartService";
 import { getAllCategorySeries } from "../../services/SeriesService";

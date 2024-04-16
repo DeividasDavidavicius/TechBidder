@@ -6,7 +6,7 @@ import { Avatar, Box, Button, Container, CssBaseline, Dialog, DialogActions, Dia
 import PATHS from "../../utils/Paths";
 import { checkTokenValidity, refreshAccessToken } from "../../services/AuthenticationService";
 import { useUser } from "../../contexts/UserContext";
-import { deleteBid, getAuctionBids, getHighestBid, postBid } from "../../services/BIdService";
+import { deleteBid, getAuctionBids, getHighestBid, postBid } from "../../services/BidService";
 import { getCategory } from "../../services/PartCategoryService";
 import { getPart } from "../../services/PartService";
 import { getSeries } from "../../services/SeriesService";
@@ -321,8 +321,6 @@ function AuctionInfo() {
               });
 
             setBids(modifiedBids);
-            console.log(result);
-            console.log(result.length)
         }
 
         fetchBids();

@@ -5,7 +5,7 @@ import { Avatar, Box, Card, CardActionArea, CardContent, CardHeader, Container, 
 import { getAuctionRecommendations } from "../../services/AuctionService";
 import { timeLeft } from "../../utils/DateUtils";
 import SnackbarContext from "../../contexts/SnackbarContext";
-import { getHighestBid } from "../../services/BIdService";
+import { getHighestBid } from "../../services/BidService";
 import { Link } from "react-router-dom";
 
 const AuctionRecommendations = ({auctionId}) => {

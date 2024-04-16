@@ -73,3 +73,20 @@ export const postAuction = async (data) => {
       throw error;
     }
   };
+
+  export const getUserNewAuctions = async () => {
+    try {
+      const accessToken = localStorage.getItem('accessToken');
+      const response = await axios.get(`${API_URL}/user/newauctions`, {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`
+        }
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error("Error getting user bids", error);
+      throw error;
+    }
+  };

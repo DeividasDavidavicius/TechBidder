@@ -23,7 +23,6 @@ namespace Backend_PcAuction.Controllers
         private readonly IAzureBlobStorageService _azureBlobStorageService;
         private readonly IAuctionService _auctionService;
 
-
         public AuctionsController(IAuctionsRepository auctionsRepository, IPartsRepository partsRepository, IPartCategoriesRepository partCategoriesRepository,
             IAuthorizationService authorizationService, IAzureBlobStorageService azureBlobStorageService, IAuctionService auctionService)
         {

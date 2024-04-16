@@ -4,7 +4,7 @@ import { Autocomplete, Avatar, Box, Button, Card, CardActionArea, CardContent, C
 import { generatePcBuild } from "../../services/CalculationsService";
 import PATHS from "../../utils/Paths";
 import { timeLeft } from "../../utils/DateUtils";
-import { getHighestBid } from "../../services/BIdService";
+import { getHighestBid } from "../../services/BidService";
 import { Link } from "react-router-dom";
 
 function PcBuildGenerator()

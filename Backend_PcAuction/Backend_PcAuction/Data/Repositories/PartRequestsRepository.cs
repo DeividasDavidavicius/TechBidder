@@ -28,7 +28,8 @@ namespace Backend_PcAuction.Data.Repositories
 
         public async Task<PartRequest?> GetAsync(Guid? partRequestId)
         {
-            return await _context.PartRequests.Include(r => r.Auction).Include(r => r.Part).Include(r => r.Part.Category).FirstOrDefaultAsync(partRequest => partRequest.Id == partRequestId);
+            return await _context.PartRequests.Include(r => r.Auction).Include(r => r.Part).Include(r => r.Part.Category).
+                FirstOrDefaultAsync(partRequest => partRequest.Id == partRequestId);
         }
 
         public async Task<IReadOnlyList<PartRequest>> GetManyAsync()

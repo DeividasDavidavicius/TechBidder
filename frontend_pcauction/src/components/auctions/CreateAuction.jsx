@@ -168,7 +168,7 @@ function CreateAuction() {
     useEffect(() => {
         if (!role.includes("RegisteredUser")) {
             openSnackbar('You must login to create auctions!', 'error');
-            navigate('/');
+            navigate(PATHS.LOGIN);
         }
 
         const fetchCategoriesData = async () => {

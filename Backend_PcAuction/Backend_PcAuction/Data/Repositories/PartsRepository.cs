@@ -35,7 +35,8 @@ namespace Backend_PcAuction.Data.Repositories
 
         public async Task<Part?> GetAsync(string categoryId, Guid? partId)
         {
-            return await _context.Parts.Include(p => p.Series).Include(p => p.Category).FirstOrDefaultAsync(part => part.Id == partId && part.Category.Id == categoryId);
+            return await _context.Parts.Include(p => p.Series).Include(p => p.Category).
+                FirstOrDefaultAsync(part => part.Id == partId && part.Category.Id == categoryId);
         }
 
         public async Task<Part?> GetForAnyCategoryAsync(Guid partId)
@@ -45,17 +46,20 @@ namespace Backend_PcAuction.Data.Repositories
 
         public async Task<IReadOnlyList<Part>> GetManyAsync(string categoryId)
         {
-            return await _context.Parts.Include(part => part.Category).Include(part => part.Series).Where(part => part.Category.Id == categoryId && part.Type == PartTypes.Permanent).OrderBy(part => part.Name).ToListAsync();
+            return await _context.Parts.Include(part => part.Category).Include(part => part.Series).
+                Where(part => part.Category.Id == categoryId && part.Type == PartTypes.Permanent).OrderBy(part => part.Name).ToListAsync();
         }
 
         public async Task<IReadOnlyList<Part>> GetManyTempAsync(string categoryId)
         {
-            return await _context.Parts.Include(part => part.Series).Where(part => part.Category.Id == categoryId && part.Type == PartTypes.Temporary).OrderBy(part => part.Name).ToListAsync();
+            return await _context.Parts.Include(part => part.Series).Where(part => part.Category.Id == categoryId && part.Type == PartTypes.Temporary).
+                OrderBy(part => part.Name).ToListAsync();
         }
         public async Task<Part?> GetFromActiveAuctions(string categoryId, Guid partId)
         {
             var auctionQuery = _context.Auctions
-                .Where(a => a.Status == AuctionStatuses.Active && a.Part.Id == partId && a.Part.Category.Id == categoryId && a.Part.AveragePrice > 0) .Include(a => a.Part.Category)
+                .Where(a => a.Status == AuctionStatuses.Active && a.Part.Id == partId && a.Part.Category.Id == categoryId && a.Part.AveragePrice > 0).
+                Include(a => a.Part.Category)
                 .Select(a => new
                 {
                     Auction = a,

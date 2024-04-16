@@ -29,7 +29,8 @@ namespace Backend_PcAuction.Data.Repositories
 
         public async Task<Purchase?> GetLastAsync(Guid auctionId)
         {
-            return await _context.Purchases.Include(p => p.Buyer).Include(p => p.Auction).OrderByDescending(p => p.AuctionWinDate).FirstOrDefaultAsync(p => p.Auction.Id == auctionId);
+            return await _context.Purchases.Include(p => p.Buyer).Include(p => p.Auction).OrderByDescending(p => p.AuctionWinDate).
+                FirstOrDefaultAsync(p => p.Auction.Id == auctionId);
         }
 
         public async Task<IReadOnlyList<Purchase>> GetManyAsync(Guid auctionId)

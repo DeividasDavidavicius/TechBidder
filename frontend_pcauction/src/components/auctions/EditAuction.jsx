@@ -12,7 +12,7 @@ import dayjs from 'dayjs';
 import { checkTokenValidity, refreshAccessToken } from "../../services/AuthenticationService";
 import PATHS from "../../utils/Paths";
 import { getAuction, putAuction } from "../../services/AuctionService";
-import { getHighestBid } from "../../services/BIdService";
+import { getHighestBid } from "../../services/BidService";
 
 function EditAuction() {
     const navigate = useNavigate();
