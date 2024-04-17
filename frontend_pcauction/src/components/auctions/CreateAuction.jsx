@@ -64,7 +64,10 @@ function CreateAuction() {
 
         const reader = new FileReader();
 
-        setImageType(file && file.type ? file.type : null);
+        if(file)
+        {
+            setImageType(file && file.type ? file.type : null);
+        }
 
         reader.onload = () => {
           setSelectedImage(reader.result);
@@ -72,9 +75,8 @@ function CreateAuction() {
 
         if (file) {
           reader.readAsDataURL(file);
+          setImageFile(file);
         }
-
-        setImageFile(file);
       };
 
     const handleSubmit = async (e) => {

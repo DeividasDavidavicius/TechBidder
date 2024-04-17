@@ -90,3 +90,54 @@ export const postAuction = async (data) => {
       throw error;
     }
   };
+
+  export const getUserActiveAuctions = async () => {
+    try {
+      const accessToken = localStorage.getItem('accessToken');
+      const response = await axios.get(`${API_URL}/user/activeauctions`, {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`
+        }
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error("Error getting user bids", error);
+      throw error;
+    }
+  };
+
+  export const getUserEndedAuctions = async () => {
+    try {
+      const accessToken = localStorage.getItem('accessToken');
+      const response = await axios.get(`${API_URL}/user/endedauctions`, {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`
+        }
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error("Error getting user bids", error);
+      throw error;
+    }
+  };
+
+  export const getUserWonAuctions = async () => {
+    try {
+      const accessToken = localStorage.getItem('accessToken');
+      const response = await axios.get(`${API_URL}/user/wonauctions`, {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`
+        }
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error("Error getting user bids", error);
+      throw error;
+    }
+  };

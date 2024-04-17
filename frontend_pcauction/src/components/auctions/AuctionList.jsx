@@ -329,7 +329,7 @@ function AuctionList() {
                             Time left:&nbsp;
                           </Typography>
                           <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', fontWeight: 'bold', color: '#c21818', display: 'inline-block'}}>
-                          {timeLeft(auction.endDate, new Date().toISOString().slice(0, 19))}
+                            {timeLeft(auction.endDate, new Date().toISOString().slice(0, 19))}
                           </Typography>
                       </Box>
                       <Typography

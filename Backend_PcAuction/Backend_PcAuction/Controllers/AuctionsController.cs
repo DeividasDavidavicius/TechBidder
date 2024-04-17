@@ -22,9 +22,10 @@ namespace Backend_PcAuction.Controllers
         private readonly IAuthorizationService _authorizationService;
         private readonly IAzureBlobStorageService _azureBlobStorageService;
         private readonly IAuctionService _auctionService;
+        private readonly IBidsRepository _bidsRepository;
 
         public AuctionsController(IAuctionsRepository auctionsRepository, IPartsRepository partsRepository, IPartCategoriesRepository partCategoriesRepository,
-            IAuthorizationService authorizationService, IAzureBlobStorageService azureBlobStorageService, IAuctionService auctionService)
+            IAuthorizationService authorizationService, IAzureBlobStorageService azureBlobStorageService, IAuctionService auctionService, IBidsRepository bidsRepository)
         {
             _auctionsRepository = auctionsRepository;
             _partsRepository = partsRepository;
@@ -32,6 +33,7 @@ namespace Backend_PcAuction.Controllers
             _authorizationService = authorizationService;
             _azureBlobStorageService = azureBlobStorageService;
             _auctionService = auctionService;
+            _bidsRepository = bidsRepository;
         }
 
         [HttpPost]
@@ -219,6 +221,13 @@ namespace Backend_PcAuction.Controllers
                 return UnprocessableEntity("End date must be later than start date");
             }
 
+
+            var highestBid = _bidsRepository.GetLastAsync(auction.Id);
+            if (!(auction.Status == "New" || auction.Status == "NewNA" || (auction.Status == "Active" || auction.Status == "ActiveNA") && highestBid != null))
+            {
+                return UnprocessableEntity("Can not edit auctions with bids");
+            }
+
             if (updateAuctionDto.Image != null)
             {
                 if (!auction.ImageUri.StartsWith("/default"))
@@ -228,6 +237,7 @@ namespace Backend_PcAuction.Controllers
 
                 auction.ImageUri = await _azureBlobStorageService.UploadImageAsync(updateAuctionDto.Image);
             }
+
 
             auction.Name = updateAuctionDto.Name;
             auction.Description = updateAuctionDto.Description;

@@ -17,6 +17,8 @@ namespace Backend_PcAuction.Data.Repositories
         Task<List<Auction>> GetManyByCategoryDifferentPartAsync(Auction auction);
         Task<IReadOnlyList<Auction>> GetManyWithPaginationAsync(int page, string categoryId, Guid? seriesId, Guid? partId, string sortType);
         Task<IReadOnlyList<Auction>> GetAllNewByUserAsync(string userId);
+        Task<IReadOnlyList<Auction>> GetAllActiveByUserAsync(string userId);
+        Task<IReadOnlyList<Auction>> GetAllEndedByUserAsync(string userId);
         Task UpdateAsync(Auction auction);
         Task<int> GetCountAsync(string categoryId, Guid? seriesId, Guid? partId);
 
@@ -102,9 +104,23 @@ namespace Backend_PcAuction.Data.Repositories
         public async Task<IReadOnlyList<Auction>> GetAllNewByUserAsync(string userId)
         {
             return await _context.Auctions.Include(a => a.Part).Include(a => a.Part.Category).
-                Where(a => a.User.Id == userId && (a.Status == AuctionStatuses.New || a.Status == AuctionStatuses.NewNA)).ToListAsync();
+                Where(a => a.User.Id == userId && (a.Status == AuctionStatuses.New || a.Status == AuctionStatuses.NewNA)).
+                OrderBy(a => a.StartDate).ToListAsync();
         }
 
+        public async Task<IReadOnlyList<Auction>> GetAllActiveByUserAsync(string userId)
+        {
+            return await _context.Auctions.Include(a => a.Part).Include(a => a.Part.Category).
+                Where(a => a.User.Id == userId && (a.Status == AuctionStatuses.Active || a.Status == AuctionStatuses.ActiveNA)).
+                OrderBy(a => a.EndDate).ToListAsync();
+        }
+
+        public async Task<IReadOnlyList<Auction>> GetAllEndedByUserAsync(string userId)
+        {
+            return await _context.Auctions.Include(a => a.Part).Include(a => a.Part.Category).
+                Where(a => a.User.Id == userId && (a.Status == AuctionStatuses.EndedWithoutBids || a.Status == AuctionStatuses.EndedWithBids || a.Status == AuctionStatuses.Paid)).
+                OrderByDescending(a => a.EndDate).ToListAsync();
+        }
 
         public async Task UpdateAsync(Auction auction)
         {

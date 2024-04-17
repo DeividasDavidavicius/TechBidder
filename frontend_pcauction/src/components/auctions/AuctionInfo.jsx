@@ -92,7 +92,7 @@ function AuctionInfo() {
 
         const minutesDiff = timeDiff / (1000 * 60);
 
-        return minutesDiff >= 60;
+        return minutesDiff >= 30;
     }
 
     const handlePayClick =  async () => {
@@ -520,7 +520,29 @@ function AuctionInfo() {
                                 </Button>
                             </Box>
                         </Grid>
-                        </> )}
+                        </> )
+                        }
+                        { !(role.includes("RegisteredUser")) && endDateLocal > currentDateLocal && startDateLocal < currentDateLocal &&
+                            <Grid item xs={12}>
+                                <Box sx={{ display: 'flex', alignItems: 'stretch' }}>
+                                    <Typography
+                                        component="span"
+                                        variant="subtitle1"
+                                        sx={{
+                                            fontWeight: 'bold',
+                                            fontSize: '20px',
+                                            fontFamily: 'Arial, sans-serif',
+                                            letterSpacing: '1px',
+                                            textTransform: 'uppercase',
+                                            color: '#3b9298' }}
+                                    >
+                                        Login to bid!
+                                    </Typography >
+                                </Box>
+                            </Grid>
+                        }
+
+
                         <Grid item xs={12}>
                             {startDateLocal < currentDateLocal && endDateLocal > currentDateLocal && (
                             <Box sx={{ display: 'flex', alignItems: 'stretch', marginTop: 2 }}>

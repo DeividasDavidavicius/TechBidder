@@ -1,4 +1,5 @@
 ﻿using Backend_PcAuction.Data.Entities;
+using Backend_PcAuction.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend_PcAuction.Data.Repositories
@@ -10,6 +11,7 @@ namespace Backend_PcAuction.Data.Repositories
         Task<Purchase?> GetLastAsync(Guid auctionId);
         Task<IReadOnlyList<Purchase>> GetManyAsync(Guid auctionId);
         Task UpdateAsync(Purchase purchase);
+        Task<IReadOnlyList<Purchase>> GetAllUserPurchasesAsync(string userId);
     }
 
     public class PurchaseRepository : IPurchaseRepository
@@ -42,6 +44,12 @@ namespace Backend_PcAuction.Data.Repositories
         {
             _context.Purchases.Update(purchase);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<IReadOnlyList<Purchase>> GetAllUserPurchasesAsync(string userId)
+        {
+            return await _context.Purchases.Include(p => p.Auction).Include(p => p.Auction.Part).Include(p => p.Auction.Part.Category).
+                Where(p => p.Buyer.Id == userId).ToListAsync();
         }
 
         public async Task DeleteAsync(Purchase purchase)
