@@ -10,7 +10,7 @@ namespace Backend_PcAuction.Services
 {
     public interface ICalculationsService
     {
-        PsuCalcResultDto CalculatePSU(Part motherboard, Part cpu, Part gpu, Part ram, Part ssd, Part hdd);
+        PsuCalcResultDto CalculatePSU(Part motherboard, Part cpu, Part gpu, Part ram, Part ssd, Part hdd, double additional = 0);
         Task<List<Auction>> GeneratePcBuild(PcBuilderDataDto pcBuilderDataDto);
         Task<List<CompatiblePartsResultDto>> GetCompatibleParts(CompatiblePartsDataDto compatiblePartsDataDto);
     }
@@ -27,10 +27,10 @@ namespace Backend_PcAuction.Services
             _partPriceService = partPriceService;
         }
 
-        public PsuCalcResultDto CalculatePSU(Part motherboard, Part cpu, Part gpu, Part ram, Part ssd, Part hdd)
+        public PsuCalcResultDto CalculatePSU(Part motherboard, Part cpu, Part gpu, Part ram, Part ssd, Part hdd, double additional = 0)
         {
             List<Part> parts = new List<Part>();
-            double psuSize = 0;
+            double psuSize = 0 + additional;
 
             parts.Add(motherboard);
             parts.Add(cpu);
@@ -295,14 +295,40 @@ namespace Backend_PcAuction.Services
                 if (hddList == null) return null;
             }
 
-            if (pcBuilderDataDto.MotherboardAlreadyHave) motherboard = null;
+            var additionalPSU = 0.0;
+
+            if (pcBuilderDataDto.MotherboardAlreadyHave)
+            {
+                additionalPSU += Double.Parse(motherboard.SpecificationValue10);
+                motherboard = null;
+            }
             else motherboard.AveragePrice = await _partPriceService.GetPriceAverageAsync(motherboard.Id);
 
-            if (pcBuilderDataDto.CpuAlreadyHave) cpuList = null;
-            if (pcBuilderDataDto.GpuAlreadyHave) gpuList = null;
-            if (pcBuilderDataDto.RamAlreadyHave) ramList = null;
-            if (pcBuilderDataDto.SsdAlreadyHave) ssdList = null;
-            if (pcBuilderDataDto.HddAlreadyHave) hddList = null;
+            if (pcBuilderDataDto.CpuAlreadyHave)
+            {
+                additionalPSU += Double.Parse(cpuList[0].SpecificationValue10);
+                cpuList = null;
+            }
+            if (pcBuilderDataDto.GpuAlreadyHave) 
+            {
+                additionalPSU += Double.Parse(gpuList[0].SpecificationValue10);
+                gpuList = null; 
+            }
+            if (pcBuilderDataDto.RamAlreadyHave) 
+            {
+                additionalPSU += Double.Parse(ramList[0].SpecificationValue10) * Int32.Parse(ramList[0].SpecificationValue4);
+                ramList = null; 
+            }
+            if (pcBuilderDataDto.SsdAlreadyHave) 
+            {
+                additionalPSU += Double.Parse(ssdList[0].SpecificationValue10);
+                ssdList = null; 
+            }
+            if (pcBuilderDataDto.HddAlreadyHave) 
+            {
+                additionalPSU += Double.Parse(hddList[0].SpecificationValue10);
+                hddList = null; 
+            }
 
             if (cpuList != null) cpuList = await GetPrices(cpuList);
             if (gpuList != null) gpuList = await GetPrices(gpuList);
@@ -322,7 +348,7 @@ namespace Backend_PcAuction.Services
 
             if (pcBuilderDataDto.IncludePsu)
             {
-                var psuCalcResult = CalculatePSU(build.Motherboard, build.CPU, build.GPU, build.RAM, build.SSD, build.HDD);
+                var psuCalcResult = CalculatePSU(build.Motherboard, build.CPU, build.GPU, build.RAM, build.SSD, build.HDD, additionalPSU);
                 var psuSize = psuCalcResult.CalculatedWattage > psuCalcResult.RecommendedWattage ? psuCalcResult.CalculatedWattage : psuCalcResult.RecommendedWattage;
 
                 var suitablePSUs = psuList.Where(p => Double.Parse(p.SpecificationValue1) >= psuSize);
@@ -355,7 +381,7 @@ namespace Backend_PcAuction.Services
             int iterationsCount = 100;
             for(int i = 0; i < iterationsCount; i++)
             {
-                PcBuild randomBuild = GenerateRandomBuild(build, cpuList, gpuList, ramList, ssdList, hddList, psuList, motherboard, pcBuilderDataDto.Budget, pcBuilderDataDto.IncludePsu);
+                PcBuild randomBuild = GenerateRandomBuild(build, cpuList, gpuList, ramList, ssdList, hddList, psuList, motherboard, pcBuilderDataDto.Budget, pcBuilderDataDto.IncludePsu, additionalPSU);
                 var score = CalculateScore(randomBuild, build);
                 if(randomBuild.TotalPrice <= pcBuilderDataDto.Budget && score > 0)
                 {
@@ -459,7 +485,7 @@ namespace Backend_PcAuction.Services
         }
 
         public PcBuild GenerateRandomBuild(PcBuild build, List<Part> cpuList, List<Part> gpuList, List<Part> ramList, List<Part> ssdList, List<Part> hddList,
-                                           List<Part> psuList, Part motherboard, double budget, bool includePsu)
+                                           List<Part> psuList, Part motherboard, double budget, bool includePsu, double additionalPsu)
         {
             PcBuild randomBuild = new PcBuild();
 
@@ -473,7 +499,7 @@ namespace Backend_PcAuction.Services
 
             if (includePsu)
             {
-                var psuCalcResult = CalculatePSU(randomBuild.Motherboard, randomBuild.CPU, randomBuild.GPU, randomBuild.RAM, randomBuild.SSD, randomBuild.HDD);
+                var psuCalcResult = CalculatePSU(randomBuild.Motherboard, randomBuild.CPU, randomBuild.GPU, randomBuild.RAM, randomBuild.SSD, randomBuild.HDD, additionalPsu);
                 var psuSize = psuCalcResult.CalculatedWattage > psuCalcResult.RecommendedWattage ? psuCalcResult.CalculatedWattage : psuCalcResult.RecommendedWattage;
                 var suitablePSUs = psuList.Where(p => Double.Parse(p.SpecificationValue1) >= psuSize);
                 randomBuild.PSU = suitablePSUs.OrderBy(p => p.AveragePrice).FirstOrDefault();

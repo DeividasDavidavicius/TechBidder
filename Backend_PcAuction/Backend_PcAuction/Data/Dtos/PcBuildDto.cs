@@ -15,6 +15,7 @@
         bool SsdAlreadyHave,
         bool HddAlreadyHave,
         bool IncludePsu,
-        double Budget
+        double Budget,
+        double? AdditionalPsu = 0
     );
 }
