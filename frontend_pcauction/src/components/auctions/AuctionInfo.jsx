@@ -297,7 +297,7 @@ function AuctionInfo() {
 
         fetchPurchase();
 
-        const interval = setInterval(fetchPurchase, 100000); // TODO uzdet 3000
+        const interval = setInterval(fetchPurchase, 3000); //
 
         return () => clearInterval(interval);
     }, [auctionId]);

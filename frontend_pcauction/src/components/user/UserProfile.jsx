@@ -1,20 +1,24 @@
-import { AppBar, Avatar, Box, Button, Card, CardActionArea, CardContent, CardHeader, Container, CssBaseline, Paper, Tab, Table, TableBody, TableCell, TableHead, TableRow, Tabs, Typography } from "@mui/material";
+import { AppBar, Avatar, Box, Button, Card, CardActionArea, CardContent, CardHeader, Container, CssBaseline, Grid, Paper, Tab, Table, TableBody, TableCell, TableHead, TableRow, Tabs, TextField, Typography } from "@mui/material";
 import { useUser } from "../../contexts/UserContext";
 import { useContext, useEffect, useState } from "react";
 import PATHS from "../../utils/Paths";
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import SnackbarContext from "../../contexts/SnackbarContext";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getHighestBid, getUserBids, getWinningUserBids } from "../../services/BidService";
 import { checkTokenValidity, refreshAccessToken } from "../../services/AuthenticationService";
 import { getUserActiveAuctions, getUserEndedAuctions, getUserNewAuctions, getUserWonAuctions } from "../../services/AuctionService";
 import { timeLeft } from "../../utils/DateUtils";
+import { getUserData, patchUserData } from "../../services/UserService";
 
 function UserProfile() {
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const [tabValue, setTabValue] = useState(parseInt(queryParams.get('tab', 1) || 0));
+
     const { role, setLogin, setLogout, getUserId, getUserName } = useUser();
     const openSnackbar = useContext(SnackbarContext);
     const navigate = useNavigate();
-    const [tabValue, setTabValue] = useState(0);
 
     const [allBids, setAllBids] = useState([]);
     const [winningBids, setWinningBids] = useState([]);
@@ -24,8 +28,14 @@ function UserProfile() {
     const [endedAuctions, setEndedAuctions] = useState([]);
     const [wonAuctions, setWonAuctions] = useState([]);
 
+    const [userData, setUserData] = useState([]);
+    const [address, setAddress] = useState([]);
+    const [phoneNumber, setPhoneNumber] = useState([]);
+    const [bankDetails, setBankDetails] = useState([]);
+
     const handleTabChange = (event, newValue) => {
         setTabValue(newValue);
+        navigate(PATHS.USERPROFILE + "?tab=" + newValue);
     };
 
     const handleRowClick = (auctionId) => {
@@ -43,6 +53,44 @@ function UserProfile() {
         const localDate = new Date(utcDate.getTime() - offsetInMilliseconds).toLocaleString();
         return localDate;
     };
+
+    const handleAddressChange = (e) => {
+        setAddress(e.target.value);
+    };
+
+    const handlePhoneNumberChange = (e) => {
+        setPhoneNumber(e.target.value);
+    };
+
+    const handleBankDetailsChange = (e) => {
+        setBankDetails(e.target.value);
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        const patchData = {address, phoneNumber, bankDetails};
+
+        const accessToken = localStorage.getItem('accessToken');
+        if (!checkTokenValidity(accessToken)) {
+            const result = await refreshAccessToken();
+            if (!result.success) {
+                openSnackbar('You need to login!', 'error');
+                setLogout();
+                navigate(PATHS.LOGIN);
+                return;
+            }
+
+            setLogin(result.response.data.accessToken, result.response.data.refreshToken);
+        }
+
+        try {
+            await patchUserData(patchData);
+            openSnackbar('User info updated successfully!', 'success');
+        } catch(error) {
+            openSnackbar(error.response.data.errorMessage, "error")
+        }
+    }
 
     useEffect(() => {
         const fetchData = async () => {
@@ -104,6 +152,13 @@ function UserProfile() {
 
             const wonAuctionsResult = await getUserWonAuctions();
             setWonAuctions(wonAuctionsResult);
+
+            const userId = await getUserId();
+            const userDataResult = await getUserData(userId);
+            setUserData(userDataResult);
+            setAddress(userDataResult.address);
+            setPhoneNumber(userDataResult.phoneNumber);
+            setBankDetails(userDataResult.bankDetails);
         }
 
         fetchData();
@@ -140,6 +195,7 @@ function UserProfile() {
                                 <Tab label="My bids" />
                                 <Tab label="My auctions" />
                                 <Tab label="Won auctions" />
+                                <Tab label ="Account settings" />
                             </Tabs>
                         </AppBar>
                         {tabValue === 0 && (
@@ -440,7 +496,7 @@ function UserProfile() {
                                                                     {truncateText(auction.description, 180)}
                                                                 </Typography>
                                                                 <Box sx ={{textAlign: 'left', mt: 1, marginRight: 3, color: '#138c94', fontWeight: 'bold', fontSize: '18px' }}>
-                                                                    {auction.status == 'EndedWithBids' ? 'Awaiting payment' : auction.status == 'EndedWithoutBids' ? 'Ended without bids' : 'Paid'}
+                                                                    {auction.status === 'EndedWithBids' ? 'Awaiting payment' : auction.status === 'EndedWithoutBids' ? 'Ended without bids' : 'Paid'}
                                                                 </Box>
                                                             </CardContent>
                                                         </Box>
@@ -520,7 +576,7 @@ function UserProfile() {
                                                                 {truncateText(auction.description, 180)}
                                                             </Typography>
                                                             <Box sx ={{textAlign: 'left', mt: 1, marginRight: 3, color: '#138c94', fontWeight: 'bold', fontSize: '18px' }}>
-                                                                {auction.status == 'EndedWithBids' ? 'Awaiting payment' : 'Paid'}
+                                                                {auction.status === 'EndedWithBids' ? 'Awaiting payment' : 'Paid'}
                                                             </Box>
                                                         </CardContent>
                                                     </Box>
@@ -541,6 +597,57 @@ function UserProfile() {
                                 </Box>
                             }
                         </Box>
+                        )}
+                        {tabValue === 3 && (
+                            <Box sx={{mt: 3}}>
+                                <Typography variant="h5" sx={{fontWeight: 'bold'}}>ACCOUNT SETTINGS</Typography>
+
+                                <Box component="form" noValidate onSubmit={(event) => handleSubmit(event)} sx={{ mt: 3 }}>
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={12}>
+                                            <TextField
+                                                fullWidth
+                                                id="address"
+                                                label="Address"
+                                                name="address"
+                                                value={address}
+                                                onChange={handleAddressChange}
+                                                sx={{maxWidth:'50%'}}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <TextField
+                                                fullWidth
+                                                id="phoneNumber"
+                                                label="Phone number"
+                                                name="phoneNumber"
+                                                value={phoneNumber}
+                                                onChange={handlePhoneNumberChange}
+                                                sx={{maxWidth:'50%'}}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <TextField
+                                                fullWidth
+                                                id="bankDetails"
+                                                label="Bank details"
+                                                name="bankDetails"
+                                                value={bankDetails}
+                                                onChange={handleBankDetailsChange}
+                                                sx={{maxWidth:'50%'}}
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                    <Button
+                                        type="submit"
+                                        fullWidth
+                                        variant="contained"
+                                        sx={{ maxWidth: '50%', mt: 3, mb: 3, bgcolor: '#0d6267', '&:hover': { backgroundColor: '#07383b'}}}
+                                    >
+                                        UPDATE
+                                    </Button>
+                                </Box>
+                            </Box>
                         )}
                     </Box>
                 </Box>

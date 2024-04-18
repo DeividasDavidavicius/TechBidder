@@ -41,7 +41,10 @@ namespace Backend_PcAuction.Controllers
             {
                 UserName = registerUserDto.UserName,
                 Email = registerUserDto.Email,
-                BlacklistedRefreshTokens = ""
+                BlacklistedRefreshTokens = "",
+                Address = "",
+                PhoneNumber = "",
+                BankDetails = ""
             };
 
             var createUserResult = await _userManager.CreateAsync(newUser, registerUserDto.Password);
@@ -50,7 +53,7 @@ namespace Backend_PcAuction.Controllers
 
             await _userManager.AddToRoleAsync(newUser, UserRoles.RegisteredUser);
 
-            return CreatedAtAction(nameof(Register), new UserDto(newUser.Id, newUser.UserName, newUser.Email));
+            return CreatedAtAction(nameof(Register), new NewUserDto(newUser.Id, newUser.UserName, newUser.Email));
         }
 
         [HttpPost]

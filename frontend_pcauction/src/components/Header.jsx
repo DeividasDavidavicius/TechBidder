@@ -18,19 +18,19 @@ function Header() {
 
     const pages = [
         { name: 'MAIN', route: PATHS.MAIN },
-        { name: 'CREATE', route: PATHS.CREATEAUCTION },
+        { name: 'CREATE AUCTION', route: PATHS.CREATEAUCTION },
         { name: "AUCTIONS", route: PATHS.AUCTIONS + "?page=1" },
-        { name: "PARTS", route: PATHS.PARTS },
-        { name: "SERIES", route: PATHS.SERIES },
+        { name: "PC BUILDER", route: PATHS.PCBUILDGENERATOR },
         { name: "PSU CALCULATOR", route: PATHS.PSUCALCULATOR },
-        { name: "PC BUILD GENERATOR", route: PATHS.PCBUILDGENERATOR },
-        { name: "COMPATIBILITY", route: PATHS.COMPATIBILITYCHECK }
+        { name: "COMPATIBILITY CHECKER", route: PATHS.COMPATIBILITYCHECK }
     ];
 
     let navOptions = [];
 
     if (isLoggedIn === true) {
-        navOptions.push({ name: 'Profile', route: PATHS.USERPROFILE });
+        navOptions.push({ name: 'Profile', route: PATHS.USERPROFILE + "?tab=0"});
+        navOptions.push({ name: 'Part management', route: PATHS.PARTS}); // TODO CHECK IF ADMIN
+        navOptions.push({ name: 'Series management', route: PATHS.SERIES});
         navOptions.push({ name: 'Logout', route: PATHS.MAIN, method: 'handleLogout' });
     }
 

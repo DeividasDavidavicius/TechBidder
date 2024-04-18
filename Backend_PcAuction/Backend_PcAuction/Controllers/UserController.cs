@@ -1,9 +1,11 @@
-﻿using Backend_PcAuction.Auth.Models;
+﻿using Backend_PcAuction.Auth.Model;
+using Backend_PcAuction.Auth.Models;
 using Backend_PcAuction.Data.Dtos;
 using Backend_PcAuction.Data.Entities;
 using Backend_PcAuction.Data.Repositories;
 using Backend_PcAuction.Utils;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -18,12 +20,50 @@ namespace Backend_PcAuction.Controllers
         private readonly IAuctionsRepository _auctionsRepository;
         private readonly IBidsRepository _bidsRepository;
         private readonly IPurchaseRepository _purchaseRepository;
+        private readonly UserManager<User> _userManager;
 
-        public UserController(IAuctionsRepository auctionsRepository, IBidsRepository bidsRepository, IPurchaseRepository purchaseRepository)
+        public UserController(IAuctionsRepository auctionsRepository, IBidsRepository bidsRepository, IPurchaseRepository purchaseRepository, UserManager<User> userManager)
         {
             _auctionsRepository = auctionsRepository;
             _bidsRepository = bidsRepository;
             _purchaseRepository = purchaseRepository;
+            _userManager = userManager;
+        }
+
+        [HttpGet]
+        [Route("{userId}")]
+        public async Task<ActionResult<UserDto>> Get(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return new UserDto(user.Id, user.UserName, user.Address, user.PhoneNumber, user.BankDetails);
+        }
+
+        [HttpPatch]
+        [Authorize(Roles = UserRoles.RegisteredUser)]
+        public async Task<ActionResult<UserDto>> Update(UpdateUserDto updateUserDto)
+        {
+            var userId = User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                return UnprocessableEntity("Invalid token");
+            }
+
+            user.Address = updateUserDto.Address;
+            user.PhoneNumber = updateUserDto.PhoneNumber;
+            user.BankDetails = updateUserDto.BankDetails;
+
+            await _userManager.UpdateAsync(user);
+
+            return new UserDto(user.Id, user.UserName, user.Address, user.PhoneNumber, user.BankDetails);
         }
 
         [HttpGet]

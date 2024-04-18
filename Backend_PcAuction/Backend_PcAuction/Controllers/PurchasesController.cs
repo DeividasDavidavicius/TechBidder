@@ -87,6 +87,8 @@ namespace Backend_PcAuction.Controllers
 
             string paymentStatus = "unpaid";
 
+            await Task.Delay(250); // 250ms delay just to be sure that Stripe finishes processing payment and my API can actually fetch the payment
+
             var stripePayment = await _stripePaymentRepository.GetLastAsync(purchase.Id);
 
             using (HttpClient client = new HttpClient())
