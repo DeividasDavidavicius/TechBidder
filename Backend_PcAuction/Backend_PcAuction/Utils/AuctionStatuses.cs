@@ -13,5 +13,7 @@
         public const string EndedWithoutBids = nameof(EndedWithoutBids);
 
         public const string Paid = nameof(Paid);
+
+        public const string Cancelled = nameof(Cancelled);
     }
 }

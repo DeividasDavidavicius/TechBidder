@@ -141,3 +141,18 @@ export const postAuction = async (data) => {
       throw error;
     }
   };
+
+  export const cancelAuction = async (auctionId) => {
+    try {
+      const accessToken = localStorage.getItem('accessToken');
+      await axios.patch(`${API_URL}/auctions/${auctionId}/cancel`, {}, {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`
+        }
+      })
+    } catch (error) {
+      console.error("Error cancelling auction", error);
+      throw error;
+    }
+  };

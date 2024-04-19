@@ -602,7 +602,7 @@ function AuctionInfo() {
                             </Typography >
                             </Box>
                             )}
-                            {endDateLocal < currentDateLocal && (
+                            {endDateLocal < currentDateLocal && auctionData.status !== 'Cancelled' && (
                             <Box sx={{ display: 'flex', alignItems: 'stretch', marginTop: 2 }}>
                                 <Typography
                                     component="span"
@@ -616,6 +616,23 @@ function AuctionInfo() {
                                         color: '#3b9298' }}
                                 >
                                     Auction has ended
+                                </Typography >
+                            </Box>
+                            )}
+                            {auctionData.status === 'Cancelled' && (
+                            <Box sx={{ display: 'flex', alignItems: 'stretch', marginTop: 2 }}>
+                                <Typography
+                                    component="span"
+                                    variant="subtitle1"
+                                    sx={{
+                                        fontWeight: 'bold',
+                                        fontSize: '20px',
+                                        fontFamily: 'Arial, sans-serif',
+                                        letterSpacing: '1px',
+                                        textTransform: 'uppercase',
+                                        color: '#3b9298' }}
+                                >
+                                    Auction was cancelled
                                 </Typography >
                             </Box>
                             )}

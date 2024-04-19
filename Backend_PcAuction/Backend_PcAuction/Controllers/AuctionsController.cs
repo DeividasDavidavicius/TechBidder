@@ -222,8 +222,8 @@ namespace Backend_PcAuction.Controllers
             }
 
 
-            var highestBid = _bidsRepository.GetLastAsync(auction.Id);
-            if (!(auction.Status == "New" || auction.Status == "NewNA" || (auction.Status == "Active" || auction.Status == "ActiveNA") && highestBid != null))
+            var highestBid = await _bidsRepository.GetLastAsync(auction.Id);
+            if (!(auction.Status == "New" || auction.Status == "NewNA" || (auction.Status == "Active" || auction.Status == "ActiveNA") && highestBid == null))
             {
                 return UnprocessableEntity("Can not edit auctions with bids");
             }
@@ -254,29 +254,6 @@ namespace Backend_PcAuction.Controllers
                 auction.UserId, auction.Part.Id, auction.Part.Category.Id));
         }
 
-        [HttpDelete]
-        [Route("{auctionId}")]
-        [Authorize(Roles = UserRoles.RegisteredUser)]
-        public async Task<ActionResult> Delete(Guid auctionId)
-        {
-            var auction = await _auctionsRepository.GetAsync(auctionId);
-
-            if (auction == null)
-            {
-                return NotFound();
-            }
-
-            var authorizationResult = await _authorizationService.AuthorizeAsync(User, auction, PolicyNames.ResourceOwner);
-            if (!authorizationResult.Succeeded)
-                return Forbid();
-
-            await _azureBlobStorageService.DeleteImageAsync(auction.ImageUri);
-
-            await _auctionsRepository.DeleteAsync(auction);
-
-            return NoContent();
-        }
-
         [HttpPatch]
         [Route("{auctionId}")]
         [Authorize(Roles = UserRoles.Admin)]
@@ -289,7 +266,11 @@ namespace Backend_PcAuction.Controllers
                 return NotFound();
             }
 
-            if(updateAuctionPartDto != null)
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, auction, PolicyNames.ResourceOwner);
+            if (!authorizationResult.Succeeded)
+                return Forbid();
+
+            if (updateAuctionPartDto != null)
             {
                 var part = await _partsRepository.GetAsync(updateAuctionPartDto.CategoryId, updateAuctionPartDto.PartId);
 
@@ -306,6 +287,33 @@ namespace Backend_PcAuction.Controllers
             if (auction.Status == AuctionStatuses.ActiveNA)
                 auction.Status = AuctionStatuses.Active;
 
+            await _auctionsRepository.UpdateAsync(auction);
+
+            return Ok(new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate,
+                auction.EndDate, auction.MinIncrement, auction.Condition, auction.Manufacturer, auction.ImageUri, auction.Status,
+                auction.UserId, auction.Part.Id, auction.Part.Category.Id));
+        }
+
+        [HttpPatch]
+        [Route("{auctionId}/cancel")]
+        [Authorize(Roles = UserRoles.Admin)]
+        public async Task<ActionResult<AuctionDto>> CancelAuction(Guid auctionId)
+        {
+            var auction = await _auctionsRepository.GetAsync(auctionId);
+
+            if (auction == null)
+            {
+                return NotFound();
+            }
+
+            var highestBid = await _bidsRepository.GetLastAsync(auction.Id);
+            if (!(auction.Status == "New" || auction.Status == "NewNA" || (auction.Status == "Active" || auction.Status == "ActiveNA") && highestBid == null))
+            {
+                return UnprocessableEntity("Can not cancel auctions with bids");
+            }
+
+            auction.Status = AuctionStatuses.Cancelled;
+            auction.EndDate = DateTime.UtcNow;
             await _auctionsRepository.UpdateAsync(auction);
 
             return Ok(new AuctionDto(auction.Id, auction.Name, auction.Description, auction.CreationDate, auction.StartDate,

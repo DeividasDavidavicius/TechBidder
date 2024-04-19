@@ -1,13 +1,15 @@
-import { AppBar, Avatar, Box, Button, Card, CardActionArea, CardContent, CardHeader, Container, CssBaseline, Grid, Paper, Tab, Table, TableBody, TableCell, TableHead, TableRow, Tabs, TextField, Typography } from "@mui/material";
+import { AppBar, Avatar, Box, Button, Card, CardActionArea, CardContent, CardHeader, Container, CssBaseline, Dialog, DialogActions, DialogTitle, Grid, Paper, Tab, Table, TableBody, TableCell, TableHead, TableRow, Tabs, TextField, Typography } from "@mui/material";
 import { useUser } from "../../contexts/UserContext";
 import { useContext, useEffect, useState } from "react";
 import PATHS from "../../utils/Paths";
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
+import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import SnackbarContext from "../../contexts/SnackbarContext";
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getHighestBid, getUserBids, getWinningUserBids } from "../../services/BidService";
 import { checkTokenValidity, refreshAccessToken } from "../../services/AuthenticationService";
-import { getUserActiveAuctions, getUserEndedAuctions, getUserNewAuctions, getUserWonAuctions } from "../../services/AuctionService";
+import { cancelAuction, getUserActiveAuctions, getUserEndedAuctions, getUserNewAuctions, getUserWonAuctions } from "../../services/AuctionService";
 import { timeLeft } from "../../utils/DateUtils";
 import { getUserData, patchUserData } from "../../services/UserService";
 
@@ -28,10 +30,13 @@ function UserProfile() {
     const [endedAuctions, setEndedAuctions] = useState([]);
     const [wonAuctions, setWonAuctions] = useState([]);
 
-    const [userData, setUserData] = useState([]);
     const [address, setAddress] = useState([]);
     const [phoneNumber, setPhoneNumber] = useState([]);
     const [bankDetails, setBankDetails] = useState([]);
+
+    const [openCancelModal, setOpenCancelModal] = useState(false);
+    const [currentCancelAuction, setCurrentCancelAuction] = useState({});
+
 
     const handleTabChange = (event, newValue) => {
         setTabValue(newValue);
@@ -65,6 +70,50 @@ function UserProfile() {
     const handleBankDetailsChange = (e) => {
         setBankDetails(e.target.value);
     };
+
+    const handleOpeCancel = (auction) => {
+        setCurrentCancelAuction(auction);
+        setOpenCancelModal(true);
+    };
+
+    const handleCloseCancel = () => {
+        setOpenCancelModal(false);
+        setCurrentCancelAuction({});
+    };
+    const handleCancelAuction = async () => {
+        const accessToken = localStorage.getItem('accessToken');
+        if (!checkTokenValidity(accessToken)) {
+            const result = await refreshAccessToken();
+            if (!result.success) {
+                openSnackbar('You need to login!', 'error');
+                setLogout();
+                navigate(PATHS.LOGIN);
+                return;
+            }
+
+            setLogin(result.response.data.accessToken, result.response.data.refreshToken);
+        }
+
+        cancelAuction(currentCancelAuction.id);
+        openSnackbar('Auction cancelled successfully!', 'success');
+
+        if(currentCancelAuction.status === "New" || currentCancelAuction.status === "NewNA")
+        {
+            const updatedNewAuctions = newAuctions.filter(
+                (a) => a.id !== currentCancelAuction.id
+            );
+            setNewAuctions(updatedNewAuctions);
+        }
+        else
+        {
+            const updatedActiveAuctions = activeAuctions.filter(
+                (a) => a.id !== currentCancelAuction.id
+            );
+            setActiveAuctions(updatedActiveAuctions);
+        }
+
+        handleCloseCancel();
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -155,7 +204,6 @@ function UserProfile() {
 
             const userId = await getUserId();
             const userDataResult = await getUserData(userId);
-            setUserData(userDataResult);
             setAddress(userDataResult.address);
             setPhoneNumber(userDataResult.phoneNumber);
             setBankDetails(userDataResult.bankDetails);
@@ -329,6 +377,16 @@ function UserProfile() {
                                                                             Edit auction info
                                                                         </Button>
                                                                     </Link>
+                                                                    <Button startIcon={<CancelOutlinedIcon />}
+                                                                        sx={{ marginRight: 0, color: '#138c94', fontWeight: 'bold' }}
+                                                                        onClick={(event) => {
+                                                                            event.stopPropagation();
+                                                                            event.preventDefault();
+                                                                            handleOpeCancel(auction);
+                                                                        }}
+                                                                    >
+                                                                        Cancel auction
+                                                                    </Button>
                                                                 </Box>
                                                             </CardContent>
                                                         </Box>
@@ -368,14 +426,14 @@ function UserProfile() {
                                                             }}
                                                             />
                                                             <CardContent>
-                                                                {auction.highestBidAmount > 0  && (
+                                                                {auction.highestBid > 0  && (
                                                                     <>
                                                                     <Box sx = {{textAlign: 'left',}}>
                                                                     <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '20px', color: '#255e62', fontFamily: 'Arial, sans-serif', display: 'inline-block'}}>
                                                                         Highest bid:&nbsp;
                                                                     </Typography>
                                                                     <Typography component="span" sx={{fontFamily: 'Arial, sans-serif', fontWeight: 'bold', fontSize: '20px', color: '#c21818', display: 'inline-block'}}>
-                                                                        {auction.highestBidAmount}
+                                                                        {auction.highestBid}
                                                                     </Typography>
                                                                 </Box>
                                                                     </> )}
@@ -419,6 +477,16 @@ function UserProfile() {
                                                                             Edit auction info
                                                                         </Button>
                                                                     </Link>
+                                                                    <Button startIcon={<CancelOutlinedIcon />}
+                                                                        sx={{ marginRight: 0, color: '#138c94', fontWeight: 'bold' }}
+                                                                        onClick={(event) => {
+                                                                            event.stopPropagation();
+                                                                            event.preventDefault();
+                                                                            handleOpeCancel(auction);
+                                                                        }}
+                                                                    >
+                                                                        Cancel auction
+                                                                    </Button>
                                                                 </Box>
                                                                 }
                                                             </CardContent>
@@ -496,7 +564,7 @@ function UserProfile() {
                                                                     {truncateText(auction.description, 180)}
                                                                 </Typography>
                                                                 <Box sx ={{textAlign: 'left', mt: 1, marginRight: 3, color: '#138c94', fontWeight: 'bold', fontSize: '18px' }}>
-                                                                    {auction.status === 'EndedWithBids' ? 'Awaiting payment' : auction.status === 'EndedWithoutBids' ? 'Ended without bids' : 'Paid'}
+                                                                    {auction.status === 'EndedWithBids' ? 'Awaiting payment' : auction.status === 'EndedWithoutBids' ? 'Ended without bids' : auction.status === 'Paid' ? 'Paid' : 'Cancelled'}
                                                                 </Box>
                                                             </CardContent>
                                                         </Box>
@@ -652,6 +720,17 @@ function UserProfile() {
                     </Box>
                 </Box>
             </Box>
+            <Dialog open={openCancelModal} onClose={handleCloseCancel}>
+                <DialogTitle sx={{ fontSize: '20px', fontWeight: 'bold', fontFamily: 'Arial, sans-serif', color: '#0d6267' }} >Do you want to cancel auction '{currentCancelAuction.name}'?</DialogTitle>
+                <DialogActions style={{ justifyContent: 'center' }}>
+                    <Button onClick={handleCancelAuction} startIcon={<CancelOutlinedIcon />} sx ={{ fontWeight: 'bold', color: "red" }}>
+                        Cancel
+                    </Button>
+                    <Button onClick={handleCloseCancel} startIcon={<HighlightOffIcon />} sx ={{ fontWeight: 'bold', color: "#268747" }}>
+                        Back
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Container>
     );
 }

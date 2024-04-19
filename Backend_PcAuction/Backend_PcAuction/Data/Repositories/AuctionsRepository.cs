@@ -7,7 +7,6 @@ namespace Backend_PcAuction.Data.Repositories
     public interface IAuctionsRepository
     {
         Task CreateAsync(Auction auction);
-        Task DeleteAsync(Auction auction);
         Task<Auction?> GetAsync(Guid auctionId);
         Task<Auction?> GetWithPartActiveCheapestAsync(Guid partId);
         Task<IReadOnlyList<Auction>> GetManyAsync();
@@ -118,19 +117,14 @@ namespace Backend_PcAuction.Data.Repositories
         public async Task<IReadOnlyList<Auction>> GetAllEndedByUserAsync(string userId)
         {
             return await _context.Auctions.Include(a => a.Part).Include(a => a.Part.Category).
-                Where(a => a.User.Id == userId && (a.Status == AuctionStatuses.EndedWithoutBids || a.Status == AuctionStatuses.EndedWithBids || a.Status == AuctionStatuses.Paid)).
+                Where(a => a.User.Id == userId && (a.Status == AuctionStatuses.EndedWithoutBids || a.Status == AuctionStatuses.EndedWithBids || 
+                a.Status == AuctionStatuses.Paid || a.Status == AuctionStatuses.Cancelled)).
                 OrderByDescending(a => a.EndDate).ToListAsync();
         }
 
         public async Task UpdateAsync(Auction auction)
         {
             _context.Auctions.Update(auction);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task DeleteAsync(Auction auction)
-        {
-            _context.Auctions.Remove(auction);
             await _context.SaveChangesAsync();
         }
 
