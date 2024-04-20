@@ -42,7 +42,6 @@ namespace Backend_PcAuction.Controllers
                 return NotFound();
             }
 
-            // TODO - Padaryt, kad neitu same useriui keliu bid is eiles
             var lastBid = await _bidsRepository.GetLastAsync(auctionId);
             if (lastBid != null)
             {

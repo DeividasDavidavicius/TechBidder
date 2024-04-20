@@ -131,8 +131,6 @@ namespace Backend_PcAuction.Controllers
             await _userManager.UpdateAsync(user);
 
             return Ok("Succesfully logged out!");
-            // TODO maybe : prideti access tokenu blacklista ir i ji idet logoutinant, kad neitu vel logout su same access tokenu?
-            // bet nelabai naudingas, nes vis tiek su access tokenu gali kitus endpoint pasiekti, kol dar neexpirino
         }
     }
 }
