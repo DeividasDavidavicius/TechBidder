@@ -17,6 +17,7 @@ import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import UndoRoundedIcon from '@mui/icons-material/UndoRounded';
 import { getPurchase, getStripePurchaseSession, patchPurchase } from "../../services/PurchaseService";
+import { getUserData } from "../../services/UserService";
 
 function AuctionInfo() {
     const [auctionData, setAuctionData] = useState({});
@@ -45,6 +46,8 @@ function AuctionInfo() {
     const [bids, setBids] = useState([]);
     const [openRemoveModal, setOpenRemoveModal] = useState(false);
     const [removeBid, setRemoveBid] = useState({});
+
+    const [buyerData, setBuyerData] = useState({});
 
     const handleBidChange = (event) => {
         setBidAmountField(event.target.value);
@@ -290,8 +293,13 @@ function AuctionInfo() {
     useEffect(() => {
         const fetchPurchase = async () => {
             try {
-                const result = await getPurchase(auctionId);
-                setPurchase(result);
+                const purchaseResult = await getPurchase(auctionId);
+                setPurchase(purchaseResult);
+
+                const buyerResult = await getUserData(purchaseResult.buyerId);
+                setBuyerData(buyerResult);
+
+                console.log(buyerResult);
             } catch (error) {}
         }
 
@@ -683,6 +691,93 @@ function AuctionInfo() {
                                     {purchase.status === 'Paid' ? 'Buyer paid for the part' : 'Buyer did not pay for the part in time'}
                                     </Typography >
                             </Box>
+                            {purchase.status === 'Paid' && buyerData.address !== null && buyerData.address !== "" && role.includes("RegisteredUser") && auctionData.userId === getUserId() &&
+                                <Box sx={{ display: 'flex', alignItems: 'stretch', mt: 2 }}>
+                                    <Typography
+                                        component="span"
+                                        variant="subtitle1"
+                                        sx={{
+                                            fontWeight: 'bold',
+                                            fontSize: '16px',
+                                            fontFamily: 'Arial, sans-serif',
+                                            letterSpacing: '1px',
+                                            textTransform: 'uppercase',
+                                            color: '#3b9298' }}
+                                    >
+                                        Address:
+                                    </Typography >
+                                    <Typography
+                                        component="span"
+                                        variant="subtitle1"
+                                        sx={{
+                                            fontWeight: 'bold',
+                                            fontSize: '16px',
+                                            fontFamily: 'Arial, sans-serif',
+                                            color: '#333',
+                                            letterSpacing: '1px' }}
+                                    >
+                                    &nbsp;{buyerData.address}
+                                    </Typography >
+                                </Box>
+                            }
+                            {purchase.status === 'Paid' && buyerData.phoneNumber !== null && buyerData.phoneNumber !== "" && role.includes("RegisteredUser") && auctionData.userId === getUserId() &&
+                                <Box sx={{ display: 'flex', alignItems: 'stretch' }}>
+                                    <Typography
+                                        component="span"
+                                        variant="subtitle1"
+                                        sx={{
+                                            fontWeight: 'bold',
+                                            fontSize: '16px',
+                                            fontFamily: 'Arial, sans-serif',
+                                            letterSpacing: '1px',
+                                            textTransform: 'uppercase',
+                                            color: '#3b9298' }}
+                                    >
+                                        Phone number:
+                                    </Typography >
+                                    <Typography
+                                        component="span"
+                                        variant="subtitle1"
+                                        sx={{
+                                            fontWeight: 'bold',
+                                            fontSize: '16px',
+                                            fontFamily: 'Arial, sans-serif',
+                                            color: '#333',
+                                            letterSpacing: '1px' }}
+                                    >
+                                    &nbsp;{buyerData.phoneNumber}
+                                    </Typography >
+                                </Box>
+                            }
+                            {purchase.status === 'Paid' && buyerData.bankDetails !== null && buyerData.bankDetails !== "" && role.includes("RegisteredUser") && auctionData.userId === getUserId() &&
+                                <Box sx={{ display: 'flex', alignItems: 'stretch' }}>
+                                    <Typography
+                                        component="span"
+                                        variant="subtitle1"
+                                        sx={{
+                                            fontWeight: 'bold',
+                                            fontSize: '16px',
+                                            fontFamily: 'Arial, sans-serif',
+                                            letterSpacing: '1px',
+                                            textTransform: 'uppercase',
+                                            color: '#3b9298' }}
+                                    >
+                                        Bank details:
+                                    </Typography >
+                                    <Typography
+                                        component="span"
+                                        variant="subtitle1"
+                                        sx={{
+                                            fontWeight: 'bold',
+                                            fontSize: '16px',
+                                            fontFamily: 'Arial, sans-serif',
+                                            color: '#333',
+                                            letterSpacing: '1px' }}
+                                    >
+                                    &nbsp;{buyerData.bankDetails}
+                                    </Typography >
+                                </Box>
+                            }
                         </Grid>
                         }
 
