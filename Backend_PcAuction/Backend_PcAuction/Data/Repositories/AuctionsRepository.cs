@@ -118,7 +118,7 @@ namespace Backend_PcAuction.Data.Repositories
         {
             return await _context.Auctions.Include(a => a.Part).Include(a => a.Part.Category).
                 Where(a => a.User.Id == userId && (a.Status == AuctionStatuses.EndedWithoutBids || a.Status == AuctionStatuses.EndedWithBids || 
-                a.Status == AuctionStatuses.Paid || a.Status == AuctionStatuses.Cancelled)).
+                a.Status == AuctionStatuses.Paid || a.Status == AuctionStatuses.Cancelled || a.Status == AuctionStatuses.PaymentNotReceived)).
                 OrderByDescending(a => a.EndDate).ToListAsync();
         }
 

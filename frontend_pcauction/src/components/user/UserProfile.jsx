@@ -564,7 +564,7 @@ function UserProfile() {
                                                                     {truncateText(auction.description, 180)}
                                                                 </Typography>
                                                                 <Box sx ={{textAlign: 'left', mt: 1, marginRight: 3, color: '#138c94', fontWeight: 'bold', fontSize: '18px' }}>
-                                                                    {auction.status === 'EndedWithBids' ? 'Awaiting payment' : auction.status === 'EndedWithoutBids' ? 'Ended without bids' : auction.status === 'Paid' ? 'Paid' : 'Cancelled'}
+                                                                    {auction.status === 'EndedWithBids' ? 'Awaiting payment' : auction.status === 'EndedWithoutBids' ? 'Ended without bids' : auction.status === 'Paid' ? 'Paid' : auction.status === 'Cancelled' ? 'Cancelled' : 'Payment not received in time'}
                                                                 </Box>
                                                             </CardContent>
                                                         </Box>
@@ -644,7 +644,7 @@ function UserProfile() {
                                                                 {truncateText(auction.description, 180)}
                                                             </Typography>
                                                             <Box sx ={{textAlign: 'left', mt: 1, marginRight: 3, color: '#138c94', fontWeight: 'bold', fontSize: '18px' }}>
-                                                                {auction.status === 'EndedWithBids' ? 'Awaiting payment' : 'Paid'}
+                                                                {auction.status === 'EndedWithBids' ? 'Awaiting payment' : auction.status === 'Paid' ? 'Paid' : 'Payment not received in time' }
                                                             </Box>
                                                         </CardContent>
                                                     </Box>

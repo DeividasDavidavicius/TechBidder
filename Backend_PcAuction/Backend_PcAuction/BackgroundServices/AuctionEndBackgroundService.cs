@@ -20,12 +20,12 @@ namespace Backend_PcAuction.BackgroundServices
         {
             while (!token.IsCancellationRequested)
             {
-                await CheckAuctionStartTime();
+                await CheckAuctionsStartTime();
                 await Task.Delay(_interval, token);
             }
         }
 
-        private async Task CheckAuctionStartTime()
+        private async Task CheckAuctionsStartTime()
         {
             using (var scope = _scopeFactory.CreateScope())
             {
