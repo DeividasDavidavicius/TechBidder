@@ -14,7 +14,6 @@ namespace Backend_PcAuction.Controllers
     [Route("api/v1/user")]
     public class UserController : ControllerBase
     {
-
         private readonly IAuctionsRepository _auctionsRepository;
         private readonly IBidsRepository _bidsRepository;
         private readonly IPurchaseRepository _purchaseRepository;
@@ -39,7 +38,7 @@ namespace Backend_PcAuction.Controllers
                 return NotFound();
             }
 
-            return new UserDto(user.Id, user.UserName, user.Address, user.PhoneNumber, user.BankDetails);
+            return Ok(new UserDto(user.Id, user.UserName, user.Address, user.PhoneNumber, user.BankDetails));
         }
 
         [HttpPatch]
@@ -61,7 +60,7 @@ namespace Backend_PcAuction.Controllers
 
             await _userManager.UpdateAsync(user);
 
-            return new UserDto(user.Id, user.UserName, user.Address, user.PhoneNumber, user.BankDetails);
+            return Ok(new UserDto(user.Id, user.UserName, user.Address, user.PhoneNumber, user.BankDetails));
         }
 
         [HttpGet]
@@ -82,7 +81,6 @@ namespace Backend_PcAuction.Controllers
         public async Task<ActionResult<IEnumerable<BidWithAuctionIdDto>>> GetAllWinningBids()
         {
             var userId = User.FindFirstValue(JwtRegisteredClaimNames.Sub);
-
 
             var bids = await _bidsRepository.GetAllByUserAsync(userId);
             var winningBids = new List<Bid>();

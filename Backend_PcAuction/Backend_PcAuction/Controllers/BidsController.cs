@@ -31,14 +31,14 @@ namespace Backend_PcAuction.Controllers
         {
             var auction = await _auctionsRepository.GetAsync(auctionId);
 
-            if(auction.Status != AuctionStatuses.Active && auction.Status != AuctionStatuses.ActiveNA)
-            {
-                return UnprocessableEntity("Auction is not active");
-            }
-
-            if (auction == null)
+            if (auction == null) // validationu tvarka bloga buvo
             {
                 return NotFound();
+            }
+
+            if (auction.Status != AuctionStatuses.Active && auction.Status != AuctionStatuses.ActiveNA)
+            {
+                return UnprocessableEntity("Auction is not active");
             }
 
             var lastBid = await _bidsRepository.GetLastAsync(auctionId);
