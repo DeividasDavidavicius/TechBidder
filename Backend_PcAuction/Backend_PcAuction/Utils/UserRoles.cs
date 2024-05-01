@@ -1,4 +1,4 @@
-﻿namespace Backend_PcAuction.Auth.Models
+﻿namespace Backend_PcAuction.Utils
 {
     public class UserRoles
     {

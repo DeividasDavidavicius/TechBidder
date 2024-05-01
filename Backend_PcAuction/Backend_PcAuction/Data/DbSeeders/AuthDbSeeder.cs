@@ -1,5 +1,5 @@
-﻿using Backend_PcAuction.Auth.Model;
-using Backend_PcAuction.Auth.Models;
+﻿using Backend_PcAuction.Data.Entities;
+using Backend_PcAuction.Utils;
 using Microsoft.AspNetCore.Identity;
 
 namespace Backend_PcAuction.Data.Seeders

@@ -1,5 +1,4 @@
-﻿using Backend_PcAuction.Auth.Model;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
 namespace Backend_PcAuction.Data.Entities

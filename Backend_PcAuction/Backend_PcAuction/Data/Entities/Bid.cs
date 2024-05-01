@@ -1,5 +1,4 @@
-﻿using Backend_PcAuction.Auth.Model;
-using Backend_PcAuction.Auth.Models;
+﻿using Backend_PcAuction.Utils;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 

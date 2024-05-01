@@ -298,8 +298,6 @@ function AuctionInfo() {
 
                 const buyerResult = await getUserData(purchaseResult.buyerId);
                 setBuyerData(buyerResult);
-
-                console.log(buyerResult);
             } catch (error) {}
         }
 

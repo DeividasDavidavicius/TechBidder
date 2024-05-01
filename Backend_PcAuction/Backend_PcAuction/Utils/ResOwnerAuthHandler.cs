@@ -2,7 +2,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
-namespace Backend_PcAuction.Auth.Models
+namespace Backend_PcAuction.Utils
 {
     public class ResOwnerAuthHandler : AuthorizationHandler<ResourceOwnerRequirement, IUserOwnedResource>
     {

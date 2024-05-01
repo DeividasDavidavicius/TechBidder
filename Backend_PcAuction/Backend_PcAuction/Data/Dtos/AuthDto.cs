@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Backend_PcAuction.Auth.Models
+namespace Backend_PcAuction.Data.Dtos
 {
 
     public record RegisterUserDto([Required] string UserName, [EmailAddress][Required] string Email, [Required] string Password);

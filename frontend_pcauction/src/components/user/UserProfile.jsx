@@ -161,56 +161,75 @@ function UserProfile() {
                 setLogin(result.response.data.accessToken, result.response.data.refreshToken);
             }
 
-            const allBidsResult = await getUserBids();
+            setAllBids([]);
+            setWinningBids([]);
+            setNewAuctions([]);
+            setActiveAuctions([]);
+            setEndedAuctions([]);
+            setWonAuctions([]);
 
-            const allBidsModified = allBidsResult.map(bid => {
-                return {
-                  ...bid,
-                  creationDate: modifyDate(bid.creationDate)
-                };
-            });
+            if(tabValue === 0)
+            {
+                const allBidsResult = await getUserBids();
 
-            setAllBids(allBidsModified);
+                const allBidsModified = allBidsResult.map(bid => {
+                    return {
+                    ...bid,
+                    creationDate: modifyDate(bid.creationDate)
+                    };
+                });
+
+                setAllBids(allBidsModified);
 
 
-            const winningBidsResult = await getWinningUserBids();
+                const winningBidsResult = await getWinningUserBids();
 
-            const winningBidsModified = winningBidsResult.map(bid => {
-                return {
-                  ...bid,
-                  creationDate: modifyDate(bid.creationDate)
-                };
-            });
+                const winningBidsModified = winningBidsResult.map(bid => {
+                    return {
+                    ...bid,
+                    creationDate: modifyDate(bid.creationDate)
+                    };
+                });
 
-            setWinningBids(winningBidsModified);
+                setWinningBids(winningBidsModified);
+            }
 
-            const newAuctionsResult = await getUserNewAuctions();
-            setNewAuctions(newAuctionsResult);
+            if(tabValue === 1)
+            {
+                const newAuctionsResult = await getUserNewAuctions();
+                setNewAuctions(newAuctionsResult);
 
-            const activeAuctionsResult = await getUserActiveAuctions();
+                const activeAuctionsResult = await getUserActiveAuctions();
 
-            await Promise.all(activeAuctionsResult.map(async (auction) => {
-                const highestBidResult = await getHighestBid(auction.id);
-                auction.highestBid = highestBidResult.amount;
-            }));
+                await Promise.all(activeAuctionsResult.map(async (auction) => {
+                    const highestBidResult = await getHighestBid(auction.id);
+                    auction.highestBid = highestBidResult.amount;
+                }));
 
-            setActiveAuctions(activeAuctionsResult);
+                setActiveAuctions(activeAuctionsResult);
 
-            const endedAuctionsResult = await getUserEndedAuctions();
-            setEndedAuctions(endedAuctionsResult);
+                const endedAuctionsResult = await getUserEndedAuctions();
+                setEndedAuctions(endedAuctionsResult);
+            }
 
-            const wonAuctionsResult = await getUserWonAuctions();
-            setWonAuctions(wonAuctionsResult);
+            if(tabValue === 2)
+            {
+                const wonAuctionsResult = await getUserWonAuctions();
+                setWonAuctions(wonAuctionsResult);
+            }
 
-            const userId = await getUserId();
-            const userDataResult = await getUserData(userId);
-            setAddress(userDataResult.address);
-            setPhoneNumber(userDataResult.phoneNumber);
-            setBankDetails(userDataResult.bankDetails);
+            if(tabValue === 3)
+            {
+                const userId = await getUserId();
+                const userDataResult = await getUserData(userId);
+                setAddress(userDataResult.address);
+                setPhoneNumber(userDataResult.phoneNumber);
+                setBankDetails(userDataResult.bankDetails);
+            }
         }
 
         fetchData();
-    }, []);
+    }, [tabValue]);
 
 
     return (

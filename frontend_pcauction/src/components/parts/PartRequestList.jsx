@@ -108,21 +108,21 @@ function PartRequestList() {
                 {requests.map((request, index) => (
                     <TableRow key={index} >
                         <TableCell style={{ width: '20%' }}>{request.categoryId}</TableCell>
-                        <TableCell style={{ width: '35%' }}>{request.name}</TableCell>
-                        <TableCell style={{ width: '45%' }}>
+                        <TableCell style={{ width: '33%' }}>{request.name}</TableCell>
+                        <TableCell style={{ width: '48%' }}>
                             <Link to={PATHS.PARTREQUESTCREATE.replace(':requestId', request.id).replace(':categoryId', request.categoryId)}>
-                                <Button startIcon={<AddIcon />} sx={{ marginRight: 3, color: '#138c94', fontWeight: 'bold' }}>
-                                    CREATE
+                                <Button startIcon={<AddIcon />} sx={{ marginRight: 2, color: '#138c94', fontWeight: 'bold' }}>
+                                    ACCEPT
                                 </Button>
                             </Link>
                             <Button startIcon={<DeleteIcon />}
-                                sx={{ marginRight: 0, color: '#138c94', fontWeight: 'bold' }}
+                                sx={{ marginRight: 2, color: '#138c94', fontWeight: 'bold' }}
                                 onClick={ () => handleOpenRemove(request)}
                             >
                                 Delete
                             </Button>
                             <Link to={PATHS.AUCTIONINFO.replace(':auctionId', request.auctionId).replace(':categoryId', request.categoryId)}>
-                                <Button startIcon={<InfoOutlinedIcon />} sx={{ marginRight: 3, color: '#138c94', fontWeight: 'bold' }}>
+                                <Button startIcon={<InfoOutlinedIcon />} sx={{ marginRight: 2, color: '#138c94', fontWeight: 'bold' }}>
                                     AUCTION
                                 </Button>
                             </Link>

@@ -3,7 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace Backend_PcAuction.Auth
+namespace Backend_PcAuction.Services
 {
     public interface IJwtTokenService
     {

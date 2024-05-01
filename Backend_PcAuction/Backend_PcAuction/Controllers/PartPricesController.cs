@@ -1,16 +1,9 @@
-﻿using Backend_PcAuction.Auth.Models;
-using Backend_PcAuction.Data.Dtos;
+﻿using Backend_PcAuction.Data.Dtos;
 using Backend_PcAuction.Data.Entities;
 using Backend_PcAuction.Data.Repositories;
 using Backend_PcAuction.Services;
 using Backend_PcAuction.Utils;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace Backend_PcAuction.Controllers
 {

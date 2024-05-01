@@ -1,6 +1,4 @@
-﻿using Backend_PcAuction.Auth.Model;
-using Backend_PcAuction.Auth.Models;
-using Backend_PcAuction.Data.Dtos;
+﻿using Backend_PcAuction.Data.Dtos;
 using Backend_PcAuction.Data.Entities;
 using Backend_PcAuction.Data.Repositories;
 using Microsoft.AspNetCore.Authorization;

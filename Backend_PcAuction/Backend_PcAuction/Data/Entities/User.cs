@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace Backend_PcAuction.Auth.Model
+namespace Backend_PcAuction.Data.Entities
 {
     using Microsoft.AspNetCore.Identity;
     using System.Collections.Generic;

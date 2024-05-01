@@ -1,9 +1,6 @@
-﻿using Backend_PcAuction.Auth.Model;
-using Backend_PcAuction.Data.Dtos;
-using Backend_PcAuction.Data.Entities;
+﻿using Backend_PcAuction.Data.Entities;
 using Backend_PcAuction.Data.Repositories;
 using Backend_PcAuction.Utils;
-using Microsoft.AspNetCore.Identity;
 
 namespace Backend_PcAuction.Data.DbSeeders
 {

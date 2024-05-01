@@ -11,7 +11,7 @@ import { getAllCategorySeries } from "../../services/SeriesService";
 import { patchAuction } from "../../services/AuctionService";
 import { deletePartRequest, getPartRequest } from "../../services/PartRequestService";
 
-function PartRequestsCreate() {
+function PartRequestsManage() {
     const [categorySeries, setCategorySeries] = useState([]);
     const [partSeries, setPartSeries] = useState("none");
     const [categoryFields, setCategoryFields] = useState(null);
@@ -231,7 +231,7 @@ function PartRequestsCreate() {
                 }}
             >
                 <Typography component="h1" variant="h5" sx={{ fontSize: '26px', fontWeight: 'bold', fontFamily: 'Arial, sans-serif', color: '#0d6267' }}>
-                    CREATE NEW PART
+                    HANDLE REQUEST
                 </Typography>
 
                 <Box component="form" noValidate onSubmit={(event) => handleSubmit(event)} sx={{ mt: 3 }}>
@@ -299,6 +299,7 @@ function PartRequestsCreate() {
                             />
                             </FormControl>
                         </Grid>
+                        { part === null && <>
                         <Grid item xs={12}>
                             <FormControl fullWidth>
                                 <InputLabel id="part-category-label">Series</InputLabel>
@@ -443,6 +444,7 @@ function PartRequestsCreate() {
                             />
                         </Grid>
                         )}
+                        </>}
                     </Grid>
                     <Button
                         type="submit"
@@ -450,7 +452,7 @@ function PartRequestsCreate() {
                         variant="contained"
                         sx={{ mt: 2, mb: 2, bgcolor: '#0d6267', '&:hover': { backgroundColor: '#07383b'}}}
                     >
-                        CREATE PART
+                        {part === null ? 'CREATE PART' : 'Change auction part'}
                     </Button>
                 </Box>
 
@@ -459,4 +461,4 @@ function PartRequestsCreate() {
     );
 };
 
-export default PartRequestsCreate;
+export default PartRequestsManage;

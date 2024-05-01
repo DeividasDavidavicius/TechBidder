@@ -1,7 +1,4 @@
 using Azure.Storage.Blobs;
-using Backend_PcAuction.Auth;
-using Backend_PcAuction.Auth.Model;
-using Backend_PcAuction.Auth.Models;
 using Backend_PcAuction.BackgroundServices;
 using Backend_PcAuction.Data;
 using Backend_PcAuction.Data.DbSeeders;
@@ -13,7 +10,6 @@ using Backend_PcAuction.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;

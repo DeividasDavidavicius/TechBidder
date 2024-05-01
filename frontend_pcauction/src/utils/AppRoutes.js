@@ -13,11 +13,11 @@ import SeriesList from "../components/series/SeriesList";
 import CreateSeries from "../components/series/CreateSeries";
 import EditSeries from "../components/series/EditSeries";
 import PartRequestList from "../components/parts/PartRequestList";
-import PartRequestsCreate from "../components/parts/PartRequestsCreate";
 import PsuCalculator from "../components/parts/PsuCalculator";
 import PcBuildGenerator from "../components/parts/PcBuildGenerator";
 import CompatibilityCheck from "../components/parts/CompatibilityCheck";
 import UserProfile from "../components/user/UserProfile";
+import PartRequestsManage from "../components/parts/PartRequestsManage";
 
 const AppRoutes = [
     { path: PATHS.LOGIN, element: <Login/> },
@@ -33,7 +33,7 @@ const AppRoutes = [
     { path: PATHS.CREATESERIES, element: <CreateSeries/>},
     { path: PATHS.EDITSERIES, element: <EditSeries/> },
     { path: PATHS.PARTREQUESTS, element: <PartRequestList/> },
-    { path: PATHS.PARTREQUESTCREATE, element: <PartRequestsCreate/> },
+    { path: PATHS.PARTREQUESTCREATE, element: <PartRequestsManage/> },
     { path: PATHS.PSUCALCULATOR, element: <PsuCalculator/> },
     { path: PATHS.PCBUILDGENERATOR, element: <PcBuildGenerator/> },
     { path: PATHS.COMPATIBILITYCHECK, element: <CompatibilityCheck/> },
