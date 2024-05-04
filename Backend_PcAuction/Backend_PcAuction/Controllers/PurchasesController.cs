@@ -27,10 +27,10 @@ namespace Backend_PcAuction.Controllers
         private readonly IPartsRepository _partsRepository;
         private readonly IPartsPricesRepository _partsPricesRepository;
         private readonly IPartPricesService _partPricesService;
-        private readonly StripeSettings _stripeSettings;
+        private readonly IStripeService _stripeService;
 
         public PurchasesController(IPurchaseRepository purchaseRepository, IAuctionsRepository auctionsRepository, IStripePaymentRepository stripePaymentRepository,
-            IPartsRepository partsRepository, IPartsPricesRepository partsPricesRepository, IPartPricesService partPricesService, IOptions<StripeSettings> stripeSettings) 
+            IPartsRepository partsRepository, IPartsPricesRepository partsPricesRepository, IPartPricesService partPricesService, IStripeService stripeService) 
         {
             _purchaseRepository = purchaseRepository;
             _auctionsRepository = auctionsRepository;
@@ -38,7 +38,7 @@ namespace Backend_PcAuction.Controllers
             _partsRepository = partsRepository;
             _partsPricesRepository = partsPricesRepository;
             _partPricesService = partPricesService;
-            _stripeSettings = stripeSettings.Value;
+            _stripeService = stripeService;
         }
 
         [HttpGet]
@@ -84,31 +84,11 @@ namespace Backend_PcAuction.Controllers
                 return Forbid();
             }
 
-            string paymentStatus = "unpaid";
-
-            await Task.Delay(250); // 250ms delay just to be sure that Stripe finishes processing payment and my API can actually fetch the payment
+            await Task.Delay(500); // 500ms delay just to be sure that Stripe finishes processing payment and my API can actually fetch the payment
 
             var stripePayment = await _stripePaymentRepository.GetLastAsync(purchase.Id);
 
-            using (HttpClient client = new HttpClient())
-            {
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _stripeSettings.SecretKey);
-
-                try
-                {
-                    HttpResponseMessage response = await client.GetAsync($"https://api.stripe.com/v1/checkout/sessions/{stripePayment.Id}");
-                    
-                    if (response.IsSuccessStatusCode)
-                    {
-                        string responseBody = await response.Content.ReadAsStringAsync();
-                        dynamic responseObject = JsonConvert.DeserializeObject(responseBody);
-                        paymentStatus = responseObject.payment_status;
-                    }
-                }
-                catch (Exception ex)
-                {
-                }
-            }
+            var paymentStatus = await _stripeService.GetPurchaseStatus(stripePayment.Id);
 
             if(paymentStatus != "paid")
             {
@@ -162,50 +142,18 @@ namespace Backend_PcAuction.Controllers
                 return Forbid();
             }
 
-            var currency = "eur";
-            StripeConfiguration.ApiKey = _stripeSettings.SecretKey;
-
-            var options = new SessionCreateOptions
-            {
-                PaymentMethodTypes = new List<string>
-                {
-                    "card"
-                },
-                LineItems = new List<SessionLineItemOptions>
-                {
-                    new SessionLineItemOptions 
-                    {
-                        PriceData = new SessionLineItemPriceDataOptions
-                        {
-                            Currency = currency,
-                            UnitAmount = Convert.ToInt32(purchase.Amount) * 100,
-                            ProductData = new SessionLineItemPriceDataProductDataOptions
-                            {
-                                Name = auction.Part.Name,
-                                Description = auction.Name
-                            }
-                        },
-                        Quantity = 1
-                    }
-                },
-                Mode = "payment",
-                SuccessUrl = $"http://localhost:3000/auctions/{auctionId}?status=success",
-                CancelUrl = $"http://localhost:3000/auctions/{auctionId}"
-            };
-
-            var service = new SessionService();
-            var session = service.Create(options);
+            var purchaseStripeDto = await _stripeService.CreateStripeSession(auction, purchase);
 
             var stripePayment = new StripePayment
             {
-                Id = session.Id,
+                Id = purchaseStripeDto.Id,
                 PaymentDate = DateTime.UtcNow,
                 Purchase = purchase
             };
 
             await _stripePaymentRepository.CreateAsync(stripePayment);
 
-            return Ok(new PurchaseStripeDto(session.Id, session.Url));
+            return Ok(purchaseStripeDto);
         }
     }
 }

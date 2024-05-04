@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Stripe;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace Tests
@@ -121,5 +122,100 @@ namespace Tests
             var okResult = Assert.IsType<OkObjectResult>(result);
             Assert.Equal("Succesfully logged out!", okResult.Value);
         }
+
+        [Fact]
+        public async Task Logout_NullUserPrincipal_ReturnsUnprocessableEntity()
+        {
+            var refreshAccessTokenDto = new RefreshAccessTokenDto("validRefreshToken");
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = null }
+            };
+
+            var result = await _controller.Logout(refreshAccessTokenDto);
+
+            var unprocessableEntityResult = Assert.IsType<UnprocessableEntityObjectResult>(result);
+            Assert.Equal("Invalid token", unprocessableEntityResult.Value);
+        }
+
+        [Fact]
+        public async Task AccessToken_WithValidRefreshToken_ReturnsOkResult()
+        {
+            var refreshToken = "valid_refresh_token";
+            var claims = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, "valid_user_id")
+            }));
+
+            _jwtTokenServiceMock.Setup(x => x.TryParseRefreshToken(refreshToken, out claims)).Returns(true);
+
+            var user = new User();
+            _userManagerMock.Setup(x => x.FindByIdAsync("valid_user_id")).ReturnsAsync(user);
+            _userManagerMock.Setup(x => x.GetRolesAsync(user)).ReturnsAsync(new List<string>());
+
+            _jwtTokenServiceMock.Setup(x => x.CreateAccessToken(user.UserName, user.Id, It.IsAny<IEnumerable<string>>())).Returns("access_token");
+            _jwtTokenServiceMock.Setup(x => x.CreateRefreshToken(user.Id)).Returns("new_refresh_token");
+
+            var result = await _controller.AccessToken(new RefreshAccessTokenDto(refreshToken));
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var successfulLoginDto = Assert.IsType<SuccessfulLoginDto>(okResult.Value);
+            Assert.Equal("access_token", successfulLoginDto.AccessToken);
+            Assert.Equal("new_refresh_token", successfulLoginDto.RefreshToken);
+        }
+
+        [Fact]
+        public async Task AccessToken_WithInvalidRefreshToken_ReturnsUnprocessableEntity()
+        {
+            var refreshToken = "invalid_refresh_token";
+            ClaimsPrincipal claims = null;
+
+            _jwtTokenServiceMock.Setup(x => x.TryParseRefreshToken(refreshToken, out claims)).Returns(false);
+
+            var result = await _controller.AccessToken(new RefreshAccessTokenDto(refreshToken ));
+
+            var unprocessableEntityResult = Assert.IsType<UnprocessableEntityResult>(result);
+        }
+
+        [Fact]
+        public async Task AccessToken_WithNullUser_ReturnsUnprocessableEntity()
+        {
+            var refreshToken = "valid_refresh_token";
+            ClaimsPrincipal claims = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, "valid_user_id")
+            }));
+
+            _jwtTokenServiceMock.Setup(x => x.TryParseRefreshToken(refreshToken, out claims)).Returns(true);
+
+            _userManagerMock.Setup(x => x.FindByIdAsync("valid_user_id")).ReturnsAsync((User)null);
+
+            var result = await _controller.AccessToken(new RefreshAccessTokenDto(refreshToken));
+
+            var unprocessableEntityResult = Assert.IsType<UnprocessableEntityObjectResult>(result);
+            Assert.Equal("Invalid token", unprocessableEntityResult.Value);
+        }
+
+        [Fact]
+        public async Task AccessToken_WithBlacklistedRefreshToken_ReturnsUnprocessableEntity()
+        {
+            var refreshToken = "blacklisted_refresh_token";
+            ClaimsPrincipal claims = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, "valid_user_id")
+            }));
+
+            _jwtTokenServiceMock.Setup(x => x.TryParseRefreshToken(refreshToken, out claims)).Returns(true);
+
+            var user = new User();
+            _userManagerMock.Setup(x => x.FindByIdAsync("valid_user_id")).ReturnsAsync(user);
+            user.AddRefreshTokenToBlacklist(refreshToken);
+
+            var result = await _controller.AccessToken(new RefreshAccessTokenDto(refreshToken ));
+
+            var unprocessableEntityResult = Assert.IsType<UnprocessableEntityObjectResult>(result);
+            Assert.Equal("Invalid token2", unprocessableEntityResult.Value);
+        }
+
     }
 }

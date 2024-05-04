@@ -168,7 +168,7 @@ namespace Tests
         public async Task Create_ReturnsUnprocessableEntity_WhenStartingBidNotPositiveNumber()
         {
             var auctionId = Guid.NewGuid();
-            var createBidDto = new CreateBidDto(0); // Zero bid amount
+            var createBidDto = new CreateBidDto(0);
             var auction = new Auction { Status = AuctionStatuses.Active, MinIncrement = 0 };
             _auctionsRepositoryMock.Setup(repo => repo.GetAsync(auctionId)).ReturnsAsync(auction);
 

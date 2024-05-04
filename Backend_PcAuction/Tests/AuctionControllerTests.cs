@@ -238,11 +238,500 @@ namespace Tests
             Assert.Equal(categoryId, auctionDto.CategoryId);
         }
 
+        [Fact]
+        public async Task Update_ReturnsNotFound_WhenAuctionNotFound()
+        {
+            var auctionId = Guid.NewGuid();
+            var updateAuctionDto = new UpdateAuctionDto("Updated Name", "Updated Description", DateTime.UtcNow.AddDays(1), DateTime.UtcNow.AddDays(2), 10, "Updated Condition", "Updated Manufacturer", null);
+            _auctionsRepositoryMock.Setup(repo => repo.GetAsync(auctionId)).ReturnsAsync((Auction)null);
+
+            var result = await _controller.Update(auctionId, updateAuctionDto);
+
+            var notFoundResult = Assert.IsType<NotFoundResult>(result.Result);
+        }
+
+        [Fact]
+        public async Task Update_ReturnsForbid_WhenAuthorizationFails()
+        {
+            var auctionId = Guid.NewGuid();
+            var updateAuctionDto = new UpdateAuctionDto("Updated Name", "Updated Description", DateTime.UtcNow.AddDays(1), DateTime.UtcNow.AddDays(2), 10, "Updated Condition", "Updated Manufacturer", null);
+            var auction = new Auction { };
+            _auctionsRepositoryMock.Setup(repo => repo.GetAsync(auctionId)).ReturnsAsync(auction);
+            _authorizationServiceMock.Setup(service => service.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), auction, PolicyNames.ResourceOwner)).ReturnsAsync(AuthorizationResult.Failed());
+
+            var result = await _controller.Update(auctionId, updateAuctionDto);
+
+            var forbidResult = Assert.IsType<ForbidResult>(result.Result);
+        }
+
+        [Theory]
+        [InlineData("Short")]
+        [InlineData("ThisIsAVeryLongNameThatExceedsFortyFiveCharactersLimit")]
+        public async Task Update_ReturnsUnprocessableEntity_WhenNameLengthIsInvalid(string invalidName)
+        {
+            var auctionId = Guid.NewGuid();
+            var updateAuctionDto = new UpdateAuctionDto(invalidName, "Updated Description", DateTime.UtcNow.AddDays(1), DateTime.UtcNow.AddDays(2), 10, "Updated Condition", "Updated Manufacturer", null);
+            var auction = new Auction { };
+            _auctionsRepositoryMock.Setup(repo => repo.GetAsync(auctionId)).ReturnsAsync(auction);
+            _authorizationServiceMock.Setup(service => service.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), auction, PolicyNames.ResourceOwner)).ReturnsAsync(AuthorizationResult.Success());
+
+            var result = await _controller.Update(auctionId, updateAuctionDto);
+
+            var unprocessableEntityResult = Assert.IsType<UnprocessableEntityObjectResult>(result.Result);
+        }
+
+        [Fact]
+        public async Task Update_ReturnsUnprocessableEntity_WhenDescriptionLengthIsInvalid()
+        {
+            var auctionId = Guid.NewGuid();
+            var invalidDescription = new string('A', 9);
+            var updateAuctionDto = new UpdateAuctionDto("Updated Name", invalidDescription, DateTime.UtcNow.AddDays(1), DateTime.UtcNow.AddDays(2), 10, "Updated Condition", "Updated Manufacturer", null);
+            var auction = new Auction { };
+            _auctionsRepositoryMock.Setup(repo => repo.GetAsync(auctionId)).ReturnsAsync(auction);
+            _authorizationServiceMock.Setup(service => service.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), auction, PolicyNames.ResourceOwner)).ReturnsAsync(AuthorizationResult.Success());
+
+            var result = await _controller.Update(auctionId, updateAuctionDto);
+
+            var unprocessableEntityResult = Assert.IsType<UnprocessableEntityObjectResult>(result.Result);
+        }
+
+        [Fact]
+        public async Task Update_ReturnsUnprocessableEntity_WhenMinIncrementIsNegative()
+        {
+            var auctionId = Guid.NewGuid();
+            var updateAuctionDto = new UpdateAuctionDto("Updated Name", "Updated Description", DateTime.UtcNow.AddDays(1), DateTime.UtcNow.AddDays(2), -100, "Updated Condition", "Updated Manufacturer", null);
+            var auction = new Auction { };
+            _auctionsRepositoryMock.Setup(repo => repo.GetAsync(auctionId)).ReturnsAsync(auction);
+            _authorizationServiceMock.Setup(service => service.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), auction, PolicyNames.ResourceOwner)).ReturnsAsync(AuthorizationResult.Success());
+
+            var result = await _controller.Update(auctionId, updateAuctionDto);
+
+            var unprocessableEntityResult = Assert.IsType<UnprocessableEntityObjectResult>(result.Result);
+        }
+
+        [Fact]
+        public async Task Update_ReturnsUnprocessableEntity_WhenStartDateIsInThePast()
+        {
+            var auctionId = Guid.NewGuid();
+            var pastStartDate = DateTime.UtcNow.AddDays(-1);
+            var updateAuctionDto = new UpdateAuctionDto("Updated Name", "Updated Description", pastStartDate, DateTime.UtcNow.AddDays(2), 10, "Updated Condition", "Updated Manufacturer", null);
+            var auction = new Auction { Status = AuctionStatuses.New, /* Populate other fields */ };
+            _auctionsRepositoryMock.Setup(repo => repo.GetAsync(auctionId)).ReturnsAsync(auction);
+            _authorizationServiceMock.Setup(service => service.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), auction, PolicyNames.ResourceOwner)).ReturnsAsync(AuthorizationResult.Success());
+
+            var result = await _controller.Update(auctionId, updateAuctionDto);
+
+            var unprocessableEntityResult = Assert.IsType<UnprocessableEntityObjectResult>(result.Result);
+        }
+
+        [Fact]
+        public async Task Update_ReturnsUnprocessableEntity_WhenEndDateIsBeforeCurrentTime()
+        {
+            var auctionId = Guid.NewGuid();
+            var pastEndDate = DateTime.UtcNow.AddDays(-1);
+            var updateAuctionDto = new UpdateAuctionDto("Updated Name", "Updated Description", DateTime.UtcNow.AddDays(1), pastEndDate, 10, "Updated Condition", "Updated Manufacturer", null);
+            var auction = new Auction { };
+            _auctionsRepositoryMock.Setup(repo => repo.GetAsync(auctionId)).ReturnsAsync(auction);
+            _authorizationServiceMock.Setup(service => service.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), auction, PolicyNames.ResourceOwner)).ReturnsAsync(AuthorizationResult.Success());
+
+            var result = await _controller.Update(auctionId, updateAuctionDto);
+
+            var unprocessableEntityResult = Assert.IsType<UnprocessableEntityObjectResult>(result.Result);
+        }
+
+        [Fact]
+        public async Task Update_ReturnsUnprocessableEntity_WhenEndDateIsBeforeStartDate()
+        {
+            var auctionId = Guid.NewGuid();
+            var startDate = DateTime.UtcNow.AddDays(2);
+            var endDate = DateTime.UtcNow.AddDays(1);
+            var updateAuctionDto = new UpdateAuctionDto("Updated Name", "Updated Description", startDate, endDate, 10, "Updated Condition", "Updated Manufacturer", null);
+            var auction = new Auction { };
+            _auctionsRepositoryMock.Setup(repo => repo.GetAsync(auctionId)).ReturnsAsync(auction);
+            _authorizationServiceMock.Setup(service => service.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), auction, PolicyNames.ResourceOwner)).ReturnsAsync(AuthorizationResult.Success());
+
+            var result = await _controller.Update(auctionId, updateAuctionDto);
+
+            var unprocessableEntityResult = Assert.IsType<UnprocessableEntityObjectResult>(result.Result);
+        }
+
+        [Fact]
+        public async Task Update_WithImage_ReturnsOk()
+        {
+            var auctionId = Guid.NewGuid();
+            var updateAuctionDto = new UpdateAuctionDto("Updated Name", "Updated Description", DateTime.UtcNow.AddDays(1), DateTime.UtcNow.AddDays(2), 10, "Updated Condition", "Updated Manufacturer", new Mock<IFormFile>().Object);
 
 
+            var partId = Guid.NewGuid();
+            var categoryId = "Cat1";
+            var auction = new Auction 
+            { 
+                Id = auctionId, 
+                Status = AuctionStatuses.New,
+                Part = new Part { Id = partId, Category = new PartCategory { Id = categoryId } },
+                ImageUri = "uri"
+            };
+
+            _auctionsRepositoryMock.Setup(repo => repo.GetAsync(auctionId)).ReturnsAsync(auction);
+            _authorizationServiceMock.Setup(service => service.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), auction, PolicyNames.ResourceOwner))
+                .ReturnsAsync(AuthorizationResult.Success());
+            _azureBlobStorageServiceMock.Setup(service => service.UploadImageAsync(updateAuctionDto.Image)).ReturnsAsync("image-url");
+
+            var result = await _controller.Update(auctionId, updateAuctionDto);
+
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var auctionDto = Assert.IsType<AuctionDto>(okResult.Value);
+            Assert.NotNull(auctionDto);
+        }
+
+        [Fact]
+        public async Task GetManyWithPagination_ReturnsOk()
+        {
+            var expectedPage = 1;
+            var expectedCategoryId = "category1";
+            var expectedSeriesId = Guid.NewGuid();
+            var expectedPartId = Guid.NewGuid();
+            var expectedSortType = AuctionSortingTypes.CreationDate;
+            var auctions = new List<Auction>
+            {
+                new Auction { Id = Guid.NewGuid(), Name = "Auction 1",
+                    Part = new Part { Id = Guid.NewGuid(), Name = "Part 1", Category = new PartCategory { Id = "cat1" } } },
+                new Auction { Id = Guid.NewGuid(), Name = "Auction 2",
+                    Part = new Part { Id = Guid.NewGuid(), Name = "Part 2", Category = new PartCategory { Id = "cat2" } } },
+            };
+            var auctionCount = auctions.Count;
+            _auctionsRepositoryMock.Setup(repo => repo.GetManyWithPaginationAsync(expectedPage, expectedCategoryId, expectedSeriesId, expectedPartId, expectedSortType))
+                .ReturnsAsync(auctions);
+            _auctionsRepositoryMock.Setup(repo => repo.GetCountAsync(expectedCategoryId, expectedSeriesId, expectedPartId))
+                .ReturnsAsync(auctionCount);
+
+            var result = await _controller.GetManyWithPagination(expectedPage, expectedCategoryId, expectedSeriesId, expectedPartId, expectedSortType);
+
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var response = Assert.IsType<AuctionsWithPaginationDto>(okResult.Value);
+            Assert.Equal(auctions.Count, response.Auctions.Count());
+            Assert.Equal(auctionCount, response.AuctionCount);
+        }
+
+        [Fact]
+        public async Task GetManyWithPagination_WithInvalidSortType_ReturnsUnprocessableEntity()
+        {
+            var invalidSortType = "invalidSortType";
+
+            var result = await _controller.GetManyWithPagination(sortType: invalidSortType);
+
+            Assert.IsType<UnprocessableEntityResult>(result.Result);
+        }
+
+        [Fact]
+        public async Task GetMany_Returns_Ok_With_AuctionDtos()
+        {
+            var partCategory = new PartCategory { Id = "CPU" };
+            var part = new Part { Id = Guid.NewGuid(), Name = "Part 1", Category = partCategory };
+            var auctions = new List<Auction>
+            {
+                new Auction { Id = Guid.NewGuid(), Name = "Auction 1", Part = part },
+                new Auction { Id = Guid.NewGuid(), Name = "Auction 2", Part = part}
+            };
+
+            _auctionsRepositoryMock.Setup(repo => repo.GetManyAsync()).ReturnsAsync(auctions);
 
 
+            var result = await _controller.GetMany();
 
+            var okResult = Assert.IsType<ActionResult<IEnumerable<AuctionDto>>>(result);
+            Assert.IsAssignableFrom<OkObjectResult>(okResult.Result);
 
+            var auctionDtos = Assert.IsAssignableFrom<IEnumerable<AuctionDto>>((okResult.Result as OkObjectResult).Value);
+            Assert.Equal(auctions.Count, auctionDtos.Count());
+        }
+
+        [Fact]
+        public async Task Get_Returns_Ok_With_AuctionDto_When_Auction_Exists()
+        {
+            var auctionId = Guid.NewGuid();
+            var partCategory = new PartCategory { Id = "CPU" };
+            var part = new Part { Id = Guid.NewGuid(), Name = "Part 1", Category = partCategory };
+            var auction = new Auction
+            {
+                Id = auctionId,
+                Name = "Auction 1",
+                Part = part
+            };
+
+            _auctionsRepositoryMock.Setup(repo => repo.GetAsync(auctionId)).ReturnsAsync(auction);
+
+            var result = await _controller.Get(auctionId);
+
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var auctionDto = Assert.IsType<AuctionDto>(okResult.Value);
+            Assert.Equal(auction.Id, auctionDto.Id);
+        }
+
+        [Fact]
+        public async Task Get_Returns_NotFound_When_Auction_Does_Not_Exist()
+        {
+            var nonExistingAuctionId = Guid.NewGuid();
+            _auctionsRepositoryMock.Setup(repo => repo.GetAsync(nonExistingAuctionId)).ReturnsAsync((Auction)null);
+
+            var result = await _controller.Get(nonExistingAuctionId);
+
+            Assert.IsType<NotFoundResult>(result.Result);
+        }
+
+        [Fact]
+        public async Task Create_Returns_Created_With_AuctionDto_When_Auction_Is_Created_Successfully()
+        {
+            var createAuctionDto = new CreateAuctionDto(
+                "Test Auction",
+                "Test Description",
+                DateTime.UtcNow.AddDays(1),
+                DateTime.UtcNow.AddDays(2),
+                10,
+                "Test Condition",
+                "Test Manufacturer",
+                null, 
+                "CPU",
+                Guid.NewGuid(), 
+                "Test1",
+                "Test2"
+            );
+
+            var auctionId = Guid.NewGuid();
+            var partCategory = new PartCategory { Id = "CPU" };
+            var part = new Part { Id = (Guid)createAuctionDto.PartId, Name = "Part 1", Category = partCategory };
+            var auction = new Auction { Id = auctionId };
+
+            _partsRepositoryMock.Setup(repo => repo.GetAsync(createAuctionDto.PartCategory, createAuctionDto.PartId)).ReturnsAsync(part);
+            _auctionsRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<Auction>()));
+
+            var result = await _controller.Create(createAuctionDto);
+
+            var createdResult = Assert.IsType<CreatedResult>(result.Result);
+            var auctionDto = Assert.IsType<AuctionDto>(createdResult.Value);
+            Assert.Equal(createAuctionDto.Name, auctionDto.Name);
+        }
+
+        [Fact]
+        public async Task Create_Returns_UnprocessableEntity_When_Name_Is_Too_Short()
+        {
+            var createAuctionDto = new CreateAuctionDto(
+                "A",
+                "Test Description",
+                DateTime.UtcNow.AddDays(1),
+                DateTime.UtcNow.AddDays(2),
+                10,
+                "Test Condition",
+                "Test Manufacturer",
+                null,
+                "CPU",
+                Guid.NewGuid(),
+                "Test1",
+                "Test2"
+            );
+
+            var result = await _controller.Create(createAuctionDto);
+
+            var unprocessableEntityResult = Assert.IsType<UnprocessableEntityObjectResult>(result.Result);
+            Assert.Equal("Title must be 5 - 45 characters long", unprocessableEntityResult.Value);
+        }
+
+        [Fact]
+        public async Task Create_Returns_UnprocessableEntity_When_Description_Is_Too_Short()
+        {
+            var createAuctionDto = new CreateAuctionDto(
+                "Test Auction",
+                "Short",
+                DateTime.UtcNow.AddDays(1),
+                DateTime.UtcNow.AddDays(2),
+                10,
+                "Test Condition",
+                "Test Manufacturer",
+                null,
+                "CPU",
+                Guid.NewGuid(),
+                "Test1",
+                "Test2"
+            );
+
+            var result = await _controller.Create(createAuctionDto);
+
+            var unprocessableEntityResult = Assert.IsType<UnprocessableEntityObjectResult>(result.Result);
+            Assert.Equal("Description must be at least 10 characters long", unprocessableEntityResult.Value);
+        }
+
+        [Fact]
+        public async Task Create_Returns_UnprocessableEntity_When_MinIncrement_Is_Negative()
+        {
+            var createAuctionDto = new CreateAuctionDto(
+                "Test Auction",
+                "Test Description",
+                DateTime.UtcNow.AddDays(1),
+                DateTime.UtcNow.AddDays(2),
+                -10,
+                "Test Condition",
+                "Test Manufacturer",
+                null,
+                "CPU",
+                Guid.NewGuid(),
+                "Test1",
+                "Test2"
+            );
+
+            var result = await _controller.Create(createAuctionDto);
+
+            var unprocessableEntityResult = Assert.IsType<UnprocessableEntityObjectResult>(result.Result);
+            Assert.Equal("Minimum increment must 0 or a positive number", unprocessableEntityResult.Value);
+        }
+
+        [Fact]
+        public async Task Create_Returns_UnprocessableEntity_When_StartDateIsInThePast()
+        {
+            var createAuctionDto = new CreateAuctionDto(
+                "Test Auction",
+                "Test Description",
+                DateTime.UtcNow.AddHours(-1),
+                DateTime.UtcNow.AddDays(2),
+                10,
+                "Test Condition",
+                "Test Manufacturer",
+                null,
+                "CPU",
+                Guid.NewGuid(),
+                "Test1",
+                "Test2"
+            );
+
+            var result = await _controller.Create(createAuctionDto);
+
+            var unprocessableEntityResult = Assert.IsType<UnprocessableEntityObjectResult>(result.Result);
+            Assert.Equal("Start date must be later than current time", unprocessableEntityResult.Value);
+        }
+
+        [Fact]
+        public async Task Create_Returns_UnprocessableEntity_WhenEndDateIsInThePast()
+        {
+            var createAuctionDto = new CreateAuctionDto(
+                "Test Auction",
+                "Test Description",
+                DateTime.UtcNow.AddDays(1),
+                DateTime.UtcNow.AddHours(-1),
+                10,
+                "Test Condition",
+                "Test Manufacturer",
+                null,
+                "CPU",
+                Guid.NewGuid(),
+                "Test1",
+                "Test2"
+            );
+
+            var result = await _controller.Create(createAuctionDto);
+
+            var unprocessableEntityResult = Assert.IsType<UnprocessableEntityObjectResult>(result.Result);
+            Assert.Equal("End date must be later than current time", unprocessableEntityResult.Value);
+        }
+
+        [Fact]
+        public async Task Create_Returns_UnprocessableEntity_When_EndDateLessThanStartDate()
+        {
+            var createAuctionDto = new CreateAuctionDto(
+                "Test Auction",
+                "Test Description",
+                DateTime.UtcNow.AddDays(2),
+                DateTime.UtcNow.AddDays(1),
+                10,
+                "Test Condition",
+                "Test Manufacturer",
+                null,
+                "CPU",
+                Guid.NewGuid(),
+                "Test1",
+                "Test2"
+            );
+
+            var result = await _controller.Create(createAuctionDto);
+
+            Assert.IsType<UnprocessableEntityObjectResult>(result.Result);
+        }
+
+        [Fact]
+        public async Task Create_Returns_NotFound_When_PartId_Is_Provided_But_Part_Does_Not_Exist()
+        {
+            var createAuctionDto = new CreateAuctionDto(
+                "Test Auction",
+                "Test Description",
+                DateTime.UtcNow.AddDays(1),
+                DateTime.UtcNow.AddDays(2),
+                10,
+                "Test Condition",
+                "Test Manufacturer",
+                null,
+                "CPU",
+                Guid.NewGuid(),
+                "Test1",
+                "Test2"
+            );
+
+            _partsRepositoryMock.Setup(repo => repo.GetAsync(createAuctionDto.PartCategory, createAuctionDto.PartId)).ReturnsAsync((Part)null);
+
+            var result = await _controller.Create(createAuctionDto);
+
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result.Result);
+            Assert.Equal("Part not found", notFoundResult.Value);
+        }
+
+        [Fact]
+        public async Task Create_Returns_NotFound_When_PartName_And_PartCategoryName_Are_Provided_But_PartCategory_Does_Not_Exist()
+        {
+            var createAuctionDto = new CreateAuctionDto(
+                "Test Auction",
+                "Test Description",
+                DateTime.UtcNow.AddDays(1),
+                DateTime.UtcNow.AddDays(2),
+                10,
+                "Test Condition",
+                "Test Manufacturer",
+                null,
+                "NonExistingCategory",
+                null,
+                "Test1",
+                "Test2"
+            );
+
+            _partCategoriesRepositoryMock.Setup(repo => repo.GetAsync(createAuctionDto.PartCategoryName)).ReturnsAsync((PartCategory)null);
+
+            var result = await _controller.Create(createAuctionDto);
+
+            Assert.IsType<NotFoundResult>(result.Result);
+        }
+
+        [Fact]
+        public async Task Create_Returns_Created_With_AuctionDto_When_PartName_And_PartCategoryName_Are_Provided_And_PartCategory_Exists()
+        {
+            var createAuctionDto = new CreateAuctionDto(
+                "Test Auction",
+                "Test Description",
+                DateTime.UtcNow.AddDays(1),
+                DateTime.UtcNow.AddDays(2),
+                10,
+                "Test Condition",
+                "Test Manufacturer",
+                null,
+                "ExistingCategory",
+                null,
+                "Test1",
+                "Test2"
+            );
+
+            var category = new PartCategory { Id = "ExistingCategory" };
+            _partCategoriesRepositoryMock.Setup(repo => repo.GetAsync(createAuctionDto.PartCategoryName)).ReturnsAsync(category);
+
+            var result = await _controller.Create(createAuctionDto);
+
+            var createdResult = Assert.IsType<CreatedResult>(result.Result);
+            var auctionDto = Assert.IsType<AuctionDto>(createdResult.Value);
+            Assert.Equal(createAuctionDto.Name, auctionDto.Name);
+        }
     }
 }

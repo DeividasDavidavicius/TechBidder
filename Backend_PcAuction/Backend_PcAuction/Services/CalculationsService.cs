@@ -192,8 +192,6 @@ namespace Backend_PcAuction.Services
                 return new List<Auction>();
             }
 
-            // TODO: Galbut dar atkreipti demesi skaiciuojant weight score i kainu skirtuma (100/kainu skirtumas) * weight * score
-
             var finalBuild = builds.OrderByDescending(b => b.TotalPrice).FirstOrDefault();
             List<Auction> auctions = new List<Auction>();
 
@@ -208,7 +206,7 @@ namespace Backend_PcAuction.Services
             return auctions;
         }
 
-        public async Task<List<Part>> GetParts(string id, string category)
+        private async Task<List<Part>> GetParts(string id, string category)
         {
             if (id.Equals("ANY"))
             {
@@ -228,7 +226,7 @@ namespace Backend_PcAuction.Services
             }
         }
 
-        public async Task<List<Part>> GetPartAlreadyHave(string id, string category)
+        private async Task<List<Part>> GetPartAlreadyHave(string id, string category)
         {
             Guid guid;
             if (!Guid.TryParse(id, out guid))
@@ -236,10 +234,11 @@ namespace Backend_PcAuction.Services
                 return null;
             }
             var part = await _partsRepository.GetAsync(category, guid);
+            if (part == null) return null;
             return new List<Part> { part };
         }
 
-        public async Task<PcBuild> GenerateBuildForMotherboard(Part motherboard, PcBuilderDataDto pcBuilderDataDto)
+        private async Task<PcBuild> GenerateBuildForMotherboard(Part motherboard, PcBuilderDataDto pcBuilderDataDto)
         {
             var cpuList = new List<Part>();
             var gpuList = new List<Part>();
@@ -352,6 +351,7 @@ namespace Backend_PcAuction.Services
                 var psuSize = psuCalcResult.CalculatedWattage > psuCalcResult.RecommendedWattage ? psuCalcResult.CalculatedWattage : psuCalcResult.RecommendedWattage;
 
                 var suitablePSUs = psuList.Where(p => Double.Parse(p.SpecificationValue1) >= psuSize);
+                if (suitablePSUs.Count() == 0) return null;
                 build.PSU = suitablePSUs.OrderBy(p => p.AveragePrice).FirstOrDefault();
             }
 
@@ -392,7 +392,7 @@ namespace Backend_PcAuction.Services
             return build;
         }
 
-        public List<Part> CheckCpuCompatibility(Part motherboard, List<Part> cpuList)
+        private List<Part> CheckCpuCompatibility(Part motherboard, List<Part> cpuList)
         {
             cpuList = cpuList.Where(cpu => cpu.SpecificationValue1.Equals(motherboard.SpecificationValue1)).ToList();
 
@@ -404,7 +404,7 @@ namespace Backend_PcAuction.Services
             return cpuList;
         }
 
-        public List<Part> CheckRamCompatibility(Part motherboard, List<Part> ramList)
+        private List<Part> CheckRamCompatibility(Part motherboard, List<Part> ramList)
         {
             ramList = ramList.Where(ram =>
                 ram.SpecificationValue3.Equals(motherboard.SpecificationValue2) &&
@@ -420,7 +420,7 @@ namespace Backend_PcAuction.Services
             return ramList;
         }
 
-        public List<Part> CheckSsdCompatibility(Part motherboard, List<Part> ssdList)
+        private List<Part> CheckSsdCompatibility(Part motherboard, List<Part> ssdList)
         {
             ssdList = ssdList.Where(ssd =>
                 ((ssd.SpecificationValue2 != "" && (motherboard.SpecificationValue5 != "" || motherboard.SpecificationValue7 != "")) || (ssd.SpecificationValue3 != "" && motherboard.SpecificationValue9 != ""))
@@ -434,7 +434,7 @@ namespace Backend_PcAuction.Services
             return ssdList;
         }
 
-        public List<Part> CheckHddCompatibility(Part motherboard, List<Part> hddList)
+        private List<Part> CheckHddCompatibility(Part motherboard, List<Part> hddList)
         {
             hddList = hddList.Where(hdd => Double.Parse(motherboard.SpecificationValue9) > 0).ToList();
 
@@ -446,7 +446,7 @@ namespace Backend_PcAuction.Services
             return hddList;
         }
 
-        public async Task<List<Part>> GetPrices(List<Part> parts)
+        private async Task<List<Part>> GetPrices(List<Part> parts)
         {
             foreach(var part in parts)
             {
@@ -455,7 +455,7 @@ namespace Backend_PcAuction.Services
             return parts;
         }
 
-        public Part FindCheapestPart(List<Part> parts)
+        private Part FindCheapestPart(List<Part> parts)
         {
             if (parts == null)
                 return null;
@@ -463,7 +463,7 @@ namespace Backend_PcAuction.Services
             return parts.OrderBy(p => p.AveragePrice).FirstOrDefault();
         }
 
-        public double CompareParts(double oldPartSpec1, double oldPartSpec2, double newPartSpec1, double newPartSpec2)
+        private double CompareParts(double oldPartSpec1, double oldPartSpec2, double newPartSpec1, double newPartSpec2)
         {
             if (oldPartSpec1 > newPartSpec1)
                 return -1;
@@ -477,14 +477,14 @@ namespace Backend_PcAuction.Services
             return 0;
         }
 
-        public double CheckChangeOverBudget(double budget, double setupPrice, double oldPartPrice, double newPartPrice)
+        private double CheckChangeOverBudget(double budget, double setupPrice, double oldPartPrice, double newPartPrice)
         {
             if (setupPrice + newPartPrice - oldPartPrice > budget)
                 return -1;
             return 0;
         }
 
-        public PcBuild GenerateRandomBuild(PcBuild build, List<Part> cpuList, List<Part> gpuList, List<Part> ramList, List<Part> ssdList, List<Part> hddList,
+        private PcBuild GenerateRandomBuild(PcBuild build, List<Part> cpuList, List<Part> gpuList, List<Part> ramList, List<Part> ssdList, List<Part> hddList,
                                            List<Part> psuList, Part motherboard, double budget, bool includePsu, double additionalPsu)
         {
             PcBuild randomBuild = new PcBuild();
@@ -516,7 +516,7 @@ namespace Backend_PcAuction.Services
             return randomBuild;
         }
 
-        public  Part SelectRandomPart(List<Part> parts, Random random)
+        private Part SelectRandomPart(List<Part> parts, Random random)
         {
             if (parts != null)
             {
@@ -526,7 +526,7 @@ namespace Backend_PcAuction.Services
             return null;
         }
 
-        public double CalculateScore(PcBuild randomBuild, PcBuild oldBuild)
+        private double CalculateScore(PcBuild randomBuild, PcBuild oldBuild)
         {
             double cpuWeight = 0.2;
             double gpuWeight = 0.3;

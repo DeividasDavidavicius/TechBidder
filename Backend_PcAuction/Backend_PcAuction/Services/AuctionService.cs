@@ -15,13 +15,11 @@ namespace Backend_PcAuction.Services
 
         private readonly IBidsRepository _bidsRepository;
         private readonly IAuctionsRepository _auctionsRepository;
-        private readonly IPartPricesService _partPricesService;
 
-        public AuctionService(IBidsRepository bidsRepository, IAuctionsRepository auctionsRepository, IPartPricesService partPricesService)
+        public AuctionService(IBidsRepository bidsRepository, IAuctionsRepository auctionsRepository)
         {
             _bidsRepository = bidsRepository;
             _auctionsRepository = auctionsRepository;
-            _partPricesService = partPricesService;
         }
 
         public async Task<List<Auction>> GenerateAuctionRecommendations(Auction auction)

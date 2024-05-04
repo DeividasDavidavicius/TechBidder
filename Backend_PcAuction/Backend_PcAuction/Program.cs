@@ -38,6 +38,7 @@ builder.Services.AddScoped<IAzureBlobStorageService, AzureBlobStorageService>();
 builder.Services.AddScoped<IPartPricesService, PartPricesService>();
 builder.Services.AddScoped<IAuctionService, AuctionService>();
 builder.Services.AddScoped<ICalculationsService, CalculationsService>();
+builder.Services.AddScoped<IStripeService, StripeService>();
 
 builder.Services.AddHostedService<AuctionStartBackgroundService>();
 builder.Services.AddHostedService<AuctionEndBackgroundService>();

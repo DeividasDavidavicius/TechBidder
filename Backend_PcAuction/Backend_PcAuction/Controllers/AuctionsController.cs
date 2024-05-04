@@ -76,7 +76,6 @@ namespace Backend_PcAuction.Controllers
 
             if(createAuctionDto.PartId !=  null)
             {
-                var partId = createAuctionDto.PartId;
                 part = await _partsRepository.GetAsync(createAuctionDto.PartCategory, createAuctionDto.PartId);
 
                 if (part == null)
