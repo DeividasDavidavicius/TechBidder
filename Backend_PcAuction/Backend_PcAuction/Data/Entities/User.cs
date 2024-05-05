@@ -8,9 +8,9 @@ namespace Backend_PcAuction.Data.Entities
     public class User : IdentityUser
     {
         public string BlacklistedRefreshTokens { get; set; }
-        public string Address { get; set; }
-        public string PhoneNumber { get; set; }
-        public string BankDetails { get; set; }
+        public string? Address { get; set; }
+        public string? PhoneNumber { get; set; }
+        public string? BankDetails { get; set; }
 
         public bool IsRefreshTokenBlacklisted(string token)
         {
