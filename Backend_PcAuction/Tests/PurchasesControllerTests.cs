@@ -261,7 +261,7 @@ namespace Tests
             var buyerId = Guid.NewGuid().ToString();
 
             var auction = new Auction { Id = auctionId };
-            var purchase = new Purchase { BuyerId = Guid.NewGuid().ToString() }; // Different buyer ID
+            var purchase = new Purchase { BuyerId = Guid.NewGuid().ToString() };
 
             _auctionsRepositoryMock.Setup(repo => repo.GetAsync(auctionId)).ReturnsAsync(auction);
             _purchaseRepositoryMock.Setup(repo => repo.GetLastAsync(auctionId)).ReturnsAsync(purchase);

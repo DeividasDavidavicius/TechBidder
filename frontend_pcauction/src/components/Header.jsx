@@ -12,12 +12,11 @@ import { checkTokenValidity, logout, refreshAccessToken } from "../services/Auth
 import PATHS from "../utils/Paths";
 
 function Header() {
-    const { isLoggedIn, accessToken, setLogin, setLogout } = useUser();
+    const { isLoggedIn, accessToken, role, setLogin, setLogout } = useUser();
     const openSnackbar = useContext(SnackbarContext);
     const navigation = useNavigate();
 
     const pages = [
-        { name: 'MAIN', route: PATHS.MAIN },
         { name: 'CREATE AUCTION', route: PATHS.CREATEAUCTION },
         { name: "AUCTIONS", route: PATHS.AUCTIONS + "?page=1" },
         { name: "PC BUILDER", route: PATHS.PCBUILDGENERATOR },
@@ -25,12 +24,20 @@ function Header() {
         { name: "COMPATIBILITY CHECKER", route: PATHS.COMPATIBILITYCHECK }
     ];
 
+    const imageClick = [
+        { name: 'MAIN', route: PATHS.MAIN},
+    ];
+
     let navOptions = [];
 
     if (isLoggedIn === true) {
         navOptions.push({ name: 'Profile', route: PATHS.USERPROFILE + "?tab=0"});
-        navOptions.push({ name: 'Part management', route: PATHS.PARTS}); // TODO CHECK IF ADMIN
-        navOptions.push({ name: 'Series management', route: PATHS.SERIES});
+
+        if (role.includes('Admin')) {
+            navOptions.push({ name: 'Part management', route: PATHS.PARTS});
+            navOptions.push({ name: 'Series management', route: PATHS.SERIES});
+        }
+
         navOptions.push({ name: 'Logout', route: PATHS.MAIN, method: 'handleLogout' });
     }
 
@@ -103,7 +110,10 @@ function Header() {
         <AppBar position="sticky" style={{ top: 0, zIndex: 1000, backgroundColor: '#138c94'}}>
             <Container maxWidth="x1">
                 <Toolbar disableGutters>
-                    <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
+                    <div onClick={() => handleNavigation(imageClick[0].route)} style={{ textDecoration: 'none', color: 'white', cursor: 'pointer', pointerEvents: 'auto', backgroundColor: 'error.light', width: 90, height: 40 }}>
+                        <img src="/assets/TechBidderLogo.png" alt="CafeGame icon" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                    <Box sx={{ marginLeft: 1, flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
                         <IconButton color="inherit" onClick={handleOpenNavMenu}>
                             <MenuIcon/>
                         </IconButton>
@@ -139,7 +149,7 @@ function Header() {
                         </Menu>
                     </Box>
 
-                    <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+                    <Box sx={{ marginLeft: 2, flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                         {pages.map((page, index) => (
                             <Link key={page.name} to={page.route} style={{ textDecoration: 'none', color: 'white', fontWeight: 'bold', colorborderBottom: '2px solid transparent', marginRight: index !== pages.length - 1 ? '20px' : 0}} className="header-link" >
                                 {page.name}
