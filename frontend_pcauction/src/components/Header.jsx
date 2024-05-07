@@ -110,9 +110,15 @@ function Header() {
         <AppBar position="sticky" style={{ top: 0, zIndex: 1000, backgroundColor: '#138c94'}}>
             <Container maxWidth="x1">
                 <Toolbar disableGutters>
-                    <div onClick={() => handleNavigation(imageClick[0].route)} style={{ textDecoration: 'none', color: 'white', cursor: 'pointer', pointerEvents: 'auto', backgroundColor: 'error.light', width: 90, height: 40 }}>
-                        <img src="/assets/TechBidderLogo.png" alt="CafeGame icon" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    </div>
+                <div onClick={() => handleNavigation(imageClick[0].route)} style={{ textDecoration: 'none', color: 'white', cursor: 'pointer', pointerEvents: 'auto', backgroundColor: 'error.light', width: 90, height: 40 }}>
+    <img
+        src="/assets/TechBidderLogo.png"
+        alt="CafeGame icon"
+        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+        loading="lazy" // Add lazy loading attribute
+    />
+</div>
+
                     <Box sx={{ marginLeft: 1, flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
                         <IconButton color="inherit" onClick={handleOpenNavMenu}>
                             <MenuIcon/>
