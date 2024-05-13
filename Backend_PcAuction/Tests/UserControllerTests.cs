@@ -21,18 +21,18 @@ namespace Tests
     {
         private readonly Mock<IAuctionsRepository> _auctionsRepositoryMock;
         private readonly Mock<IBidsRepository> _bidsRepositoryMock;
-        private readonly Mock<IPurchaseRepository> _purchaseRepositoryMock;
+        private readonly Mock<IPurchasesRepository> _purchaseRepositoryMock;
         private readonly Mock<UserManager<User>> _userManagerMock;
         private readonly Mock<HttpContext> _httpContextMock;
 
-        private readonly UserController _controller;
+        private readonly UsersController _controller;
 
 
         public UserControllerTests()
         {
             _auctionsRepositoryMock = new Mock<IAuctionsRepository>();
             _bidsRepositoryMock = new Mock<IBidsRepository>();
-            _purchaseRepositoryMock = new Mock<IPurchaseRepository>();
+            _purchaseRepositoryMock = new Mock<IPurchasesRepository>();
 
             var mockUserStore = new Mock<IUserStore<User>>();
             var mockPasswordHasher = new Mock<IPasswordHasher<User>>();
@@ -46,7 +46,7 @@ namespace Tests
                 new Claim(JwtRegisteredClaimNames.Sub, "userId")
             }, "mock")));
 
-            _controller = new UserController(_auctionsRepositoryMock.Object, _bidsRepositoryMock.Object, _purchaseRepositoryMock.Object, _userManagerMock.Object)
+            _controller = new UsersController(_auctionsRepositoryMock.Object, _bidsRepositoryMock.Object, _purchaseRepositoryMock.Object, _userManagerMock.Object)
             {
                 ControllerContext = new ControllerContext
                 {

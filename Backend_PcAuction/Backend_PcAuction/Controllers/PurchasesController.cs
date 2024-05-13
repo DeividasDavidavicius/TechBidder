@@ -21,15 +21,15 @@ namespace Backend_PcAuction.Controllers
     [Route("api/v1/auctions/{auctionId}/purchases")]
     public class PurchasesController : ControllerBase
     {
-        private readonly IPurchaseRepository _purchaseRepository;
+        private readonly IPurchasesRepository _purchaseRepository;
         private readonly IAuctionsRepository _auctionsRepository;
-        private readonly IStripePaymentRepository _stripePaymentRepository;
+        private readonly IStripePaymentsRepository _stripePaymentRepository;
         private readonly IPartsRepository _partsRepository;
         private readonly IPartsPricesRepository _partsPricesRepository;
         private readonly IPartPricesService _partPricesService;
         private readonly IStripeService _stripeService;
 
-        public PurchasesController(IPurchaseRepository purchaseRepository, IAuctionsRepository auctionsRepository, IStripePaymentRepository stripePaymentRepository,
+        public PurchasesController(IPurchasesRepository purchaseRepository, IAuctionsRepository auctionsRepository, IStripePaymentsRepository stripePaymentRepository,
             IPartsRepository partsRepository, IPartsPricesRepository partsPricesRepository, IPartPricesService partPricesService, IStripeService stripeService) 
         {
             _purchaseRepository = purchaseRepository;
@@ -110,10 +110,10 @@ namespace Backend_PcAuction.Controllers
             await _partsPricesRepository.CreateAsync(partPrice);
 
             part.AveragePrice = await _partPricesService.GetPriceAverageAsync(part.Id);
-            _partsRepository.UpdateAsync(part);
+            await _partsRepository.UpdateAsync(part);
 
             auction.Status = AuctionStatuses.Paid;
-            _auctionsRepository.UpdateAsync(auction);
+            await _auctionsRepository.UpdateAsync(auction);
 
             return Ok(new PurchaseDto(purchase.Id, purchase.Amount, purchase.Status, purchase.AuctionWinDate, purchase.Buyer.Id, purchase.Auction.Id));
         }

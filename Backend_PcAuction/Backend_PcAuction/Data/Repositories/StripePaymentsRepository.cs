@@ -3,17 +3,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Backend_PcAuction.Data.Repositories
 {
-    public interface IStripePaymentRepository
+    public interface IStripePaymentsRepository
     {
         Task CreateAsync(StripePayment stripePayment);
         Task<StripePayment?> GetLastAsync(Guid purchaseId);
     }
 
-    public class StripePaymentRepository : IStripePaymentRepository
+    public class StripePaymentsRepository : IStripePaymentsRepository
     {
         private readonly PcAuctionDbContext _context;
 
-        public StripePaymentRepository(PcAuctionDbContext auctionDbContext)
+        public StripePaymentsRepository(PcAuctionDbContext auctionDbContext)
         {
             _context = auctionDbContext;
         }

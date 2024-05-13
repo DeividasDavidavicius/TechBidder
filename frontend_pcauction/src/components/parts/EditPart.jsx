@@ -8,6 +8,7 @@ import SnackbarContext from "../../contexts/SnackbarContext";
 import PATHS from "../../utils/Paths";
 import { getPart, patchPart } from "../../services/PartService";
 import { getAllCategorySeries, getSeries } from "../../services/SeriesService";
+
 function EditPart() {
     const [categoryFields, setCategoryFields] = useState({});
     const [partSeries, setPartSeries] = useState("");

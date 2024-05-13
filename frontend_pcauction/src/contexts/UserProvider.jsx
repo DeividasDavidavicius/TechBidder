@@ -15,7 +15,6 @@ const UserContextProvider = ({ children }) => {
 
             return payload;
         } catch (error) {
-            console.error("Failed to decode JWT:", error);
             return null;
         }
     }

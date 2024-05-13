@@ -6,6 +6,7 @@ import { useUser } from "../../contexts/UserContext";
 import SnackbarContext from "../../contexts/SnackbarContext";
 import PATHS from "../../utils/Paths";
 import { getSeries, putSeries } from "../../services/SeriesService";
+
 function EditSeries() {
     const [name, setName] = useState("");
     const [validationErrors, setValidationErrors] = useState({

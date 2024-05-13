@@ -3,6 +3,7 @@ using Backend_PcAuction.Data.Entities;
 using Backend_PcAuction.Services;
 using Backend_PcAuction.Utils;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
 
@@ -12,11 +13,13 @@ namespace Backend_PcAuction.BackgroundServices
     {
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly TimeSpan _interval;
+        private readonly RapidApiSettings _rapidApiSettings;
 
-        public PartAveragePriceBackgroundService(IServiceScopeFactory scopeFactory)
+        public PartAveragePriceBackgroundService(IServiceScopeFactory scopeFactory, IOptions<RapidApiSettings> rapidApiSettings)
         {
             _scopeFactory = scopeFactory;
             _interval = TimeSpan.FromMinutes(1);
+            _rapidApiSettings = rapidApiSettings.Value;
         }
 
         protected override async Task ExecuteAsync(CancellationToken token)
@@ -85,7 +88,7 @@ namespace Backend_PcAuction.BackgroundServices
         private async Task<double> GetEbayPrice(string partName)
         {
 
-            string contentString = $"{{\r\"keywords\": \"{partName}\",\r\"excluded_keywords\": \"broken\",\r\"max_search_results\": \"100\",\r\"max_pages\": \"5\",\r\"remove_outliers\": \"true\",\r\"site_id\": \"0\"\r}}";
+            string contentString = $"{{\r\n    \"keywords\": \"{partName}\",\r\n    \"excluded_keywords\": \"broken\",\r\n    \"max_search_results\": \"240\",\r\n    \"remove_outliers\": \"true\",\r\n    \"site_id\": \"0\"\r\n}}";
             var client = new HttpClient();
             var request = new HttpRequestMessage
             {
@@ -93,8 +96,8 @@ namespace Backend_PcAuction.BackgroundServices
                 RequestUri = new Uri("https://ebay-average-selling-price.p.rapidapi.com/findCompletedItems"),
                 Headers =
                 {
-                    { "X-RapidAPI-Key", "e5c2ad60d2msh60da4775f7b3009p1af7dbjsn2d179823caa8" },
-                    { "X-RapidAPI-Host", "ebay-average-selling-price.p.rapidapi.com" },
+                    { "X-RapidAPI-Key", _rapidApiSettings.Key },
+                    { "X-RapidAPI-Host", _rapidApiSettings.Host },
                 },
                 Content = new StringContent(contentString)
                 {

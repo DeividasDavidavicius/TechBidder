@@ -20,9 +20,9 @@ namespace Tests
 {
     public class PurchasesControllerTests
     {
-        private readonly Mock<IPurchaseRepository> _purchaseRepositoryMock;
+        private readonly Mock<IPurchasesRepository> _purchaseRepositoryMock;
         private readonly Mock<IAuctionsRepository> _auctionsRepositoryMock;
-        private readonly Mock<IStripePaymentRepository> _stripePaymentRepositoryMock;
+        private readonly Mock<IStripePaymentsRepository> _stripePaymentRepositoryMock;
         private readonly Mock<IPartsRepository> _partsRepositoryMock;
         private readonly Mock<IPartsPricesRepository> _partsPricesRepositoryMock;
         private readonly Mock<IPartPricesService> _partPricesServiceMock;
@@ -32,9 +32,9 @@ namespace Tests
 
         public PurchasesControllerTests()
         {
-            _purchaseRepositoryMock = new Mock<IPurchaseRepository>();
+            _purchaseRepositoryMock = new Mock<IPurchasesRepository>();
             _auctionsRepositoryMock = new Mock<IAuctionsRepository>();
-            _stripePaymentRepositoryMock = new Mock<IStripePaymentRepository>();
+            _stripePaymentRepositoryMock = new Mock<IStripePaymentsRepository>();
             _partsRepositoryMock = new Mock<IPartsRepository>();
             _partsPricesRepositoryMock = new Mock<IPartsPricesRepository>();
             _partPricesServiceMock = new Mock<IPartPricesService>();

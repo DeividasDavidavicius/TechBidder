@@ -14,13 +14,13 @@ namespace Tests
     {
         private readonly Mock<IBidsRepository> _bidsRepositoryMock;
         private readonly Mock<IAuctionsRepository> _auctionsRepositoryMock;
-        private readonly AuctionService _auctionService;
+        private readonly AuctionsService _auctionService;
 
         public AuctionServiceTests()
         {
             _bidsRepositoryMock = new Mock<IBidsRepository>();
             _auctionsRepositoryMock = new Mock<IAuctionsRepository>();
-            _auctionService = new AuctionService(_bidsRepositoryMock.Object, _auctionsRepositoryMock.Object);
+            _auctionService = new AuctionsService(_bidsRepositoryMock.Object, _auctionsRepositoryMock.Object);
         }
 
         [Fact]

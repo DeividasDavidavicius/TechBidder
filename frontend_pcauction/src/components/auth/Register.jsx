@@ -73,7 +73,6 @@ function Register() {
                 setErrorMessage(errorMessage);
             }
         } catch (error) {
-            console.error("Login failed:", error);
             setErrorMessage(error.response.data);
         }
     }

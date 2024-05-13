@@ -82,7 +82,6 @@ namespace Backend_PcAuction.Services
                 motherboard = await _partsRepository.GetAsync(PartCategories.Motherboard, compatiblePartsDataDto.PartId);
             }
 
-
             switch (compatiblePartsDataDto.CompatibleCategoryId)
             {
                 case PartCategories.CPU:

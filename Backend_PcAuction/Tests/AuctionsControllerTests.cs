@@ -18,27 +18,27 @@ using System.Threading.Tasks;
 
 namespace Tests
 {
-    public class AuctionControllerTests
+    public class AuctionsControllerTests
     {
         private readonly Mock<IAuctionsRepository> _auctionsRepositoryMock;
         private readonly Mock<IPartsRepository> _partsRepositoryMock;
         private readonly Mock<IPartCategoriesRepository> _partCategoriesRepositoryMock;
         private readonly Mock<IAuthorizationService> _authorizationServiceMock;
         private readonly Mock<IAzureBlobStorageService> _azureBlobStorageServiceMock;
-        private readonly Mock<IAuctionService> _auctionServiceMock;
+        private readonly Mock<IAuctionsService> _auctionServiceMock;
         private readonly Mock<IBidsRepository> _bidsRepositoryMock;
         private readonly Mock<HttpContext> _httpContextMock;
 
         private readonly AuctionsController _controller;
 
-        public AuctionControllerTests()
+        public AuctionsControllerTests()
         {
             _auctionsRepositoryMock = new Mock<IAuctionsRepository>();
             _partsRepositoryMock = new Mock<IPartsRepository>();
             _partCategoriesRepositoryMock = new Mock<IPartCategoriesRepository>();
             _authorizationServiceMock = new Mock<IAuthorizationService>();
             _azureBlobStorageServiceMock = new Mock<IAzureBlobStorageService>();
-            _auctionServiceMock = new Mock<IAuctionService>();
+            _auctionServiceMock = new Mock<IAuctionsService>();
             _bidsRepositoryMock = new Mock<IBidsRepository>();
 
             _httpContextMock = new Mock<HttpContext>();
@@ -385,7 +385,7 @@ namespace Tests
         }
 
         [Fact]
-        public async Task GetManyWithPagination_ReturnsOk()
+        public async Task GetManyWithPagination_ReturnsOk_WhenCorrectSortType()
         {
             var expectedPage = 1;
             var expectedCategoryId = "category1";
@@ -447,7 +447,7 @@ namespace Tests
         }
 
         [Fact]
-        public async Task Get_Returns_Ok_With_AuctionDto_When_Auction_Exists()
+        public async Task Get_ReturnsOkWithAuctionDto_WhenAuctionExists()
         {
             var auctionId = Guid.NewGuid();
             var partCategory = new PartCategory { Id = "CPU" };
@@ -469,7 +469,7 @@ namespace Tests
         }
 
         [Fact]
-        public async Task Get_Returns_NotFound_When_Auction_Does_Not_Exist()
+        public async Task Get_ReturnsNotFound_WhenAuctionDoesNotExist()
         {
             var nonExistingAuctionId = Guid.NewGuid();
             _auctionsRepositoryMock.Setup(repo => repo.GetAsync(nonExistingAuctionId)).ReturnsAsync((Auction)null);
@@ -480,7 +480,7 @@ namespace Tests
         }
 
         [Fact]
-        public async Task Create_Returns_Created_With_AuctionDto_When_Auction_Is_Created_Successfully()
+        public async Task Create_ReturnsCreatedWithAuctionDto_WhenAuctionIsCreatedSuccessfully()
         {
             var createAuctionDto = new CreateAuctionDto(
                 "Test Auction",
@@ -513,7 +513,7 @@ namespace Tests
         }
 
         [Fact]
-        public async Task Create_Returns_UnprocessableEntity_When_Name_Is_Too_Short()
+        public async Task Create_ReturnsUnprocessableEntity_WhenNameIsTooShort()
         {
             var createAuctionDto = new CreateAuctionDto(
                 "A",
@@ -537,7 +537,7 @@ namespace Tests
         }
 
         [Fact]
-        public async Task Create_Returns_UnprocessableEntity_When_Description_Is_Too_Short()
+        public async Task Create_ReturnsUnprocessableEntity_WhenDescriptionIsTooShort()
         {
             var createAuctionDto = new CreateAuctionDto(
                 "Test Auction",
@@ -561,7 +561,7 @@ namespace Tests
         }
 
         [Fact]
-        public async Task Create_Returns_UnprocessableEntity_When_MinIncrement_Is_Negative()
+        public async Task Create_ReturnsUnprocessableEntity_WhenMinIncrementIsNegative()
         {
             var createAuctionDto = new CreateAuctionDto(
                 "Test Auction",
@@ -585,7 +585,7 @@ namespace Tests
         }
 
         [Fact]
-        public async Task Create_Returns_UnprocessableEntity_When_StartDateIsInThePast()
+        public async Task Create_ReturnsUnprocessableEntity_WhenStartDateIsInThePast()
         {
             var createAuctionDto = new CreateAuctionDto(
                 "Test Auction",
@@ -609,7 +609,7 @@ namespace Tests
         }
 
         [Fact]
-        public async Task Create_Returns_UnprocessableEntity_WhenEndDateIsInThePast()
+        public async Task Create_ReturnsUnprocessableEntity_WhenEndDateIsInThePast()
         {
             var createAuctionDto = new CreateAuctionDto(
                 "Test Auction",
@@ -633,7 +633,7 @@ namespace Tests
         }
 
         [Fact]
-        public async Task Create_Returns_UnprocessableEntity_When_EndDateLessThanStartDate()
+        public async Task Create_Returns_UnprocessableEntity_WhenEndDateLessThanStartDate()
         {
             var createAuctionDto = new CreateAuctionDto(
                 "Test Auction",
@@ -656,7 +656,7 @@ namespace Tests
         }
 
         [Fact]
-        public async Task Create_Returns_NotFound_When_PartId_Is_Provided_But_Part_Does_Not_Exist()
+        public async Task Create_ReturnsNotFound_WhenPartIdIsProvidedButPartDoesNotExist()
         {
             var createAuctionDto = new CreateAuctionDto(
                 "Test Auction",
@@ -682,7 +682,7 @@ namespace Tests
         }
 
         [Fact]
-        public async Task Create_Returns_NotFound_When_PartName_And_PartCategoryName_Are_Provided_But_PartCategory_Does_Not_Exist()
+        public async Task Create_ReturnsNotFound_WhenPartCategoryDoesNotExist()
         {
             var createAuctionDto = new CreateAuctionDto(
                 "Test Auction",
@@ -707,7 +707,7 @@ namespace Tests
         }
 
         [Fact]
-        public async Task Create_Returns_Created_With_AuctionDto_When_PartName_And_PartCategoryName_Are_Provided_And_PartCategory_Exists()
+        public async Task Create_ReturnsCreatedWithAuctionDto_WhenDataIsCorrect()
         {
             var createAuctionDto = new CreateAuctionDto(
                 "Test Auction",

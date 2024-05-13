@@ -72,7 +72,6 @@ function Login() {
                 setErrorMessage(errorMessage);
             }
         } catch (error) {
-            console.error("Login failed:", error);
             setErrorMessage("Wrong login details!");
         }
     }

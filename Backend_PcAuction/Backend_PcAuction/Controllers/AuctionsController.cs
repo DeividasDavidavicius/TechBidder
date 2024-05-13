@@ -20,11 +20,11 @@ namespace Backend_PcAuction.Controllers
         private readonly IPartCategoriesRepository _partCategoriesRepository;
         private readonly IAuthorizationService _authorizationService;
         private readonly IAzureBlobStorageService _azureBlobStorageService;
-        private readonly IAuctionService _auctionService;
+        private readonly IAuctionsService _auctionService;
         private readonly IBidsRepository _bidsRepository;
 
         public AuctionsController(IAuctionsRepository auctionsRepository, IPartsRepository partsRepository, IPartCategoriesRepository partCategoriesRepository,
-            IAuthorizationService authorizationService, IAzureBlobStorageService azureBlobStorageService, IAuctionService auctionService, IBidsRepository bidsRepository)
+            IAuthorizationService authorizationService, IAzureBlobStorageService azureBlobStorageService, IAuctionsService auctionService, IBidsRepository bidsRepository)
         {
             _auctionsRepository = auctionsRepository;
             _partsRepository = partsRepository;
@@ -39,8 +39,6 @@ namespace Backend_PcAuction.Controllers
         [Authorize(Roles = UserRoles.RegisteredUser)]
         public async Task<ActionResult<AuctionDto>> Create([FromForm] CreateAuctionDto createAuctionDto)
         {
-            var imageUri = await _azureBlobStorageService.UploadImageAsync(createAuctionDto.Image);
-
             if (createAuctionDto.Name.Length < 5 || createAuctionDto.Name.Length > 45)
             {
                 return UnprocessableEntity("Title must be 5 - 45 characters long");
@@ -96,6 +94,7 @@ namespace Backend_PcAuction.Controllers
                 part = new Part { Name = createAuctionDto.Name, Type = PartTypes.Temporary, Category = category };
             }
 
+            var imageUri = await _azureBlobStorageService.UploadImageAsync(createAuctionDto.Image);
 
             // TODO Create and update, backend and frontend: Max auction length 7 days (or 14), min 1 hour (or 1 day)
 

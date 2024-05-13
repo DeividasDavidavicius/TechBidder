@@ -5,18 +5,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Backend_PcAuction.Services
 {
-    public interface IAuctionService
+    public interface IAuctionsService
     {
         Task<List<Auction>> GenerateAuctionRecommendations(Auction auction);
     }
 
-    public class AuctionService : IAuctionService
+    public class AuctionsService : IAuctionsService
     {
 
         private readonly IBidsRepository _bidsRepository;
         private readonly IAuctionsRepository _auctionsRepository;
 
-        public AuctionService(IBidsRepository bidsRepository, IAuctionsRepository auctionsRepository)
+        public AuctionsService(IBidsRepository bidsRepository, IAuctionsRepository auctionsRepository)
         {
             _bidsRepository = bidsRepository;
             _auctionsRepository = auctionsRepository;

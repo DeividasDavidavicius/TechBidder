@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Backend_PcAuction.Data.Repositories
 {
-    public interface IPurchaseRepository
+    public interface IPurchasesRepository
     {
         Task CreateAsync(Purchase purchase);
         Task DeleteAsync(Purchase purchase);
@@ -14,11 +14,11 @@ namespace Backend_PcAuction.Data.Repositories
         Task<IReadOnlyList<Purchase>> GetAllUserPurchasesAsync(string userId);
     }
 
-    public class PurchaseRepository : IPurchaseRepository
+    public class PurchasesRepository : IPurchasesRepository
     {
         private readonly PcAuctionDbContext _context;
 
-        public PurchaseRepository(PcAuctionDbContext auctionDbContext)
+        public PurchasesRepository(PcAuctionDbContext auctionDbContext)
         {
             _context = auctionDbContext;
         }

@@ -27,8 +27,8 @@ builder.Services.AddTransient<IPartsRepository, PartsRepository>();
 builder.Services.AddTransient<IPartsPricesRepository, PartsPricesRepository>();
 builder.Services.AddTransient<ISeriesRepository, SeriesRepository>();
 builder.Services.AddTransient<IPartRequestsRepository, PartRequestsRepository>();
-builder.Services.AddTransient<IPurchaseRepository, PurchaseRepository>();
-builder.Services.AddTransient<IStripePaymentRepository, StripePaymentRepository>();
+builder.Services.AddTransient<IPurchasesRepository, PurchasesRepository>();
+builder.Services.AddTransient<IStripePaymentsRepository, StripePaymentsRepository>();
 
 builder.Services.AddTransient<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<AuthDbSeeder>();
@@ -36,7 +36,7 @@ builder.Services.AddScoped<PartCategorySeeder>();
 
 builder.Services.AddScoped<IAzureBlobStorageService, AzureBlobStorageService>();
 builder.Services.AddScoped<IPartPricesService, PartPricesService>();
-builder.Services.AddScoped<IAuctionService, AuctionService>();
+builder.Services.AddScoped<IAuctionsService, AuctionsService>();
 builder.Services.AddScoped<ICalculationsService, CalculationsService>();
 builder.Services.AddScoped<IStripeService, StripeService>();
 
@@ -86,6 +86,7 @@ var blobContainerClient = blobServiceClient.GetBlobContainerClient(builder.Confi
 builder.Services.AddScoped(provider => blobContainerClient);
 
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
+builder.Services.Configure<RapidApiSettings>(builder.Configuration.GetSection("RapidAPI"));
 
 var app = builder.Build();
 

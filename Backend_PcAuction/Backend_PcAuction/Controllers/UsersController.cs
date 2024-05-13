@@ -12,14 +12,14 @@ namespace Backend_PcAuction.Controllers
 {
     [ApiController]
     [Route("api/v1/user")]
-    public class UserController : ControllerBase
+    public class UsersController : ControllerBase
     {
         private readonly IAuctionsRepository _auctionsRepository;
         private readonly IBidsRepository _bidsRepository;
-        private readonly IPurchaseRepository _purchaseRepository;
+        private readonly IPurchasesRepository _purchaseRepository;
         private readonly UserManager<User> _userManager;
 
-        public UserController(IAuctionsRepository auctionsRepository, IBidsRepository bidsRepository, IPurchaseRepository purchaseRepository, UserManager<User> userManager)
+        public UsersController(IAuctionsRepository auctionsRepository, IBidsRepository bidsRepository, IPurchasesRepository purchaseRepository, UserManager<User> userManager)
         {
             _auctionsRepository = auctionsRepository;
             _bidsRepository = bidsRepository;
