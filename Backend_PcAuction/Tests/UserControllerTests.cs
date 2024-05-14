@@ -145,7 +145,7 @@ namespace Tests
         }
 
         [Fact]
-        public async Task GetAllBids_ReturnsOkWithBidWithAuctionIdDtoList()
+        public async Task GetAllBids_ReturnsOkWithBids_WhenBidsAreFound()
         {
             var userId = "userId";
             var bids = new List<Bid>
@@ -173,7 +173,7 @@ namespace Tests
         }
 
         [Fact]
-        public async Task GetAllWinningBids_ReturnsOkWithWinningBidWithAuctionIdDtoList()
+        public async Task GetAllWinningBids_ReturnsOkWithWinningBids_WhenBidsAreFound()
         {
             var userId = "userId";
             var bids = new List<Bid>
@@ -196,7 +196,7 @@ namespace Tests
         }
 
         [Fact]
-        public async Task GetAllNewAuctions_ReturnsOkWithAuctionWithPartNameDtoList()
+        public async Task GetAllNewAuctions_ReturnsOkWithAuctions_WhenAuctionsAreFound()
         {
             var userId = "userId";
             var auctions = new List<Auction>
@@ -215,7 +215,7 @@ namespace Tests
         }
 
         [Fact]
-        public async Task GetAllActiveAuctions_ReturnsOkWithAuctionWithPartNameDtoList()
+        public async Task GetAllActiveAuctions_ReturnsOkWithAuctions_WhenAuctionsAreFound()
         {
             var userId = "userId";
             var auctions = new List<Auction>
@@ -234,7 +234,7 @@ namespace Tests
         }
 
         [Fact]
-        public async Task GetAllEndedAuctions_ReturnsOkWithAuctionWithPartNameDtoList()
+        public async Task GetAllEndedAuctions_ReturnsOkWithAuctions_WhenAuctionsAreFound()
         {
             var userId = "userId";
             var auctions = new List<Auction>
@@ -253,7 +253,7 @@ namespace Tests
         }
 
         [Fact]
-        public async Task GetAllWonAuctions_ReturnsOkWithAuctionWithPartNameDtoList()
+        public async Task GetAllWonAuctions_ReturnsOkWithAuctions_WhenAuctionsAreFound()
         {
             var userId = "userId";
             var purchases = new List<Purchase>

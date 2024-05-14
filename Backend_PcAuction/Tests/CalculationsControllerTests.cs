@@ -29,7 +29,7 @@ namespace Tests
         }
 
         [Fact]
-        public async Task GetRecommendedPsu_Returns_NotFound_When_Parts_Do_Not_Exist()
+        public async Task GetRecommendedPsu_ReturnsNotFound_WhenPartsDoNotExist()
         {
             var psuCalcDataDto = new PsuCalcDataDto(Guid.NewGuid(), null, null, null, null, null);
 
@@ -42,7 +42,7 @@ namespace Tests
         }
 
         [Fact]
-        public async Task GetRecommendedPsu_Returns_Result_From_CalculationsService_When_Parts_Exist()
+        public async Task GetRecommendedPsu_ReturnsResult_WhenPartsExist()
         {
             var psuCalcDataDto = new PsuCalcDataDto(Guid.NewGuid(), null, null, null, null, null);
 
@@ -59,7 +59,7 @@ namespace Tests
         }
 
         [Fact]
-        public async Task GetPartCompatibility_Returns_Ok_With_Result_From_CalculationsService()
+        public async Task GetPartCompatibility_ReturnsOkResult_WhenPartListFound()
         {
             var pcBuilderDataDto = new CompatiblePartsDataDto("Cat1", Guid.NewGuid(), "Cat2");
             var expectedResult = new List<CompatiblePartsResultDto>();
@@ -74,7 +74,7 @@ namespace Tests
         }
 
         [Fact]
-        public async Task GetPcBuild_Returns_NotFound_When_MotherboardId_Is_Null()
+        public async Task GetPcBuild_ReturnsNotFound_WhenMotherboardIdIsNull()
         {
             var pcBuilderDataDto = new PcBuilderDataDto(null, null, null, null, null, null, null, true, true, true, true, true, true, true, 0, 0);
 
@@ -84,7 +84,7 @@ namespace Tests
         }
 
         [Fact]
-        public async Task GetPcBuild_Returns_UnprocessableEntity_When_MotherboardAlreadyHave_And_MotherboardId_Is_ANY()
+        public async Task GetPcBuild_ReturnsUnprocessableEntity_WhenMotherboardAlreadyHaveAndMotherboardIdIsANY()
         {
             var pcBuilderDataDto = new PcBuilderDataDto("ANY", null, null, null, null, null, null, true, true, true, true, true, true, true, 0, 0);
 
@@ -94,7 +94,7 @@ namespace Tests
         }
 
         [Fact]
-        public async Task GetPcBuild_Returns_Ok_With_AuctionWithAvgPriceDto_List_When_All_Conditions_Are_Met()
+        public async Task GetPcBuild_ReturnsOkWithAuctionWithAvgPriceDto_WhenAllConditionsAreMet()
         {
             var pcBuilderDataDto = new PcBuilderDataDto("ValidId", null, null, null, null, null, null, true, true, true, true, true, true, true, 0, 0);
 
