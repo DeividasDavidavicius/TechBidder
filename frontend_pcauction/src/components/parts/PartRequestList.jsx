@@ -1,4 +1,4 @@
-import { Box, Button, Container, CssBaseline, Dialog, DialogActions, DialogTitle, Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
+import { Box, Button, Container, CssBaseline, Dialog, DialogActions, DialogTitle, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
@@ -96,6 +96,9 @@ function PartRequestList() {
             padding: '10px',
           }}
         >
+            <Typography component="h1" variant="h5" sx={{ marginBottom: 1, fontSize: '26px', fontWeight: 'bold', fontFamily: 'Arial, sans-serif', color: '#0d6267' }}>
+                    PART REQUESTS
+            </Typography>
             <Table size="small">
                 <TableHead>
                     <TableRow>

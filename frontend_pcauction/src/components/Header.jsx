@@ -16,13 +16,15 @@ function Header() {
     const openSnackbar = useContext(SnackbarContext);
     const navigation = useNavigate();
 
-    const pages = [
-        { name: 'CREATE AUCTION', route: PATHS.CREATEAUCTION },
-        { name: "AUCTIONS", route: PATHS.AUCTIONS + "?page=1" },
-        { name: "PC BUILDER", route: PATHS.PCBUILDGENERATOR },
-        { name: "PSU CALCULATOR", route: PATHS.PSUCALCULATOR },
-        { name: "COMPATIBILITY CHECKER", route: PATHS.COMPATIBILITYCHECK }
-    ];
+    const pages = [];
+    if(isLoggedIn === true) {
+        pages.push({ name: 'CREATE AUCTION', route: PATHS.CREATEAUCTION });
+    }
+
+    pages.push({ name: "AUCTIONS", route: PATHS.AUCTIONS + "?page=1" });
+    pages.push({ name: "PC BUILDER", route: PATHS.PCBUILDGENERATOR });
+    pages.push({ name: "PSU CALCULATOR", route: PATHS.PSUCALCULATOR });
+    pages.push({ name: "COMPATIBILITY CHECKER", route: PATHS.COMPATIBILITYCHECK });
 
     const imageClick = [
         { name: 'MAIN', route: PATHS.MAIN},

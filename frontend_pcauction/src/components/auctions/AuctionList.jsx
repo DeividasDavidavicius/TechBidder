@@ -131,6 +131,7 @@ function AuctionList() {
 
         const queryParams = [];
         if (currentPage) {
+            setCurrentPage(1);
             queryParams.push(`page=${currentPage}`);
         }
         if (category?.id) {
@@ -148,6 +149,7 @@ function AuctionList() {
 
       const queryParams = [];
       if (currentPage) {
+          setCurrentPage(1);
           queryParams.push(`page=${currentPage}`);
       }
       if (selectedCategory?.id) {
@@ -167,6 +169,7 @@ function AuctionList() {
 
     const queryParams = [];
     if (currentPage) {
+        setCurrentPage(1);
         queryParams.push(`page=${currentPage}`);
     }
     if (selectedCategory?.id) {
