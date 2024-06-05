@@ -372,7 +372,7 @@ namespace Backend_PcAuction.Services
                 var psuSize = psuCalcResult.CalculatedWattage > psuCalcResult.RecommendedWattage ? psuCalcResult.CalculatedWattage : psuCalcResult.RecommendedWattage;
 
                 var suitablePSUs = psuList.Where(p => Double.Parse(p.SpecificationValue1) >= psuSize);
-                if (suitablePSUs.Count() == 0) throw new NoPartsException("");
+                if (suitablePSUs.Count() == 0) throw new NoPartsException("PSU");
                 build.PSU = suitablePSUs.OrderBy(p => p.AveragePrice).FirstOrDefault();
             }
 
