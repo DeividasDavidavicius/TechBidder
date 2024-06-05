@@ -85,6 +85,20 @@ namespace Backend_PcAuction.Controllers
             {
                 pcBuildAuctions = await _calculationsService.GeneratePcBuild(pcBuilderDataDto);
             }
+            catch (CustomException ex)
+            {
+                switch (ex.ErrorCode)
+                {
+                    case 1:
+                        return UnprocessableEntity($"Selected {ex.Message} is not in any active auctions");
+                    case 2:
+                        return UnprocessableEntity($"Selected {ex.Message} is not compatible with motherboard");
+                    case 3:
+                        return UnprocessableEntity("Budget is too low");
+                    default:
+                        break;
+                }
+            }
             catch (Exception ex)
             {
                 return UnprocessableEntity("Error generating PC build");

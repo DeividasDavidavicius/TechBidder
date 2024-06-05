@@ -168,26 +168,48 @@ namespace Backend_PcAuction.Services
         public async Task<List<Auction>> GeneratePcBuild(PcBuilderDataDto pcBuilderDataDto)
         {
             var motherboards = new List<Part>();
+            var errorCode = -1;
+            var errorMessage = "";
 
             if (pcBuilderDataDto.MotherboardAlreadyHave) motherboards = await GetPartAlreadyHave(pcBuilderDataDto.MotherboardId, PartCategories.Motherboard);
             else  motherboards = await GetParts(pcBuilderDataDto.MotherboardId, PartCategories.Motherboard);
 
             if (motherboards == null)
-                return new List<Auction>();
+                throw new NoPartsException("motherboard");
 
             List<PcBuild> builds = new List<PcBuild>();
 
             foreach(var motherboard in motherboards)
             {
-                var result = await GenerateBuildForMotherboard(motherboard, pcBuilderDataDto);
-                if(result != null)
+                try
                 {
-                    builds.Add(result);
+                    var result = await GenerateBuildForMotherboard(motherboard, pcBuilderDataDto);
+                    if (result != null)
+                    {
+                        builds.Add(result);
+                    }
+                }
+                catch (CustomException ex)
+                {
+                    if (errorCode < ex.ErrorCode)
+                    {
+                        errorCode = ex.ErrorCode;
+                        errorMessage = ex.Message;
+                    }
                 }
             }
 
             if(builds.Count == 0)
             {
+                switch(errorCode)
+                {
+                    case 1:
+                        throw new NoPartsException(errorMessage);
+                    case 2:
+                        throw new NoCompatibilityException(errorMessage);
+                    case 3:
+                        throw new NoBudgetException("");
+                }
                 return new List<Auction>();
             }
 
@@ -247,50 +269,50 @@ namespace Backend_PcAuction.Services
 
             if (pcBuilderDataDto.CpuAlreadyHave) cpuList = await GetPartAlreadyHave(pcBuilderDataDto.CpuId, PartCategories.CPU);
             else cpuList = pcBuilderDataDto.CpuId == null ? null : await GetParts(pcBuilderDataDto.CpuId, PartCategories.CPU);
-            if (pcBuilderDataDto.CpuId != null && cpuList == null) return null;
+            if (pcBuilderDataDto.CpuId != null && cpuList == null) throw new NoPartsException("CPU");
 
             if (pcBuilderDataDto.GpuAlreadyHave) gpuList = await GetPartAlreadyHave(pcBuilderDataDto.GpuId, PartCategories.GPU);
             else gpuList = pcBuilderDataDto.GpuId == null ? null : await GetParts(pcBuilderDataDto.GpuId, PartCategories.GPU);
-            if (pcBuilderDataDto.GpuId != null && gpuList == null) return null;
+            if (pcBuilderDataDto.GpuId != null && gpuList == null) throw new NoPartsException("GPU");
 
             if (pcBuilderDataDto.RamAlreadyHave) ramList = await GetPartAlreadyHave(pcBuilderDataDto.RamId, PartCategories.RAM);
             else ramList = pcBuilderDataDto.RamId == null ? null : await GetParts(pcBuilderDataDto.RamId, PartCategories.RAM);
-            if (pcBuilderDataDto.RamId != null && ramList == null) return null;
+            if (pcBuilderDataDto.RamId != null && ramList == null) throw new NoPartsException("RAM");
 
             if (pcBuilderDataDto.SsdAlreadyHave) ssdList = await GetPartAlreadyHave(pcBuilderDataDto.SsdId, PartCategories.SSD);
             else ssdList = pcBuilderDataDto.SsdId == null ? null : await GetParts(pcBuilderDataDto.SsdId, PartCategories.SSD);
-            if (pcBuilderDataDto.SsdId != null && ssdList == null) return null;
+            if (pcBuilderDataDto.SsdId != null && ssdList == null) throw new NoPartsException("SSD");
 
             if (pcBuilderDataDto.HddAlreadyHave) hddList = await GetPartAlreadyHave(pcBuilderDataDto.HddId, PartCategories.HDD);
             else hddList = pcBuilderDataDto.HddId == null ? null : await GetParts(pcBuilderDataDto.HddId, PartCategories.HDD);
-            if (pcBuilderDataDto.HddId != null && hddList == null) return null;
+            if (pcBuilderDataDto.HddId != null && hddList == null) throw new NoPartsException("HDD");
 
             var psuList = pcBuilderDataDto.IncludePsu == true ? await GetParts("ANY", PartCategories.PSU) : null;
-            if (pcBuilderDataDto.IncludePsu == true && psuList == null) return null;
+            if (pcBuilderDataDto.IncludePsu == true && psuList == null) throw new NoPartsException("PSU");
 
 
             if (cpuList != null)
             {
                 cpuList = CheckCpuCompatibility(motherboard, cpuList);
-                if (cpuList == null) return null;
+                if (cpuList == null) throw new NoCompatibilityException("CPU");
             }
 
             if (ramList != null) 
             {
                 ramList = CheckRamCompatibility(motherboard, ramList);
-                if(ramList == null) return null;
+                if(ramList == null) throw new NoCompatibilityException("RAM");
             }
 
             if(ssdList != null)
             {
                 ssdList = CheckSsdCompatibility(motherboard, ssdList);
-                if (ssdList == null) return null;
+                if (ssdList == null) throw new NoCompatibilityException("SSD");
             }
 
             if (hddList != null)
             {
-                hddList = CheckSsdCompatibility(motherboard, hddList);
-                if (hddList == null) return null;
+                hddList = CheckHddCompatibility(motherboard, hddList);
+                if (hddList == null) throw new NoCompatibilityException("HDD");
             }
 
             var additionalPSU = 0.0;
@@ -350,7 +372,7 @@ namespace Backend_PcAuction.Services
                 var psuSize = psuCalcResult.CalculatedWattage > psuCalcResult.RecommendedWattage ? psuCalcResult.CalculatedWattage : psuCalcResult.RecommendedWattage;
 
                 var suitablePSUs = psuList.Where(p => Double.Parse(p.SpecificationValue1) >= psuSize);
-                if (suitablePSUs.Count() == 0) return null;
+                if (suitablePSUs.Count() == 0) throw new NoPartsException("");
                 build.PSU = suitablePSUs.OrderBy(p => p.AveragePrice).FirstOrDefault();
             }
 
@@ -363,7 +385,7 @@ namespace Backend_PcAuction.Services
               (build.PSU?.AveragePrice ?? 0);
 
             if (build.TotalPrice > pcBuilderDataDto.Budget)
-                return null;
+                throw new NoBudgetException("");
 
             if(cpuList != null) cpuList = cpuList.Where(p => CompareParts(Double.Parse(build.CPU.SpecificationValue5), Double.Parse(build.CPU.SpecificationValue2), Double.Parse(p.SpecificationValue5), Double.Parse(p.SpecificationValue2)) != -1).ToList();
             if(gpuList != null) gpuList = gpuList.Where(p => CompareParts(Double.Parse(build.GPU.SpecificationValue3), Double.Parse(build.GPU.SpecificationValue2), Double.Parse(p.SpecificationValue3), Double.Parse(p.SpecificationValue2)) != -1).ToList();
